@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #F36A2A;
+  --primary-dark: #d4561e;
+  --primary-light: #f8956a;
+
+  --bg: #FFFFFF;
+  --bg-warm: #FFF8F4;
+  --surface: #FFFFFF;
+
+  /* Gradient backgrounds — warm salmon glow like Opiron */
+  --gradient-hero: radial-gradient(ellipse 120% 80% at 50% -10%, rgba(243,106,42,0.22) 0%, rgba(255,255,255,0) 70%);
+  --gradient-section: radial-gradient(ellipse 100% 70% at 50% 50%, rgba(243,106,42,0.13) 0%, rgba(255,255,255,0) 75%);
+
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #888888;
+
+  --border: rgba(0,0,0,0.08);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.07);
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --font-sans: var(--font-manrope);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scroll reveal animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.reveal {
+  opacity: 0;
+}
+.reveal.in-view {
+  animation: fadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.reveal-fade.in-view {
+  animation: fadeIn 0.65s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal, .reveal-fade { opacity: 1 !important; }
+  html { scroll-behavior: auto; }
+}
