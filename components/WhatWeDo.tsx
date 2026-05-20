@@ -1,80 +1,126 @@
 "use client";
 
-import { useScrollReveal } from "@/hooks/useScrollReveal";
+import Reveal from "@/components/Reveal";
 
-const values = [
-  { icon: "🎵", title: "Muziek voor iedereen", description: "Geen nootjes lezen nodig. We leren alle nummers op gehoor en via begeleiding. Iedereen kan meedoen." },
-  { icon: "🌟", title: "Professionele begeleiding", description: "Onder ervaren muzikale leiding brengen we het beste in onze leden naar boven — stap voor stap." },
-  { icon: "🎭", title: "Op het podium", description: "Van intieme optredens tot grote shows — we staan regelmatig voor een publiek en genieten ervan." },
-  { icon: "💛", title: "Inclusief & warm", description: "Oud en jong, man en vrouw, beginner en gevorderd — iedereen is welkom in ons koor." },
-  { icon: "🎶", title: "Gevarieerd repertoire", description: "Pop, rock, soul, gospel — we kiezen nummers die mensen kennen en die energie geven." },
-  { icon: "🏆", title: "Jaarlijkse show", description: "Elk jaar werken we toe naar onze grote koorshow. Een avond om nooit te vergeten." },
+const media = [
+  {
+    seed: "volkoren-jubileum",
+    label: "YouTube",
+    title: "Jubileum 15 jaar",
+    sub: "Optreden VÓLkoren",
+    icon: "▶",
+    iconBg: "#ff0000",
+  },
+  {
+    seed: "najaarsconcert-25",
+    label: "Foto's",
+    title: "Najaarsconcert 2025",
+    sub: "De Schakel, Gilze",
+    icon: "📷",
+    iconBg: "var(--primary)",
+  },
+  {
+    seed: "repetitie-backstage",
+    label: "Backstage",
+    title: "Repetitie",
+    sub: "Achter de schermen",
+    icon: "🎵",
+    iconBg: "#6366f1",
+  },
 ];
 
 export default function WhatWeDo() {
-  const sectionRef = useScrollReveal();
-
   return (
-    <section
-      id="wat-we-doen"
-      style={{ position: "relative", padding: "100px 24px", overflow: "hidden", background: "#FFFFFF" }}
-    >
-      <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 100% 70% at 50% 50%, rgba(243,106,42,0.09) 0%, rgba(255,255,255,0) 70%)", pointerEvents: "none" }} />
+    <section id="sfeer" style={{ position: "relative", padding: "100px 24px 140px", overflow: "hidden", background: "#FFF8F4" }}>
+      <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 100% 70% at 50% 50%, rgba(243,106,42,0.07) 0%, rgba(255,255,255,0) 70%)", pointerEvents: "none" }} />
 
-      <div ref={sectionRef} style={{ maxWidth: "940px", margin: "0 auto", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
-        {/* Header */}
-        <div className="reveal" style={{ textAlign: "center", marginBottom: "56px" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(243,106,42,0.09)", border: "1px solid rgba(243,106,42,0.18)", borderRadius: "100px", padding: "4px 14px", marginBottom: "20px" }}>
-            <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>WAT WE DOEN</span>
-          </div>
-          <h2 style={{ fontSize: "clamp(30px, 4.5vw, 48px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 16px" }}>
-            Alles wat het koor zo bijzonder maakt
-          </h2>
-          <p style={{ fontSize: "17px", lineHeight: 1.7, color: "#555", maxWidth: "480px", margin: "0 auto" }}>
-            Bij Popkoordivers draait het niet alleen om noten zingen — het gaat om mensen, beleving en muziek die ertoe doet.
-          </p>
-        </div>
-
-        {/* Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
-          {values.map((v, i) => (
-            <div
-              key={v.title}
-              className="reveal"
-              style={{
-                animationDelay: `${i * 80}ms`,
-                background: "#FFFFFF",
-                backgroundImage: [
-                  "radial-gradient(circle, rgba(243,106,42,0.18) 1.5px, transparent 1.5px)",
-                  "linear-gradient(to bottom, transparent 40%, #ffffff 100%)",
-                ].join(", "),
-                backgroundSize: "11px 11px, 100% 100%",
-                border: "1px solid rgba(128,128,128,0.14)",
-                borderRadius: "16px",
-                padding: "28px 24px",
-                boxShadow: "0 2px 5px rgba(0,0,0,0.03)",
-                transition: "box-shadow 0.2s, transform 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = "0 8px 28px rgba(0,0,0,0.09)";
-                e.currentTarget.style.transform = "translateY(-3px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = "0 2px 5px rgba(0,0,0,0.03)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(243,106,42,0.10)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", marginBottom: "16px" }} aria-hidden="true">
-                {v.icon}
-              </div>
-              <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#111", margin: "0 0 8px", letterSpacing: "-0.01em" }}>{v.title}</h3>
-              <p style={{ fontSize: "14px", lineHeight: 1.65, color: "#666", margin: 0 }}>{v.description}</p>
+        {/* Header row */}
+        <Reveal style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "16px" }}>
+          <div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(243,106,42,0.09)", border: "1px solid rgba(243,106,42,0.18)", borderRadius: "100px", padding: "4px 14px", marginBottom: "16px" }}>
+              <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>SFEER</span>
             </div>
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}>
+              Zo klinkt Divers
+            </h2>
+          </div>
+          <a
+            href="#"
+            style={{ fontSize: "14px", fontWeight: 600, color: "var(--primary)", textDecoration: "none", paddingBottom: "4px", borderBottom: "2px solid rgba(243,106,42,0.25)", transition: "border-color 0.15s", whiteSpace: "nowrap" }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(243,106,42,0.25)")}
+          >
+            Naar foto&apos;s &amp; video&apos;s →
+          </a>
+        </Reveal>
+
+        {/* Media grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }} className="sfeer-grid">
+          {media.map((item, i) => (
+            <Reveal key={item.title} delay={i * 100}>
+              <div
+                style={{ borderRadius: "20px", overflow: "hidden", position: "relative", aspectRatio: "4/3", cursor: "pointer" }}
+                className="card-hover"
+              >
+                <img
+                  src={`https://picsum.photos/seed/${item.seed}/600/450`}
+                  alt={item.title}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.4s ease" }}
+                />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)" }} />
+
+                {/* Play/icon badge */}
+                <div style={{ position: "absolute", top: "16px", left: "16px" }}>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      background: "rgba(255,255,255,0.92)",
+                      borderRadius: "100px",
+                      padding: "4px 12px",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      color: "#111",
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+
+                {/* Bottom info */}
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: "15px", fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>{item.title}</p>
+                  <p style={{ margin: 0, fontSize: "12px", color: "rgba(255,255,255,0.65)" }}>{item.sub}</p>
+                </div>
+              </div>
+            </Reveal>
           ))}
         </div>
 
       </div>
+
+      {/* Wave into dark footer */}
+      <div aria-hidden="true" style={{ position: "absolute", bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "80px" }}>
+          <path d="M0,80 L0,55 Q360,20 720,50 Q1080,76 1440,35 L1440,80 Z" fill="#111111" />
+        </svg>
+      </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .sfeer-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        @media (min-width: 641px) and (max-width: 900px) {
+          .sfeer-grid {
+            grid-template-columns: 1fr 1fr !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

@@ -1,13 +1,16 @@
 "use client";
 
+import Reveal from "@/components/Reveal";
+
 export default function Contact() {
   return (
     <section
       id="contact"
       style={{
         position: "relative",
-        padding: "100px 24px",
+        padding: "100px 24px 160px",
         overflow: "hidden",
+        background: "#FFFFFF",
       }}
     >
       <div
@@ -21,9 +24,9 @@ export default function Contact() {
         }}
       />
 
-      <div style={{ maxWidth: "940px", margin: "0 auto", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "56px" }}>
+        <Reveal style={{ textAlign: "center", marginBottom: "56px" }}>
           <div
             style={{
               display: "inline-flex",
@@ -55,21 +58,22 @@ export default function Contact() {
           <p style={{ fontSize: "17px", lineHeight: 1.7, color: "#555", maxWidth: "440px", margin: "0 auto" }}>
             Heb je vragen of wil je een keer komen kijken? We horen graag van je.
           </p>
-        </div>
+        </Reveal>
 
         {/* Grid */}
-        <div
+        <Reveal
+          delay={100}
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "48px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: "64px",
             alignItems: "start",
-            maxWidth: "860px",
+            maxWidth: "960px",
             margin: "0 auto",
           }}
         >
           {/* Info */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
             {[
               { label: "Locatie", value: "Gilze, Noord-Brabant" },
               { label: "Repetitie", value: "Wekelijks — dag en tijd volgt" },
@@ -172,7 +176,14 @@ export default function Contact() {
               Verstuur bericht
             </button>
           </form>
-        </div>
+        </Reveal>
+      </div>
+
+      {/* Wave into dark footer */}
+      <div aria-hidden="true" style={{ position: "absolute", bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "80px" }}>
+          <path d="M0,80 L0,55 Q360,20 720,50 Q1080,76 1440,35 L1440,80 Z" fill="#111111" />
+        </svg>
       </div>
     </section>
   );

@@ -9,9 +9,22 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Popkoordivers — Koor uit Gilze",
+  title: "Popkoor Divers — Koor uit Gilze",
   description:
-    "Popkoordivers is een bruisend popkoor uit Gilze. Samen zingen, samen genieten. Ontdek wie we zijn en kom een keer luisteren!",
+    "Popkoor Divers is een bruisend popkoor uit Gilze. Samen zingen, samen genieten. Ontdek wie we zijn en kom een keer luisteren!",
+  icons: {
+    icon: [
+      { url: "/favicon/favicon.ico" },
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/favicon/apple-touch-icon.png",
+    other: [
+      { url: "/favicon/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/favicon/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+  },
+  manifest: "/favicon/site.webmanifest",
 };
 
 export default function RootLayout({
