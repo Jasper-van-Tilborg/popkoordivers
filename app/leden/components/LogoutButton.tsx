@@ -3,21 +3,52 @@
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
-export default function LogoutButton({ email }: { email: string }) {
+const rolLabels: Record<string, { label: string; bg: string; color: string }> = {
+  admin: { label: "Admin",  bg: "rgba(243,106,42,0.12)", color: "var(--primary)" },
+  lid:   { label: "Lid",    bg: "rgba(0,0,0,0.06)",     color: "#666"           },
+};
+
+export default function LogoutButton({
+  email,
+  rol,
+}: {
+  email: string;
+  rol: "lid" | "admin";
+}) {
   const router = useRouter();
+  const badge = rolLabels[rol] ?? rolLabels.lid;
 
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/leden/login");
+    router.replace("/leden/login");
     router.refresh();
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
-      <span style={{ fontSize: "13px", color: "#888", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
+      {/* Rol badge */}
+      <span
+        style={{
+          fontSize: "11px",
+          fontWeight: 700,
+          letterSpacing: "0.05em",
+          textTransform: "uppercase",
+          color: badge.color,
+          background: badge.bg,
+          padding: "4px 10px",
+          borderRadius: "100px",
+        }}
+      >
+        {badge.label}
+      </span>
+
+      {/* Email */}
+      <span style={{ fontSize: "13px", color: "#888", maxWidth: "220px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
         {email}
       </span>
+
+      {/* Uitloggen */}
       <button
         onClick={handleLogout}
         style={{

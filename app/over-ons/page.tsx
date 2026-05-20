@@ -58,41 +58,21 @@ export default function OverOnsPage() {
             }}
           />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <p
-              style={{
-                margin: "0 0 8px",
-                fontSize: "12px",
-                fontWeight: 700,
-                color: "rgba(255,255,255,0.65)",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-              }}
-            >
-              Over ons
-            </p>
-            <h1
-              style={{
-                fontSize: "clamp(36px, 5vw, 60px)",
-                fontWeight: 800,
-                letterSpacing: "-2px",
-                lineHeight: 1.1,
-                color: "#FFFFFF",
-                margin: "0 0 24px",
-              }}
-            >
-              Over ons
-            </h1>
-            <p
-              style={{
-                fontSize: "clamp(15px, 1.6vw, 18px)",
-                lineHeight: 1.7,
-                color: "rgba(255,255,255,0.82)",
-                maxWidth: "520px",
-                margin: 0,
-              }}
-            >
-              Leer ons kennen — wie we zijn, waar we vandaan komen en wat ons elke dinsdagavond bij elkaar brengt.
-            </p>
+            <Reveal delay={0}>
+              <p style={{ margin: "0 0 8px", fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                Over ons
+              </p>
+            </Reveal>
+            <Reveal delay={100}>
+              <h1 style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}>
+                Over ons
+              </h1>
+            </Reveal>
+            <Reveal delay={180}>
+              <p style={{ fontSize: "clamp(15px, 1.6vw, 18px)", lineHeight: 1.7, color: "rgba(255,255,255,0.82)", maxWidth: "520px", margin: 0 }}>
+                Leer ons kennen — wie we zijn, waar we vandaan komen en wat ons elke dinsdagavond bij elkaar brengt.
+              </p>
+            </Reveal>
           </div>
 
           {/* Wave → white */}

@@ -17,13 +17,19 @@ export default function LoginPage() {
     setError("");
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setError("Onjuist e-mailadres of wachtwoord.");
       setLoading(false);
     } else {
-      router.push("/leden");
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("rol")
+        .eq("id", data.user.id)
+        .single();
+
+      router.replace(profile?.rol === "admin" ? "/admin" : "/leden");
       router.refresh();
     }
   };

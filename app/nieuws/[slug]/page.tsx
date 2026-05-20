@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Reveal from "@/components/Reveal";
 import { berichten } from "../data";
 
 export function generateStaticParams() {
@@ -45,6 +46,7 @@ export default async function NieuwsDetailPage({
           />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
+            <Reveal delay={0}>
             <a
               href="/nieuws"
               className="detail-back"
@@ -65,45 +67,31 @@ export default async function NieuwsDetailPage({
               </svg>
               Terug naar nieuws
             </a>
+            </Reveal>
 
+            <Reveal delay={80}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
               <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                 Nieuws
               </span>
               <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "rgba(255,255,255,0.35)" }} />
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  color: "var(--primary)",
-                  background: "#fff",
-                  padding: "3px 10px",
-                  borderRadius: "100px",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                }}
-              >
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--primary)", background: "#fff", padding: "3px 10px", borderRadius: "100px", letterSpacing: "0.04em", textTransform: "uppercase" }}>
                 {bericht.categorie}
               </span>
             </div>
+            </Reveal>
 
-            <h1
-              style={{
-                fontSize: "clamp(28px, 4.5vw, 56px)",
-                fontWeight: 800,
-                letterSpacing: "-2px",
-                lineHeight: 1.1,
-                color: "#FFFFFF",
-                margin: "0 0 20px",
-                maxWidth: "860px",
-              }}
-            >
+            <Reveal delay={160}>
+            <h1 style={{ fontSize: "clamp(28px, 4.5vw, 56px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 20px", maxWidth: "860px" }}>
               {bericht.titel}
             </h1>
+            </Reveal>
 
+            <Reveal delay={220}>
             <p style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "rgba(255,255,255,0.75)" }}>
               {bericht.datum}
             </p>
+            </Reveal>
           </div>
 
           {/* Wave → white */}
@@ -115,6 +103,7 @@ export default async function NieuwsDetailPage({
         </section>
 
         {/* ── Full-width image ── */}
+        <Reveal>
         <section style={{ background: "#FFFFFF", padding: "48px 24px 0" }}>
           <div
             style={{
@@ -132,6 +121,7 @@ export default async function NieuwsDetailPage({
             />
           </div>
         </section>
+        </Reveal>
 
         {/* ── Artikel tekst ── */}
         <section style={{ background: "#FFFFFF", padding: "72px 24px 100px" }}>

@@ -1,5 +1,7 @@
 "use client";
 
+import Reveal from "@/components/Reveal";
+
 const infoCards = [
   { label: "Repetities", value: "Dinsdag · 20:00", sub: "De Schakel" },
   { label: "Dirigent", value: "Tom Mordang", sub: "sinds 2008" },
@@ -49,7 +51,7 @@ export default function Hero() {
         className="hero-grid"
       >
         {/* Left: text */}
-        <div>
+        <Reveal delay={0}><div>
           {/* Badge */}
           <div
             style={{
@@ -173,10 +175,10 @@ export default function Hero() {
               </div>
             ))}
           </div>
-        </div>
+        </div></Reveal>
 
         {/* Right: image + info cards */}
-        <div style={{ position: "relative" }}>
+        <Reveal delay={200}><div style={{ position: "relative" }}>
           {/* Sfeerfoto placeholder */}
           <div
             style={{
@@ -231,7 +233,7 @@ export default function Hero() {
               </div>
             ))}
           </div>
-        </div>
+        </div></Reveal>
       </div>
       </div>
 

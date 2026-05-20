@@ -31,12 +31,14 @@ export default function Navbar() {
         backdropFilter: scrolled ? "blur(14px)" : "none",
         WebkitBackdropFilter: scrolled ? "blur(14px)" : "none",
         borderBottom: scrolled ? "1px solid rgba(0,0,0,0.07)" : "none",
-        padding: scrolled ? "10px 0" : "16px 0",
+        padding: scrolled ? "10px 24px" : "16px 24px",
       }}
     >
-      <nav style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
-        <a href="/" style={{ textDecoration: "none", flexShrink: 0, transition: "opacity 0.2s" }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+      <nav style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
+        <a
+          href="/"
+          style={{ textDecoration: "none", flexShrink: 0, transition: "opacity 0.2s" }}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
           onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
         >
           <img
@@ -47,7 +49,6 @@ export default function Navbar() {
               width: "auto",
               display: "block",
               transition: "height 0.25s ease",
-              filter: scrolled ? "none" : "brightness(0) invert(1)",
             }}
           />
         </a>
@@ -85,7 +86,7 @@ export default function Navbar() {
       </nav>
 
       {open && (
-        <div style={{ background: "rgba(255,255,255,0.98)", backdropFilter: "blur(14px)", borderTop: "1px solid rgba(0,0,0,0.07)", padding: "16px 32px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div style={{ background: "rgba(255,255,255,0.98)", backdropFilter: "blur(14px)", borderTop: "1px solid rgba(0,0,0,0.07)", padding: "16px 24px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
           {links.map((l) => (
             <a key={l.href} href={l.href} onClick={() => setOpen(false)} style={{ fontSize: "15px", fontWeight: 500, color: "#333", textDecoration: "none" }}>{l.label}</a>
           ))}

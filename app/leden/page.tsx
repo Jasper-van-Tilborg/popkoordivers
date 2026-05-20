@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import Navbar from "@/components/Navbar";
+import LedenNavbar from "@/components/LedenNavbar";
 import Footer from "@/components/Footer";
+import Reveal from "@/components/Reveal";
 import { createClient } from "@/lib/supabase/server";
-import LogoutButton from "./components/LogoutButton";
 import StemTabs from "./components/StemTabs";
 import {
   nieuwsbrieven,
@@ -12,15 +12,6 @@ import {
   choreo,
   oudeOptredens,
 } from "./data";
-
-const navLinks = [
-  { href: "#liedjes", label: "Liedjes" },
-  { href: "#nieuwsbrieven", label: "Nieuwsbrieven" },
-  { href: "#bestuur", label: "Bestuur" },
-  { href: "#smoelenboek", label: "Smoelenboek" },
-  { href: "#opnames", label: "Opnames & Choreo" },
-  { href: "#optredens", label: "Oude optredens" },
-];
 
 function SectionHeader({ pill, title }: { pill: string; title: string }) {
   return (
@@ -64,93 +55,66 @@ export default async function LedenPage() {
 
   if (!user) redirect("/leden/login");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("rol")
+    .eq("id", user.id)
+    .single();
+
+  const rol = (profile?.rol ?? "lid") as "lid" | "admin";
+
   return (
     <>
-      <Navbar />
+      <LedenNavbar email={user.email!} rol={rol} />
       <main style={{ minHeight: "100vh", background: "#FFFFFF" }}>
 
         {/* ── 1. Header ── */}
         <section
           style={{
             background: "#FFFFFF",
-            padding: "120px 24px 48px",
+            padding: "88px 24px 40px",
             borderBottom: "1px solid rgba(0,0,0,0.06)",
           }}
         >
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "space-between",
-                gap: "24px",
-                flexWrap: "wrap",
-                marginBottom: "32px",
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    background: "rgba(243,106,42,0.09)",
-                    border: "1px solid rgba(243,106,42,0.18)",
-                    borderRadius: "100px",
-                    padding: "4px 14px",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>
-                    LEDENOMGEVING
-                  </span>
-                </div>
-                <h1
-                  style={{
-                    fontSize: "clamp(32px, 5vw, 52px)",
-                    fontWeight: 800,
-                    letterSpacing: "-2px",
-                    lineHeight: 1.1,
-                    color: "#111",
-                    margin: "0 0 16px",
-                  }}
-                >
-                  Ledenomgeving
-                </h1>
-                <div style={{ width: "52px", height: "4px", background: "var(--primary)", borderRadius: "2px" }} />
+            <Reveal delay={0}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  background: "rgba(243,106,42,0.09)",
+                  border: "1px solid rgba(243,106,42,0.18)",
+                  borderRadius: "100px",
+                  padding: "4px 14px",
+                  marginBottom: "16px",
+                }}
+              >
+                <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>
+                  LEDENOMGEVING
+                </span>
               </div>
-              <LogoutButton email={user.email!} />
-            </div>
-
-            {/* Quick nav */}
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="leden-nav-link"
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    color: "#555",
-                    textDecoration: "none",
-                    padding: "7px 16px",
-                    borderRadius: "35px",
-                    border: "1.5px solid rgba(0,0,0,0.10)",
-                    transition: "border-color 0.15s, color 0.15s",
-                  }}
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
+              <h1
+                style={{
+                  fontSize: "clamp(32px, 5vw, 52px)",
+                  fontWeight: 800,
+                  letterSpacing: "-2px",
+                  lineHeight: 1.1,
+                  color: "#111",
+                  margin: "0 0 16px",
+                }}
+              >
+                Ledenomgeving
+              </h1>
+              <div style={{ width: "52px", height: "4px", background: "var(--primary)", borderRadius: "2px" }} />
+            </Reveal>
           </div>
         </section>
 
         {/* ── 2. Liedjes per stem ── */}
         <section id="liedjes" style={{ background: "#FFF8F4", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <SectionHeader pill="LIEDJES" title="Liedjes per stemgroep" />
-            <div
+            <Reveal><SectionHeader pill="LIEDJES" title="Liedjes per stemgroep" /></Reveal>
+            <Reveal delay={100}><div
               style={{
                 background: "#FFFFFF",
                 borderRadius: "20px",
@@ -160,15 +124,15 @@ export default async function LedenPage() {
               }}
             >
               <StemTabs />
-            </div>
+            </div></Reveal>
           </div>
         </section>
 
         {/* ── 3. Nieuwsbrieven ── */}
         <section id="nieuwsbrieven" style={{ background: "#FFFFFF", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <SectionHeader pill="NIEUWSBRIEVEN" title="Nieuwsbrieven" />
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <Reveal><SectionHeader pill="NIEUWSBRIEVEN" title="Nieuwsbrieven" /></Reveal>
+            <Reveal delay={80}><div style={{ display: "flex", flexDirection: "column" }}>
               {nieuwsbrieven.map((nb, i) => (
                 <div
                   key={nb.titel}
@@ -226,15 +190,15 @@ export default async function LedenPage() {
                   )}
                 </div>
               ))}
-            </div>
+            </div></Reveal>
           </div>
         </section>
 
         {/* ── 4. Bestuur ── */}
         <section id="bestuur" style={{ background: "#FFF8F4", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <SectionHeader pill="BESTUUR" title="Samenstelling bestuur" />
-            <div
+            <Reveal><SectionHeader pill="BESTUUR" title="Samenstelling bestuur" /></Reveal>
+            <Reveal delay={80}><div
               style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}
               className="bestuur-grid"
             >
@@ -280,15 +244,15 @@ export default async function LedenPage() {
                   </div>
                 </div>
               ))}
-            </div>
+            </div></Reveal>
           </div>
         </section>
 
         {/* ── 5. Smoelenboek ── */}
         <section id="smoelenboek" style={{ background: "#FFFFFF", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <SectionHeader pill="SMOELENBOEK" title="Smoelenboek" />
-            <div
+            <Reveal><SectionHeader pill="SMOELENBOEK" title="Smoelenboek" /></Reveal>
+            <Reveal delay={80}><div
               style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "16px" }}
               className="smoelenboek-grid"
             >
@@ -348,15 +312,15 @@ export default async function LedenPage() {
                   </span>
                 </div>
               ))}
-            </div>
+            </div></Reveal>
           </div>
         </section>
 
         {/* ── 6. Opnames & Choreo ── */}
         <section id="opnames" style={{ background: "#FFF8F4", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <SectionHeader pill="MEDIA" title="Opnames & Choreo" />
-            <div
+            <Reveal><SectionHeader pill="MEDIA" title="Opnames & Choreo" /></Reveal>
+            <Reveal delay={80}><div
               style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px" }}
               className="opnames-grid"
             >
@@ -515,15 +479,15 @@ export default async function LedenPage() {
                   ))}
                 </div>
               </div>
-            </div>
+            </div></Reveal>
           </div>
         </section>
 
         {/* ── 7. Oude optredens ── */}
         <section id="optredens" style={{ background: "#FFFFFF", padding: "80px 24px 120px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <SectionHeader pill="ARCHIEF" title="Oude optredens" />
-            <div
+            <Reveal><SectionHeader pill="ARCHIEF" title="Oude optredens" /></Reveal>
+            <Reveal delay={80}><div
               style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}
               className="optredens-grid"
             >
@@ -581,7 +545,7 @@ export default async function LedenPage() {
                   </div>
                 </div>
               ))}
-            </div>
+            </div></Reveal>
           </div>
         </section>
 

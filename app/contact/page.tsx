@@ -177,41 +177,21 @@ export default function ContactPage() {
             }}
           />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <p
-              style={{
-                margin: "0 0 8px",
-                fontSize: "12px",
-                fontWeight: 700,
-                color: "rgba(255,255,255,0.65)",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-              }}
-            >
-              Contact
-            </p>
-            <h1
-              style={{
-                fontSize: "clamp(36px, 5vw, 60px)",
-                fontWeight: 800,
-                letterSpacing: "-2px",
-                lineHeight: 1.1,
-                color: "#FFFFFF",
-                margin: "0 0 24px",
-              }}
-            >
-              Contact
-            </h1>
-            <p
-              style={{
-                fontSize: "clamp(15px, 1.6vw, 18px)",
-                lineHeight: 1.7,
-                color: "rgba(255,255,255,0.82)",
-                maxWidth: "520px",
-                margin: 0,
-              }}
-            >
-              Neem contact op, meld je aan om mee te zingen of vraag een offerte aan voor een optreden.
-            </p>
+            <Reveal delay={0}>
+              <p style={{ margin: "0 0 8px", fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                Contact
+              </p>
+            </Reveal>
+            <Reveal delay={100}>
+              <h1 style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}>
+                Contact
+              </h1>
+            </Reveal>
+            <Reveal delay={180}>
+              <p style={{ fontSize: "clamp(15px, 1.6vw, 18px)", lineHeight: 1.7, color: "rgba(255,255,255,0.82)", maxWidth: "520px", margin: 0 }}>
+                Neem contact op, meld je aan om mee te zingen of vraag een offerte aan voor een optreden.
+              </p>
+            </Reveal>
           </div>
 
           {/* Wave → white */}

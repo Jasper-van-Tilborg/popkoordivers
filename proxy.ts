@@ -38,8 +38,14 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user && isLoginPage) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("rol")
+      .eq("id", user.id)
+      .single();
+
     const url = request.nextUrl.clone();
-    url.pathname = "/leden";
+    url.pathname = profile?.rol === "admin" ? "/admin" : "/leden";
     return NextResponse.redirect(url);
   }
 
@@ -47,5 +53,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/leden/:path*"],
+  matcher: ["/leden/:path*", "/admin/:path*"],
 };
