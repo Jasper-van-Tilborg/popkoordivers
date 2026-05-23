@@ -323,9 +323,6 @@ export default function ContactPage() {
         >
           <div style={{ maxWidth: "700px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <Reveal style={{ textAlign: "center", marginBottom: "48px" }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(243,106,42,0.12)", border: "1px solid rgba(243,106,42,0.22)", borderRadius: "100px", padding: "4px 14px", marginBottom: "16px" }}>
-                <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>MEEZINGEN</span>
-              </div>
               <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 14px" }}>
                 Wil je meezingen?
               </h2>
@@ -403,9 +400,6 @@ export default function ContactPage() {
         >
           <div style={{ maxWidth: "700px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <Reveal style={{ textAlign: "center", marginBottom: "48px" }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(243,106,42,0.09)", border: "1px solid rgba(243,106,42,0.18)", borderRadius: "100px", padding: "4px 14px", marginBottom: "16px" }}>
-                <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>BOEKINGEN</span>
-              </div>
               <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 14px" }}>
                 Boek ons voor jouw optreden
               </h2>

@@ -27,22 +27,6 @@ export default function Contact() {
       <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Header */}
         <Reveal style={{ textAlign: "center", marginBottom: "56px" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              background: "rgba(243,106,42,0.09)",
-              border: "1px solid rgba(243,106,42,0.18)",
-              borderRadius: "100px",
-              padding: "4px 14px",
-              marginBottom: "20px",
-            }}
-          >
-            <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>
-              CONTACT
-            </span>
-          </div>
           <h2
             style={{
               fontSize: "clamp(30px, 4.5vw, 48px)",

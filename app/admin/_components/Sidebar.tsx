@@ -2,13 +2,15 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { IconCalendar, IconNewspaper, IconFolder, IconStar, IconUsers, IconEye, IconCamera } from "@/components/icons";
 
 const nav = [
-  { label: "Agenda",      href: "/admin/agenda",      icon: "📅" },
-  { label: "Nieuws",      href: "/admin/nieuws",       icon: "📰" },
-  { label: "Bestanden",   href: "/admin/bestanden",    icon: "📁" },
-  { label: "Sponsorkliks",href: "/admin/sponsorkliks", icon: "🤝" },
-  { label: "Leden",       href: "/admin/leden",        icon: "👥" },
+  { label: "Agenda",       href: "/admin/agenda",      icon: <IconCalendar size={15} /> },
+  { label: "Nieuws",       href: "/admin/nieuws",       icon: <IconNewspaper size={15} /> },
+  { label: "Media",        href: "/admin/media",        icon: <IconCamera size={15} /> },
+  { label: "Bestanden",    href: "/admin/bestanden",    icon: <IconFolder size={15} /> },
+  { label: "Sponsorkliks", href: "/admin/sponsorkliks", icon: <IconStar size={15} /> },
+  { label: "Leden",        href: "/admin/leden",        icon: <IconUsers size={15} /> },
 ];
 
 export default function Sidebar() {
@@ -60,7 +62,7 @@ export default function Sidebar() {
                 transition: "all 0.12s",
               }}
             >
-              <span style={{ fontSize: "15px", lineHeight: 1 }}>{item.icon}</span>
+              <span style={{ lineHeight: 1, display: "flex" }}>{item.icon}</span>
               {item.label}
             </a>
           );
@@ -88,7 +90,7 @@ export default function Sidebar() {
           onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.8)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.45)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
         >
-          <span style={{ fontSize: "13px" }}>👁</span>
+          <IconEye size={13} />
           Ledenomgeving
         </a>
       </div>

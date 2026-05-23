@@ -8,16 +8,18 @@ interface AgendaItem {
   id: number;
   titel: string;
   datum: string;
+  datum_sorteer: string | null;
   tijd: string | null;
   locatie: string | null;
   label: string | null;
   label_kleur: string | null;
   beschrijving: string | null;
   link: string | null;
+  fotos_url: string | null;
   gepubliceerd: boolean;
 }
 
-const empty = { titel: "", datum: "", tijd: "", locatie: "", label: "", label_kleur: "#F36A2A", beschrijving: "", link: "", gepubliceerd: true };
+const empty = { titel: "", datum: "", datum_sorteer: "", tijd: "", locatie: "", label: "", label_kleur: "#F36A2A", beschrijving: "", link: "", fotos_url: "", gepubliceerd: true };
 
 export default function AgendaAdminPage() {
   const supabase = createClient();
@@ -40,7 +42,7 @@ export default function AgendaAdminPage() {
   function openAdd() { setEditing(null); setForm(empty); setShowForm(true); }
   function openEdit(item: AgendaItem) {
     setEditing(item);
-    setForm({ titel: item.titel, datum: item.datum, tijd: item.tijd || "", locatie: item.locatie || "", label: item.label || "", label_kleur: item.label_kleur || "#F36A2A", beschrijving: item.beschrijving || "", link: item.link || "", gepubliceerd: item.gepubliceerd });
+    setForm({ titel: item.titel, datum: item.datum, datum_sorteer: item.datum_sorteer || "", tijd: item.tijd || "", locatie: item.locatie || "", label: item.label || "", label_kleur: item.label_kleur || "#F36A2A", beschrijving: item.beschrijving || "", link: item.link || "", fotos_url: item.fotos_url || "", gepubliceerd: item.gepubliceerd });
     setShowForm(true);
   }
 
@@ -83,7 +85,7 @@ export default function AgendaAdminPage() {
             {editing ? "Optreden bewerken" : "Nieuw optreden"}
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            {[["titel","Titel *","text"],["datum","Datum *","text"],["tijd","Tijd","text"],["locatie","Locatie","text"],["label","Label","text"],["label_kleur","Labelkleur","color"],["link","Link (optioneel)","url"]].map(([k, lbl, type]) => (
+            {[["titel","Titel *","text"],["datum","Weergavedatum *","text"],["datum_sorteer","Datum (voor sortering) *","date"],["tijd","Tijd","text"],["locatie","Locatie","text"],["label","Label","text"],["label_kleur","Labelkleur","color"],["link","Kaartjes / info link","url"],["fotos_url","Foto's URL (leeg = alleen leden)","url"]].map(([k, lbl, type]) => (
               <div key={k}>
                 <label style={labelStyle}>{lbl}</label>
                 <input type={type} value={(form as any)[k]} onChange={(e) => set(k, e.target.value)} style={{ ...inputStyle, width: type === "color" ? "60px" : "100%", padding: type === "color" ? "4px" : inputStyle.padding, height: type === "color" ? "38px" : undefined }} />

@@ -4,7 +4,7 @@ import Reveal from "@/components/Reveal";
 
 export default function About() {
   return (
-    <section id="over-ons" style={{ position: "relative", background: "#FFFFFF", padding: "100px 24px 120px", overflow: "hidden" }}>
+    <section id="over-ons" className="about-section" style={{ position: "relative", background: "#FFFFFF", padding: "100px 24px 120px", overflow: "hidden" }}>
 
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
         <div
@@ -18,36 +18,17 @@ export default function About() {
         >
           {/* Left: groepsfoto */}
           <Reveal>
-            <div style={{ position: "relative", borderRadius: "24px", overflow: "hidden", aspectRatio: "4/3" }}>
-              <img
-                src="https://picsum.photos/seed/popkoor-groep/700/525"
-                alt="Groepsfoto Popkoor Divers"
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "20px",
-                  left: "20px",
-                  background: "rgba(255,255,255,0.92)",
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
-                  borderRadius: "12px",
-                  padding: "10px 16px",
-                }}
-              >
-                <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: "#111" }}>Popkoor Divers</p>
-                <p style={{ margin: "2px 0 0", fontSize: "11px", color: "#888" }}>Gilze · Noord-Brabant</p>
-              </div>
-            </div>
+            <div
+              style={{
+                borderRadius: "24px",
+                aspectRatio: "4/3",
+                background: "linear-gradient(135deg, rgba(243,106,42,0.18) 0%, #FDE8D8 45%, rgba(243,106,42,0.06) 100%)",
+              }}
+            />
           </Reveal>
 
           {/* Right: text */}
           <Reveal delay={120}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(243,106,42,0.09)", border: "1px solid rgba(243,106,42,0.18)", borderRadius: "100px", padding: "4px 14px", marginBottom: "20px" }}>
-              <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>OVER ONS</span>
-            </div>
-
             <h2
               style={{
                 fontSize: "clamp(28px, 3.5vw, 44px)",
@@ -76,7 +57,7 @@ export default function About() {
             </p>
 
             <a
-              href="#"
+              href="/over-ons"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -110,6 +91,9 @@ export default function About() {
           .about-grid {
             grid-template-columns: 1fr !important;
             gap: 40px !important;
+          }
+          .about-section {
+            padding: 60px 16px 80px !important;
           }
         }
       `}</style>

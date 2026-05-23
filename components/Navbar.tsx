@@ -43,7 +43,7 @@ export default function Navbar() {
         >
           <img
             src="/logo_popkoor_divers.svg"
-            alt="Popkoor Divers"
+            alt=""
             style={{
               height: scrolled ? "38px" : "44px",
               width: "auto",
@@ -86,11 +86,11 @@ export default function Navbar() {
       </nav>
 
       {open && (
-        <div style={{ background: "rgba(255,255,255,0.98)", backdropFilter: "blur(14px)", borderTop: "1px solid rgba(0,0,0,0.07)", padding: "16px 24px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div style={{ background: "rgba(255,255,255,0.98)", backdropFilter: "blur(14px)", borderTop: "1px solid rgba(0,0,0,0.07)", padding: "8px 24px 20px", display: "flex", flexDirection: "column", gap: "0" }}>
           {links.map((l) => (
-            <a key={l.href} href={l.href} onClick={() => setOpen(false)} style={{ fontSize: "15px", fontWeight: 500, color: "#333", textDecoration: "none" }}>{l.label}</a>
+            <a key={l.href} href={l.href} onClick={() => setOpen(false)} style={{ fontSize: "15px", fontWeight: 500, color: "#333", textDecoration: "none", padding: "10px 0", display: "block", minHeight: "44px", lineHeight: "24px" }}>{l.label}</a>
           ))}
-          <a href="/contact#meezingen" onClick={() => setOpen(false)} style={{ marginTop: "4px", background: "#111", color: "#fff", fontSize: "14px", fontWeight: 600, padding: "11px 20px", borderRadius: "35px", textDecoration: "none", textAlign: "center" }}>
+          <a href="/contact#meezingen" onClick={() => setOpen(false)} style={{ marginTop: "8px", background: "#111", color: "#fff", fontSize: "14px", fontWeight: 600, padding: "13px 20px", borderRadius: "35px", textDecoration: "none", textAlign: "center", minHeight: "44px", display: "flex", alignItems: "center", justifyContent: "center" }}>
             Kom meezingen →
           </a>
         </div>

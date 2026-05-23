@@ -3,6 +3,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
+import { IconClock, IconMapPin, IconMusic } from "@/components/icons";
 
 const statCards = [
   {
@@ -26,9 +27,9 @@ const statCards = [
 ];
 
 const sfeerItems = [
-  { seed: "divers-rep-1", label: "Repetitie", sub: "Dinsdag · De Schakel" },
-  { seed: "divers-optreden-1", label: "Optreden", sub: "Op het podium" },
-  { seed: "divers-groep-1", label: "Groepsfoto", sub: "Het hele koor" },
+  { gradient: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 100%)", label: "Repetitie", sub: "Dinsdag · De Schakel" },
+  { gradient: "linear-gradient(135deg, rgba(243,106,42,0.12) 0%, rgba(243,106,42,0.22) 100%)", label: "Optreden", sub: "Op het podium" },
+  { gradient: "linear-gradient(135deg, #FDE8D8 0%, rgba(243,106,42,0.08) 60%, rgba(243,106,42,0.18) 100%)", label: "Groepsfoto", sub: "Het hele koor" },
 ];
 
 export default function OverOnsPage() {
@@ -119,22 +120,6 @@ export default function OverOnsPage() {
             >
               {/* Left: text */}
               <Reveal>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    background: "rgba(243,106,42,0.09)",
-                    border: "1px solid rgba(243,106,42,0.18)",
-                    borderRadius: "100px",
-                    padding: "4px 14px",
-                    marginBottom: "20px",
-                  }}
-                >
-                  <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>
-                    ONS VERHAAL
-                  </span>
-                </div>
                 <h2
                   style={{
                     fontSize: "clamp(26px, 3.5vw, 40px)",
@@ -184,32 +169,10 @@ export default function OverOnsPage() {
                 <div
                   style={{
                     borderRadius: "24px",
-                    overflow: "hidden",
                     aspectRatio: "4/3",
-                    position: "relative",
+                    background: "linear-gradient(135deg, rgba(243,106,42,0.18) 0%, #FDE8D8 45%, rgba(243,106,42,0.06) 100%)",
                   }}
-                >
-                  <img
-                    src="https://picsum.photos/seed/popkoor-verhaal/700/525"
-                    alt="Koor in repetitie"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "20px",
-                      left: "20px",
-                      background: "rgba(255,255,255,0.92)",
-                      backdropFilter: "blur(10px)",
-                      WebkitBackdropFilter: "blur(10px)",
-                      borderRadius: "12px",
-                      padding: "10px 16px",
-                    }}
-                  >
-                    <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: "#111" }}>Popkoor Divers</p>
-                    <p style={{ margin: "2px 0 0", fontSize: "11px", color: "#888" }}>Gilze · opgericht 2008</p>
-                  </div>
-                </div>
+                />
               </Reveal>
             </div>
           </div>
@@ -243,22 +206,6 @@ export default function OverOnsPage() {
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
             <Reveal style={{ textAlign: "center", marginBottom: "56px" }}>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  background: "rgba(243,106,42,0.09)",
-                  border: "1px solid rgba(243,106,42,0.18)",
-                  borderRadius: "100px",
-                  padding: "4px 14px",
-                  marginBottom: "16px",
-                }}
-              >
-                <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>
-                  HET KOOR VANDAAG
-                </span>
-              </div>
               <h2
                 style={{
                   fontSize: "clamp(28px, 4vw, 44px)",
@@ -365,52 +312,14 @@ export default function OverOnsPage() {
                 <div
                   style={{
                     borderRadius: "24px",
-                    overflow: "hidden",
                     aspectRatio: "4/3",
-                    position: "relative",
+                    background: "linear-gradient(135deg, #FDE8D8 0%, rgba(243,106,42,0.08) 50%, rgba(243,106,42,0.18) 100%)",
                   }}
-                >
-                  <img
-                    src="https://picsum.photos/seed/popkoor-rep/700/525"
-                    alt="Repetitie in De Schakel"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "20px",
-                      left: "20px",
-                      background: "rgba(255,255,255,0.92)",
-                      backdropFilter: "blur(10px)",
-                      WebkitBackdropFilter: "blur(10px)",
-                      borderRadius: "12px",
-                      padding: "10px 16px",
-                    }}
-                  >
-                    <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: "#111" }}>De Schakel</p>
-                    <p style={{ margin: "2px 0 0", fontSize: "11px", color: "#888" }}>Gilze</p>
-                  </div>
-                </div>
+                />
               </Reveal>
 
               {/* Right: text */}
               <Reveal delay={120}>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    background: "rgba(243,106,42,0.09)",
-                    border: "1px solid rgba(243,106,42,0.18)",
-                    borderRadius: "100px",
-                    padding: "4px 14px",
-                    marginBottom: "20px",
-                  }}
-                >
-                  <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>
-                    REPETITIES
-                  </span>
-                </div>
                 <h2
                   style={{
                     fontSize: "clamp(26px, 3.5vw, 40px)",
@@ -425,9 +334,9 @@ export default function OverOnsPage() {
                 </h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
                   {[
-                    { icon: "🕗", text: "Elke dinsdag 20:00" },
-                    { icon: "📍", text: "De Schakel, Gilze" },
-                    { icon: "🎵", text: "Vrijblijvend komen proeven is altijd mogelijk" },
+                    { icon: <IconClock size={17} />, text: "Elke dinsdag 20:00" },
+                    { icon: <IconMapPin size={17} />, text: "De Schakel, Gilze" },
+                    { icon: <IconMusic size={17} />, text: "Vrijblijvend komen proeven is altijd mogelijk" },
                   ].map((item) => (
                     <div key={item.text} style={{ display: "flex", alignItems: "center", gap: "14px" }}>
                       <div
@@ -439,7 +348,7 @@ export default function OverOnsPage() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          fontSize: "17px",
+                          color: "var(--primary)",
                           flexShrink: 0,
                         }}
                       >
@@ -547,7 +456,7 @@ export default function OverOnsPage() {
                 </h2>
               </div>
               <a
-                href="#"
+                href="/media"
                 style={{
                   fontSize: "14px",
                   fontWeight: 600,
@@ -567,7 +476,7 @@ export default function OverOnsPage() {
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }} className="sfeer-grid">
               {sfeerItems.map((item, i) => (
-                <Reveal key={item.seed} delay={i * 100}>
+                <Reveal key={item.label} delay={i * 100}>
                   <div
                     style={{
                       borderRadius: "20px",
@@ -575,28 +484,11 @@ export default function OverOnsPage() {
                       position: "relative",
                       aspectRatio: "4/3",
                       cursor: "pointer",
+                      background: item.gradient,
                     }}
                     className="card-hover"
                   >
-                    <img
-                      src={`https://picsum.photos/seed/${item.seed}/600/450`}
-                      alt={item.label}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
-                        transition: "transform 0.4s ease",
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                          "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)",
-                      }}
-                    />
+                    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)" }} />
                     <div style={{ position: "absolute", top: "16px", left: "16px" }}>
                       <span
                         style={{
@@ -645,22 +537,6 @@ export default function OverOnsPage() {
         >
           <div style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center", position: "relative", zIndex: 1 }}>
             <Reveal>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  background: "rgba(243,106,42,0.12)",
-                  border: "1px solid rgba(243,106,42,0.25)",
-                  borderRadius: "100px",
-                  padding: "4px 14px",
-                  marginBottom: "20px",
-                }}
-              >
-                <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>
-                  WORD LID
-                </span>
-              </div>
               <h2
                 style={{
                   fontSize: "clamp(28px, 4vw, 44px)",

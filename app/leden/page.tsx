@@ -3,34 +3,12 @@ import LedenNavbar from "@/components/LedenNavbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import { createClient } from "@/lib/supabase/server";
+import { IconPlay, IconMusic, IconSparkle } from "@/components/icons";
 import StemTabs from "./components/StemTabs";
-import {
-  nieuwsbrieven,
-  bestuur,
-  leden,
-  opnames,
-  choreo,
-  oudeOptredens,
-} from "./data";
 
-function SectionHeader({ pill, title }: { pill: string; title: string }) {
+function SectionHeader({ title }: { title: string }) {
   return (
     <div style={{ marginBottom: "40px" }}>
-      <div
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          background: "rgba(243,106,42,0.09)",
-          border: "1px solid rgba(243,106,42,0.18)",
-          borderRadius: "100px",
-          padding: "4px 14px",
-          marginBottom: "12px",
-        }}
-      >
-        <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>
-          {pill}
-        </span>
-      </div>
       <h2
         style={{
           fontSize: "clamp(22px, 3vw, 34px)",
@@ -63,6 +41,31 @@ export default async function LedenPage() {
 
   const rol = (profile?.rol ?? "lid") as "lid" | "admin";
 
+  const [
+    { data: liedjesRaw },
+    { data: nieuwsbrieven },
+    { data: bestuur },
+    { data: leden },
+    { data: opnames },
+    { data: choreo },
+    { data: oudeOptredens },
+  ] = await Promise.all([
+    supabase.from("liedjes").select("titel, componist, stemgroep, pdf_url").order("volgorde"),
+    supabase.from("nieuwsbrieven").select("datum, titel, pdf_url").order("volgorde", { ascending: false }),
+    supabase.from("bestuur").select("naam, rol, initialen").order("volgorde"),
+    supabase.from("smoelenboek").select("naam, stemgroep, initialen").order("naam"),
+    supabase.from("opnames").select("titel, datum, type, url").order("volgorde", { ascending: false }),
+    supabase.from("choreo").select("titel, lied, url").order("volgorde"),
+    supabase.from("oude_optredens").select("titel, datum, locatie").order("volgorde", { ascending: false }),
+  ]);
+
+  // Group liedjes by stemgroep
+  const liedjesPerStem: Record<string, { titel: string; componist?: string | null; pdf_url?: string | null }[]> = {};
+  for (const lied of liedjesRaw ?? []) {
+    if (!liedjesPerStem[lied.stemgroep]) liedjesPerStem[lied.stemgroep] = [];
+    liedjesPerStem[lied.stemgroep].push({ titel: lied.titel, componist: lied.componist, pdf_url: lied.pdf_url });
+  }
+
   return (
     <>
       <LedenNavbar email={user.email!} rol={rol} />
@@ -78,21 +81,6 @@ export default async function LedenPage() {
         >
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <Reveal delay={0}>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  background: "rgba(243,106,42,0.09)",
-                  border: "1px solid rgba(243,106,42,0.18)",
-                  borderRadius: "100px",
-                  padding: "4px 14px",
-                  marginBottom: "16px",
-                }}
-              >
-                <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>
-                  LEDENOMGEVING
-                </span>
-              </div>
               <h1
                 style={{
                   fontSize: "clamp(32px, 5vw, 52px)",
@@ -113,7 +101,7 @@ export default async function LedenPage() {
         {/* ── 2. Liedjes per stem ── */}
         <section id="liedjes" style={{ background: "#FFF8F4", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader pill="LIEDJES" title="Liedjes per stemgroep" /></Reveal>
+            <Reveal><SectionHeader title="Liedjes per stemgroep" /></Reveal>
             <Reveal delay={100}><div
               style={{
                 background: "#FFFFFF",
@@ -123,7 +111,7 @@ export default async function LedenPage() {
                 boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
               }}
             >
-              <StemTabs />
+              <StemTabs liedjes={liedjesPerStem} />
             </div></Reveal>
           </div>
         </section>
@@ -131,9 +119,9 @@ export default async function LedenPage() {
         {/* ── 3. Nieuwsbrieven ── */}
         <section id="nieuwsbrieven" style={{ background: "#FFFFFF", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader pill="NIEUWSBRIEVEN" title="Nieuwsbrieven" /></Reveal>
+            <Reveal><SectionHeader title="Nieuwsbrieven" /></Reveal>
             <Reveal delay={80}><div style={{ display: "flex", flexDirection: "column" }}>
-              {nieuwsbrieven.map((nb, i) => (
+              {(nieuwsbrieven ?? []).map((nb, i) => (
                 <div
                   key={nb.titel}
                   style={{
@@ -141,7 +129,7 @@ export default async function LedenPage() {
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "20px 0",
-                    borderBottom: i < nieuwsbrieven.length - 1 ? "1px solid rgba(0,0,0,0.07)" : "none",
+                    borderBottom: i < (nieuwsbrieven ?? []).length - 1 ? "1px solid rgba(0,0,0,0.07)" : "none",
                     gap: "16px",
                     flexWrap: "wrap",
                   }}
@@ -162,9 +150,9 @@ export default async function LedenPage() {
                       {nb.titel}
                     </p>
                   </div>
-                  {nb.pdfUrl ? (
+                  {nb.pdf_url ? (
                     <a
-                      href={nb.pdfUrl}
+                      href={nb.pdf_url}
                       download
                       style={{
                         display: "inline-flex",
@@ -197,12 +185,12 @@ export default async function LedenPage() {
         {/* ── 4. Bestuur ── */}
         <section id="bestuur" style={{ background: "#FFF8F4", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader pill="BESTUUR" title="Samenstelling bestuur" /></Reveal>
+            <Reveal><SectionHeader title="Samenstelling bestuur" /></Reveal>
             <Reveal delay={80}><div
               style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}
               className="bestuur-grid"
             >
-              {bestuur.map((lid) => (
+              {(bestuur ?? []).map((lid) => (
                 <div
                   key={lid.naam}
                   style={{
@@ -251,12 +239,12 @@ export default async function LedenPage() {
         {/* ── 5. Smoelenboek ── */}
         <section id="smoelenboek" style={{ background: "#FFFFFF", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader pill="SMOELENBOEK" title="Smoelenboek" /></Reveal>
+            <Reveal><SectionHeader title="Smoelenboek" /></Reveal>
             <Reveal delay={80}><div
               style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "16px" }}
               className="smoelenboek-grid"
             >
-              {leden.map((lid) => (
+              {(leden ?? []).map((lid) => (
                 <div
                   key={lid.naam}
                   style={{
@@ -319,7 +307,7 @@ export default async function LedenPage() {
         {/* ── 6. Opnames & Choreo ── */}
         <section id="opnames" style={{ background: "#FFF8F4", padding: "80px 24px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader pill="MEDIA" title="Opnames & Choreo" /></Reveal>
+            <Reveal><SectionHeader title="Opnames & Choreo" /></Reveal>
             <Reveal delay={80}><div
               style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px" }}
               className="opnames-grid"
@@ -340,7 +328,7 @@ export default async function LedenPage() {
                   Opnames
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                  {opnames.map((item) => (
+                  {(opnames ?? []).map((item) => (
                     <div
                       key={item.titel}
                       style={{
@@ -364,11 +352,11 @@ export default async function LedenPage() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            fontSize: "13px",
                             flexShrink: 0,
+                            color: item.type === "video" ? "var(--primary)" : "#6366f1",
                           }}
                         >
-                          {item.type === "video" ? "▶" : "🎵"}
+                          {item.type === "video" ? <IconPlay size={13} /> : <IconMusic size={13} />}
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <p
@@ -418,7 +406,7 @@ export default async function LedenPage() {
                   Choreografie
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                  {choreo.map((item) => (
+                  {(choreo ?? []).map((item) => (
                     <div
                       key={item.titel}
                       style={{
@@ -442,11 +430,11 @@ export default async function LedenPage() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            fontSize: "13px",
                             flexShrink: 0,
+                            color: "#0ea5e9",
                           }}
                         >
-                          💃
+                          <IconSparkle size={13} />
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <p
@@ -486,12 +474,12 @@ export default async function LedenPage() {
         {/* ── 7. Oude optredens ── */}
         <section id="optredens" style={{ background: "#FFFFFF", padding: "80px 24px 120px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader pill="ARCHIEF" title="Oude optredens" /></Reveal>
+            <Reveal><SectionHeader title="Oude optredens" /></Reveal>
             <Reveal delay={80}><div
               style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}
               className="optredens-grid"
             >
-              {oudeOptredens.map((optreden) => (
+              {(oudeOptredens ?? []).map((optreden) => (
                 <div
                   key={optreden.titel}
                   style={{
@@ -503,36 +491,28 @@ export default async function LedenPage() {
                   }}
                   className="card-hover"
                 >
-                  <div style={{ aspectRatio: "16/9", position: "relative", overflow: "hidden" }}>
-                    <img
-                      src={`https://picsum.photos/seed/${optreden.seed}/600/338`}
-                      alt={optreden.titel}
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                    />
+                  <div
+                    style={{
+                      aspectRatio: "16/9",
+                      background: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 50%, rgba(243,106,42,0.08) 100%)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
                     <div
                       style={{
-                        position: "absolute",
-                        inset: 0,
-                        background: "rgba(0,0,0,0.32)",
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.92)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        color: "var(--primary)",
                       }}
                     >
-                      <div
-                        style={{
-                          width: "44px",
-                          height: "44px",
-                          borderRadius: "50%",
-                          background: "rgba(255,255,255,0.92)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "15px",
-                        }}
-                      >
-                        ▶
-                      </div>
+                      <IconPlay size={15} />
                     </div>
                   </div>
                   <div style={{ padding: "16px 20px", background: "#FFFFFF" }}>

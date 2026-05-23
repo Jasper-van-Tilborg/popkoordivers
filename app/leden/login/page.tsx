@@ -50,7 +50,7 @@ export default function LoginPage() {
       <a href="/" style={{ textDecoration: "none", marginBottom: "48px", display: "flex", justifyContent: "center" }}>
         <img
           src="/logo_popkoor_divers.svg"
-          alt="Popkoor Divers"
+          alt=""
           style={{ height: "56px", width: "auto", display: "block" }}
         />
       </a>

@@ -1,14 +1,14 @@
 "use client";
 
 const socials = [
-  { label: "Facebook", href: "#" },
-  { label: "Instagram", href: "#" },
-  { label: "YouTube", href: "#" },
+  { label: "Facebook",  href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL" },
+  { label: "Instagram", href: "https://www.instagram.com/popkoordivers/" },
+  { label: "YouTube",   href: "https://www.youtube.com/@popkoordivers" },
 ];
 
 export default function Footer() {
   return (
-    <footer style={{ background: "#111111", padding: "64px 24px 32px" }}>
+    <footer className="footer-outer" style={{ background: "#111111", padding: "64px 24px 32px" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 
         {/* Top grid */}
@@ -52,7 +52,7 @@ export default function Footer() {
               info@popkoordivers.nl
             </a>
             <a
-              href="#contact"
+              href="/contact#boeken"
               style={{ display: "block", fontSize: "13px", color: "rgba(255,255,255,0.45)", textDecoration: "none", transition: "color 0.15s" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
@@ -68,6 +68,8 @@ export default function Footer() {
               <a
                 key={s.label}
                 href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{ display: "block", fontSize: "13px", color: "rgba(255,255,255,0.7)", textDecoration: "none", margin: "0 0 8px", transition: "color 0.15s" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "var(--primary)")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
@@ -90,17 +92,18 @@ export default function Footer() {
           }}
         >
           <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", margin: 0 }}>
-            © {new Date().getFullYear()} Popkoor Divers · KvK 12345678
+            © {new Date().getFullYear()} Popkoor Divers
           </p>
           <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
             {[
-              { label: "SponsorKliks", href: "#" },
-              { label: "Privacy", href: "#" },
+              { label: "SponsorKliks", href: "https://www.sponsorkliks.com/products/shops.php?club=13468&cn=nl&ln=nl" },
               { label: "Log in", href: "/leden" },
             ].map((l) => (
               <a
                 key={l.label}
                 href={l.href}
+                target={l.href.startsWith("http") ? "_blank" : undefined}
+                rel={l.href.startsWith("http") ? "noopener noreferrer" : undefined}
                 style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", textDecoration: "none", transition: "color 0.15s" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.25)")}
@@ -115,6 +118,9 @@ export default function Footer() {
 
       <style>{`
         @media (max-width: 768px) {
+          .footer-outer {
+            padding: 48px 16px 24px !important;
+          }
           .footer-grid {
             grid-template-columns: 1fr 1fr !important;
             gap: 32px !important;

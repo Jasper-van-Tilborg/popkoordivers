@@ -93,20 +93,43 @@ export default function LedenNavbar({ email, rol }: Props) {
         {/* Right — rol badge + website link + logout */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
           {/* Rol badge */}
-          <span
-            style={{
-              fontSize: "10px",
-              fontWeight: 700,
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              color: badge.color,
-              background: badge.bg,
-              padding: "4px 10px",
-              borderRadius: "100px",
-            }}
-          >
-            {badge.label}
-          </span>
+          {rol === "admin" ? (
+            <a
+              href="/admin"
+              style={{
+                fontSize: "13px",
+                fontWeight: 600,
+                color: badge.color,
+                background: badge.bg,
+                padding: "7px 14px",
+                borderRadius: "35px",
+                textDecoration: "none",
+                whiteSpace: "nowrap",
+                transition: "background 0.15s",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(243,106,42,0.22)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = badge.bg; }}
+            >
+              {badge.label} ↗
+            </a>
+          ) : (
+            <span
+              style={{
+                fontSize: "13px",
+                fontWeight: 600,
+                color: badge.color,
+                background: badge.bg,
+                padding: "7px 14px",
+                borderRadius: "35px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {badge.label}
+            </span>
+          )}
 
           {/* Back to website */}
           <a

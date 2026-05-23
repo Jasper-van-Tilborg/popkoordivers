@@ -1,18 +1,16 @@
 "use client";
 
 import Reveal from "@/components/Reveal";
+import { IconMic, IconCalendar } from "@/components/icons";
 
 export default function JoinUs() {
   return (
-    <section id="meezingen" style={{ position: "relative", background: "#FFFFFF", padding: "100px 24px 140px", overflow: "hidden" }}>
+    <section id="meezingen" className="joinus-section" style={{ position: "relative", background: "#FFFFFF", padding: "100px 24px 140px", overflow: "hidden" }}>
       <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 100% 70% at 50% 50%, rgba(243,106,42,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
         <Reveal style={{ textAlign: "center", marginBottom: "56px" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(243,106,42,0.09)", border: "1px solid rgba(243,106,42,0.18)", borderRadius: "100px", padding: "4px 14px", marginBottom: "16px" }}>
-            <span style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 700, letterSpacing: "0.08em" }}>MEEDOEN</span>
-          </div>
           <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}>
             Jij hoort erbij
           </h2>
@@ -25,6 +23,7 @@ export default function JoinUs() {
           {/* Word lid */}
           <Reveal delay={0}>
             <div
+              className="joinus-card"
               style={{
                 background: "var(--primary)",
                 borderRadius: "24px",
@@ -33,8 +32,8 @@ export default function JoinUs() {
                 boxShadow: "0 8px 40px rgba(243,106,42,0.25)",
               }}
             >
-              <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", marginBottom: "24px" }}>
-                🎤
+              <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", color: "#fff" }}>
+                <IconMic size={22} />
               </div>
               <p style={{ margin: "0 0 4px", fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Word lid</p>
               <h3 style={{ fontSize: "clamp(20px, 2.5vw, 28px)", fontWeight: 800, color: "#FFFFFF", margin: "0 0 16px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
@@ -44,7 +43,7 @@ export default function JoinUs() {
                 Dinsdagavond in De Schakel. Gewoon eens proefzingen — geen verplichting, geen auditie op dag één.
               </p>
               <a
-                href="#contact"
+                href="/contact#meezingen"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -69,6 +68,7 @@ export default function JoinUs() {
           {/* Boek ons */}
           <Reveal delay={120}>
             <div
+              className="joinus-card"
               style={{
                 background: "#FFFFFF",
                 border: "1.5px solid rgba(0,0,0,0.09)",
@@ -78,8 +78,8 @@ export default function JoinUs() {
                 boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
               }}
             >
-              <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "rgba(243,106,42,0.10)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", marginBottom: "24px" }}>
-                📅
+              <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "rgba(243,106,42,0.10)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", color: "var(--primary)" }}>
+                <IconCalendar size={22} />
               </div>
               <p style={{ margin: "0 0 4px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Boek ons</p>
               <h3 style={{ fontSize: "clamp(20px, 2.5vw, 28px)", fontWeight: 800, color: "#111", margin: "0 0 16px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
@@ -89,7 +89,7 @@ export default function JoinUs() {
                 Voor feesten, jubilea, festivals of een intieme setting. Wij zingen. Vraag een vrijblijvende offerte aan.
               </p>
               <a
-                href="#contact"
+                href="/contact#boeken"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -126,6 +126,12 @@ export default function JoinUs() {
           .joinus-grid {
             grid-template-columns: 1fr !important;
             gap: 20px !important;
+          }
+          .joinus-section {
+            padding: 60px 16px 100px !important;
+          }
+          .joinus-card {
+            padding: 32px 24px !important;
           }
         }
       `}</style>

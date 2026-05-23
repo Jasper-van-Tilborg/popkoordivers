@@ -204,5 +204,5 @@ CREATE POLICY "media_insert_admin"
 --
 -- UPDATE profiles
 -- SET rol = 'admin'
--- WHERE email = 'jouw@email.nl';
+-- WHERE email = 'jasper.van.tilborg@ziggo.nl';
 -- ----------------------------------------------------------------
