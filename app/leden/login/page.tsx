@@ -181,6 +181,44 @@ export default function LoginPage() {
       <p style={{ marginTop: "24px", fontSize: "13px", color: "#bbb", textAlign: "center" }}>
         Alleen beschikbaar voor leden van Popkoor Divers
       </p>
+
+      {/* Demo section */}
+      <div
+        style={{
+          marginTop: "40px",
+          width: "100%",
+          maxWidth: "400px",
+          borderTop: "1px solid rgba(0,0,0,0.07)",
+          paddingTop: "28px",
+          textAlign: "center",
+        }}
+      >
+        <p style={{ fontSize: "12px", fontWeight: 700, color: "#aaa", letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 14px" }}>
+          Demo omgeving
+        </p>
+        <p style={{ fontSize: "13px", color: "#bbb", margin: "0 0 16px", lineHeight: 1.5 }}>
+          Bekijk een demo van de ledenomgeving of het admin dashboard — geen inloggen nodig.
+        </p>
+        <a
+          href="/demo"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            fontSize: "13px",
+            fontWeight: 700,
+            color: "var(--primary)",
+            background: "rgba(243,106,42,0.07)",
+            border: "1.5px solid rgba(243,106,42,0.2)",
+            borderRadius: "35px",
+            padding: "9px 18px",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Bekijk de demo →
+        </a>
+      </div>
     </div>
   );
 }
