@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
+import RevealText from "@/components/RevealText";
 
 interface AgendaItem {
   id: number;
@@ -55,11 +56,12 @@ export default function AgendaClient({ komend, archief }: Props) {
                 Komende &amp; afgelopen optredens
               </p>
             </Reveal>
-            <Reveal delay={100}>
-              <h1 style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}>
-                Agenda
-              </h1>
-            </Reveal>
+            <RevealText
+              text="Agenda"
+              as="h1"
+              pageDelay={0}
+              style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}
+            />
             <Reveal delay={200}>
               <div style={{ display: "flex", gap: "8px" }}>
                 <button

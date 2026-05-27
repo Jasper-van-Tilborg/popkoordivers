@@ -1,6 +1,7 @@
 "use client";
 
 import Reveal from "@/components/Reveal";
+import RevealText from "@/components/RevealText";
 import { IconMic, IconCalendar } from "@/components/icons";
 
 export default function JoinUs() {
@@ -11,9 +12,11 @@ export default function JoinUs() {
       <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
         <Reveal style={{ textAlign: "center", marginBottom: "56px" }}>
-          <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}>
-            Jij hoort erbij
-          </h2>
+          <RevealText
+            text="Jij hoort erbij"
+            pageDelay={700}
+            style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
+          />
         </Reveal>
 
         <div

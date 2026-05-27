@@ -1,6 +1,7 @@
 "use client";
 
 import Reveal from "@/components/Reveal";
+import RevealText from "@/components/RevealText";
 
 const media = [
   {
@@ -33,9 +34,11 @@ export default function WhatWeDo() {
         {/* Header row */}
         <Reveal style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "16px" }}>
           <div>
-            <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}>
-              Zo klinkt Divers
-            </h2>
+            <RevealText
+              text="Zo klinkt Divers"
+              pageDelay={900}
+              style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
+            />
           </div>
           <a
             href="/media"

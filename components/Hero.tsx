@@ -1,6 +1,7 @@
 "use client";
 
 import Reveal from "@/components/Reveal";
+import RevealText from "@/components/RevealText";
 
 export default function Hero() {
   return (
@@ -52,18 +53,12 @@ export default function Hero() {
           </p>
 
           {/* Headline */}
-          <h1
-            style={{
-              fontSize: "clamp(36px, 5vw, 60px)",
-              fontWeight: 800,
-              lineHeight: 1.1,
-              letterSpacing: "-2px",
-              color: "#FFFFFF",
-              margin: "0 0 20px",
-            }}
-          >
-            Passie voor popmuziek brengt mensen bij elkaar.
-          </h1>
+          <RevealText
+            text="Passie voor popmuziek brengt mensen bij elkaar."
+            as="h1"
+            pageDelay={0}
+            style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-2px", color: "#FFFFFF", margin: "0 0 20px" }}
+          />
 
           {/* Subheadline */}
           <p
@@ -124,37 +119,6 @@ export default function Hero() {
             </a>
           </div>
 
-          {/* Stats strip */}
-          <div
-            style={{
-              marginTop: "48px",
-              display: "flex",
-              gap: "0",
-              background: "rgba(0,0,0,0.18)",
-              borderRadius: "14px",
-              overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.12)",
-            }}
-          >
-            {[
-              { value: "60", label: "stemmen" },
-              { value: "5", label: "stemgroepen" },
-              { value: "1", label: "dirigent" },
-            ].map((s, i) => (
-              <div
-                key={s.label}
-                style={{
-                  flex: 1,
-                  padding: "14px 16px",
-                  textAlign: "center",
-                  borderRight: i < 2 ? "1px solid rgba(255,255,255,0.12)" : "none",
-                }}
-              >
-                <p style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#FFFFFF", lineHeight: 1 }}>{s.value}</p>
-                <p style={{ margin: "3px 0 0", fontSize: "11px", color: "rgba(255,255,255,0.65)", fontWeight: 500 }}>{s.label}</p>
-              </div>
-            ))}
-          </div>
         </div></Reveal>
 
         {/* Right: image + info cards */}

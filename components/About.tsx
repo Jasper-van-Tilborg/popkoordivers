@@ -1,6 +1,7 @@
 "use client";
 
 import Reveal from "@/components/Reveal";
+import RevealText from "@/components/RevealText";
 
 export default function About() {
   return (
@@ -29,22 +30,11 @@ export default function About() {
 
           {/* Right: text */}
           <Reveal delay={120}>
-            <h2
-              style={{
-                fontSize: "clamp(28px, 3.5vw, 44px)",
-                fontWeight: 800,
-                letterSpacing: "-1.5px",
-                lineHeight: 1.15,
-                color: "#111",
-                margin: "0 0 8px",
-              }}
-            >
-              Wie zijn wij?
-            </h2>
-
-            <p style={{ fontSize: "17px", fontWeight: 600, color: "var(--primary)", margin: "0 0 20px", lineHeight: 1.5 }}>
-              60 stemmen, 1 dirigent, elke dinsdag De Schakel.
-            </p>
+            <RevealText
+              text="Wie zijn wij?"
+              pageDelay={300}
+              style={{ fontSize: "clamp(28px, 3.5vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 8px" }}
+            />
 
             <p style={{ fontSize: "16px", lineHeight: 1.8, color: "#555", margin: "0 0 28px" }}>
               Popkoor Divers is een enthousiast en swingend koor uit Gilze, verdeeld over{" "}

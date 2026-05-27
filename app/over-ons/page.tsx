@@ -3,6 +3,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
+import RevealText from "@/components/RevealText";
 import { IconClock, IconMapPin, IconMusic } from "@/components/icons";
 
 const statCards = [
@@ -64,11 +65,12 @@ export default function OverOnsPage() {
                 Over ons
               </p>
             </Reveal>
-            <Reveal delay={100}>
-              <h1 style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}>
-                Over ons
-              </h1>
-            </Reveal>
+            <RevealText
+              text="Over ons"
+              as="h1"
+              pageDelay={0}
+              style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}
+            />
             <Reveal delay={180}>
               <p style={{ fontSize: "clamp(15px, 1.6vw, 18px)", lineHeight: 1.7, color: "rgba(255,255,255,0.82)", maxWidth: "520px", margin: 0 }}>
                 Leer ons kennen — wie we zijn, waar we vandaan komen en wat ons elke dinsdagavond bij elkaar brengt.
@@ -87,20 +89,11 @@ export default function OverOnsPage() {
         {/* ── 2. Intro blok ── */}
         <section style={{ background: "#FFFFFF", padding: "100px 24px 80px" }}>
           <div style={{ maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
-            <Reveal>
-              <h2
-                style={{
-                  fontSize: "clamp(26px, 4vw, 50px)",
-                  fontWeight: 800,
-                  letterSpacing: "-2px",
-                  lineHeight: 1.15,
-                  color: "#111",
-                  margin: 0,
-                }}
-              >
-                Een swingend koor uit Gilze met 60 stemmen, piano, band en bijpassende choreo.
-              </h2>
-            </Reveal>
+            <RevealText
+            text="Een swingend koor uit Gilze met 60 stemmen, piano, band en bijpassende choreo."
+            pageDelay={200}
+            style={{ fontSize: "clamp(26px, 4vw, 50px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.25, color: "#111", margin: 0 }}
+          />
           </div>
         </section>
 
@@ -120,18 +113,11 @@ export default function OverOnsPage() {
             >
               {/* Left: text */}
               <Reveal>
-                <h2
-                  style={{
-                    fontSize: "clamp(26px, 3.5vw, 40px)",
-                    fontWeight: 800,
-                    letterSpacing: "-1.5px",
-                    lineHeight: 1.15,
-                    color: "#111",
-                    margin: "0 0 28px",
-                  }}
-                >
-                  Opgericht met passie, gegroeid met plezier
-                </h2>
+                <RevealText
+                  text="Opgericht met passie, gegroeid met plezier"
+                  pageDelay={450}
+                  style={{ fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 28px" }}
+                />
                 <ul style={{ listStyle: "none", padding: 0, margin: "0 0 0" }}>
                   {[
                     "Opgericht in 2008 in Gilze",
@@ -206,18 +192,11 @@ export default function OverOnsPage() {
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
             <Reveal style={{ textAlign: "center", marginBottom: "56px" }}>
-              <h2
-                style={{
-                  fontSize: "clamp(28px, 4vw, 44px)",
-                  fontWeight: 800,
-                  letterSpacing: "-1.5px",
-                  lineHeight: 1.15,
-                  color: "#111",
-                  margin: 0,
-                }}
-              >
-                Wie zingt er mee?
-              </h2>
+              <RevealText
+                text="Wie zingt er mee?"
+                pageDelay={650}
+                style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
+              />
             </Reveal>
 
             {/* Stat cards */}
@@ -320,18 +299,11 @@ export default function OverOnsPage() {
 
               {/* Right: text */}
               <Reveal delay={120}>
-                <h2
-                  style={{
-                    fontSize: "clamp(26px, 3.5vw, 40px)",
-                    fontWeight: 800,
-                    letterSpacing: "-1.5px",
-                    lineHeight: 1.15,
-                    color: "#111",
-                    margin: "0 0 28px",
-                  }}
-                >
-                  Elke dinsdag om 20:00
-                </h2>
+                <RevealText
+                  text="Elke dinsdag om 20:00"
+                  pageDelay={850}
+                  style={{ fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 28px" }}
+                />
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
                   {[
                     { icon: <IconClock size={17} />, text: "Elke dinsdag 20:00" },
@@ -442,18 +414,11 @@ export default function OverOnsPage() {
                 >
                   Zo ziet het eruit
                 </p>
-                <h2
-                  style={{
-                    fontSize: "clamp(28px, 4vw, 44px)",
-                    fontWeight: 800,
-                    letterSpacing: "-1.5px",
-                    lineHeight: 1.15,
-                    color: "#111",
-                    margin: 0,
-                  }}
-                >
-                  Sfeer in beeld
-                </h2>
+                <RevealText
+                  text="Sfeer in beeld"
+                  pageDelay={1050}
+                  style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
+                />
               </div>
               <a
                 href="/media"
@@ -537,18 +502,11 @@ export default function OverOnsPage() {
         >
           <div style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center", position: "relative", zIndex: 1 }}>
             <Reveal>
-              <h2
-                style={{
-                  fontSize: "clamp(28px, 4vw, 44px)",
-                  fontWeight: 800,
-                  letterSpacing: "-1.5px",
-                  lineHeight: 1.15,
-                  color: "#111",
-                  margin: "0 0 20px",
-                }}
-              >
-                Kom een keer meezingen
-              </h2>
+              <RevealText
+                text="Kom een keer meezingen"
+                pageDelay={1200}
+                style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 20px" }}
+              />
               <p
                 style={{
                   fontSize: "16px",

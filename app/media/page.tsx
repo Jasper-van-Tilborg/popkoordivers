@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
+import RevealText from "@/components/RevealText";
 import { createClient } from "@/lib/supabase/server";
 import { IconPlay } from "@/components/icons";
 
@@ -61,11 +62,12 @@ export default async function MediaPage() {
                 Foto&apos;s &amp; Video&apos;s
               </p>
             </Reveal>
-            <Reveal delay={100}>
-              <h1 style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}>
-                Foto&apos;s &amp; Video&apos;s
-              </h1>
-            </Reveal>
+            <RevealText
+              text="Foto's & Video's"
+              as="h1"
+              pageDelay={0}
+              style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}
+            />
             <Reveal delay={180}>
               <p style={{ fontSize: "clamp(15px, 1.6vw, 18px)", lineHeight: 1.7, color: "rgba(255,255,255,0.82)", maxWidth: "520px", margin: 0 }}>
                 Een kijkje achter de schermen — optredens, repetities en bijzondere momenten van Popkoor Divers.

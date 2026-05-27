@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
+import RevealText from "@/components/RevealText";
 
 type FormStatus = "idle" | "sending" | "sent";
 
@@ -182,11 +183,12 @@ export default function ContactPage() {
                 Contact
               </p>
             </Reveal>
-            <Reveal delay={100}>
-              <h1 style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}>
-                Contact
-              </h1>
-            </Reveal>
+            <RevealText
+              text="Contact"
+              as="h1"
+              pageDelay={0}
+              style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}
+            />
             <Reveal delay={180}>
               <p style={{ fontSize: "clamp(15px, 1.6vw, 18px)", lineHeight: 1.7, color: "rgba(255,255,255,0.82)", maxWidth: "520px", margin: 0 }}>
                 Neem contact op, meld je aan om mee te zingen of vraag een offerte aan voor een optreden.
@@ -210,7 +212,7 @@ export default function ContactPage() {
               {/* Left: contactgegevens */}
               <Reveal>
                 <p style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Contactgegevens</p>
-                <h2 style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, letterSpacing: "-1px", color: "#111", margin: "0 0 28px" }}>Neem contact op</h2>
+                <RevealText text="Neem contact op" pageDelay={200} style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, letterSpacing: "-1px", color: "#111", margin: "0 0 28px" }} />
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                   <div>
@@ -274,7 +276,7 @@ export default function ContactPage() {
               {/* Right: repetitie info */}
               <Reveal delay={120}>
                 <p style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Repetities</p>
-                <h2 style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, letterSpacing: "-1px", color: "#111", margin: "0 0 28px" }}>Elke dinsdag</h2>
+                <RevealText text="Elke dinsdag" pageDelay={200} style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, letterSpacing: "-1px", color: "#111", margin: "0 0 28px" }} />
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
                   {[
@@ -323,9 +325,7 @@ export default function ContactPage() {
         >
           <div style={{ maxWidth: "700px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <Reveal style={{ textAlign: "center", marginBottom: "48px" }}>
-              <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 14px" }}>
-                Wil je meezingen?
-              </h2>
+              <RevealText text="Wil je meezingen?" pageDelay={350} style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 14px" }} />
               <p style={{ fontSize: "16px", color: "#555", margin: 0, lineHeight: 1.75, maxWidth: "520px", marginLeft: "auto", marginRight: "auto" }}>
                 De drempel is laag — iedereen is welkom om een avond te komen proeven. Geen auditie, geen voorbereiding nodig. Stuur ons een berichtje en we verwelkomen je de eerstvolgende dinsdag.
               </p>
@@ -400,9 +400,7 @@ export default function ContactPage() {
         >
           <div style={{ maxWidth: "700px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <Reveal style={{ textAlign: "center", marginBottom: "48px" }}>
-              <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 14px" }}>
-                Boek ons voor jouw optreden
-              </h2>
+              <RevealText text="Boek ons voor jouw optreden" pageDelay={500} style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 14px" }} />
               <p style={{ fontSize: "16px", color: "#555", margin: 0, lineHeight: 1.75, maxWidth: "520px", marginLeft: "auto", marginRight: "auto" }}>
                 Voor feesten, jubilea, festivals of een intieme setting — wij zingen. Vraag een vrijblijvende offerte aan via het formulier hieronder.
               </p>

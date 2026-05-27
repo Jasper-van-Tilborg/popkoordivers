@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
+import RevealText from "@/components/RevealText";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -41,11 +42,12 @@ export default async function NieuwsPage() {
                 Nieuws
               </p>
             </Reveal>
-            <Reveal delay={100}>
-              <h1 style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}>
-                Nieuws
-              </h1>
-            </Reveal>
+            <RevealText
+              text="Nieuws"
+              as="h1"
+              pageDelay={0}
+              style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}
+            />
             <Reveal delay={180}>
               <p style={{ fontSize: "clamp(15px, 1.6vw, 18px)", lineHeight: 1.7, color: "rgba(255,255,255,0.82)", maxWidth: "520px", margin: 0 }}>
                 Het laatste nieuws van Popkoor Divers — optredens, nieuwe leden en alles wat er speelt.
@@ -67,9 +69,11 @@ export default async function NieuwsPage() {
               <p style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 Alle berichten
               </p>
-              <h2 style={{ fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}>
-                Laatste nieuws
-              </h2>
+              <RevealText
+                text="Laatste nieuws"
+                pageDelay={200}
+                style={{ fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
+              />
             </Reveal>
 
             {!berichten || berichten.length === 0 ? (
