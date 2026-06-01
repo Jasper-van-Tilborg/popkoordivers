@@ -59,10 +59,11 @@ export default function OverOnsPage() {
 
         {/* ── 1. Hero ── */}
         <section
+          className="page-hero"
           style={{
             background: "var(--primary)",
             padding: "140px 24px 100px",
-            height: "420px",
+            minHeight: "420px",
             position: "relative",
             overflow: "hidden",
           }}
@@ -105,7 +106,7 @@ export default function OverOnsPage() {
         </section>
 
         {/* ── 2. Intro blok ── */}
-        <section style={{ background: "#FFFFFF", padding: "100px 24px 80px" }}>
+        <section className="section-pad" style={{ background: "#FFFFFF", padding: "100px 24px 80px" }}>
           <div style={{ maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
             <RevealText
             text="Een swingend koor uit Gilze met 60 stemmen, piano, band en bijpassende choreo."
@@ -117,6 +118,7 @@ export default function OverOnsPage() {
 
         {/* ── 3. Ons verhaal ── */}
         <section
+          className="section-pad"
           style={{
             background: "#FFFFFF",
             padding: "20px 24px 120px",
@@ -191,6 +193,7 @@ export default function OverOnsPage() {
 
         {/* ── 4. Het koor vandaag ── */}
         <section
+          className="section-pad"
           style={{
             background: "#FFF8F4",
             padding: "100px 24px 120px",
@@ -224,7 +227,7 @@ export default function OverOnsPage() {
             >
               {/* Stemmen */}
               <Reveal delay={0}>
-                <div style={{ background: "#FFFFFF", borderRadius: "20px", padding: "36px 28px", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", height: "100%", transition: "transform 0.2s, box-shadow 0.2s" }} className="card-hover">
+                <div className="card-hover stat-card-inner" style={{ background: "#FFFFFF", borderRadius: "20px", padding: "36px 28px", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", height: "100%", transition: "transform 0.2s, box-shadow 0.2s" }}>
                   <p style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase" as const }}>Stemmen</p>
                   <p style={{ margin: "0 0 14px", fontSize: "48px", fontWeight: 800, color: "#111", lineHeight: 1.05, letterSpacing: "-2px" }}>60</p>
                   <p style={{ margin: 0, fontSize: "14px", color: "#666", lineHeight: 1.65 }}>Verdeeld over 5 stemgroepen: alt, mezzo, sopraan, tenor en bas.</p>
@@ -278,7 +281,7 @@ export default function OverOnsPage() {
 
               {/* Begeleiding */}
               <Reveal delay={200}>
-                <div style={{ background: "#FFFFFF", borderRadius: "20px", padding: "36px 28px", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", height: "100%", transition: "transform 0.2s, box-shadow 0.2s" }} className="card-hover">
+                <div className="card-hover stat-card-inner" style={{ background: "#FFFFFF", borderRadius: "20px", padding: "36px 28px", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", height: "100%", transition: "transform 0.2s, box-shadow 0.2s" }}>
                   <p style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase" as const }}>Begeleiding</p>
                   <p style={{ margin: "0 0 14px", fontSize: "22px", fontWeight: 800, color: "#111", lineHeight: 1.05, letterSpacing: "-0.5px" }}>Piano + band</p>
                   <p style={{ margin: 0, fontSize: "14px", color: "#666", lineHeight: 1.65 }}>Piano, live band en bijpassende choreografie bij elk optreden.</p>
@@ -295,7 +298,7 @@ export default function OverOnsPage() {
               transition2: "margin-top 0.4s ease",
             } as React.CSSProperties}>
               <div style={{ overflow: "hidden" }}>
-                <div style={{
+                <div className="dirigent-panel" style={{
                   background: "#FFFFFF",
                   borderRadius: "20px",
                   border: "1.5px solid rgba(243,106,42,0.25)",
@@ -323,7 +326,7 @@ export default function OverOnsPage() {
                   }} />
 
                   {/* Foto */}
-                  <div style={{ flexShrink: 0, width: "160px", display: "flex", flexDirection: "column" }}>
+                  <div className="dirigent-foto" style={{ flexShrink: 0, width: "160px", display: "flex", flexDirection: "column" }}>
                     <button
                       onClick={openLightbox("/tom_mordang.jpg")}
                       style={{ background: "none", border: "none", padding: 0, cursor: "zoom-in", display: "flex", flex: 1, width: "100%" }}
@@ -389,6 +392,7 @@ export default function OverOnsPage() {
 
         {/* ── 5. Repetities ── */}
         <section
+          className="section-pad"
           style={{
             background: "#FFFFFF",
             padding: "100px 24px 120px",
@@ -498,6 +502,7 @@ export default function OverOnsPage() {
 
         {/* ── 6. Sfeer ── */}
         <section
+          className="section-pad"
           style={{
             background: "#FFF8F4",
             padding: "100px 24px 140px",
@@ -618,6 +623,7 @@ export default function OverOnsPage() {
 
         {/* ── 7. CTA ── */}
         <section
+          className="section-pad"
           style={{
             background: "var(--gradient-section), #FDE8D8",
             padding: "100px 24px 120px",
@@ -771,6 +777,31 @@ export default function OverOnsPage() {
         @media (max-width: 640px) {
           .sfeer-grid {
             grid-template-columns: 1fr !important;
+          }
+        }
+
+        /* ── Mobile overrides ── */
+        @media (max-width: 640px) {
+          .page-hero {
+            padding: 100px 20px 80px !important;
+            height: auto !important;
+            min-height: 320px !important;
+          }
+          .section-pad {
+            padding-top: 60px !important;
+            padding-bottom: 72px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+          }
+          .stat-card-inner {
+            padding: 24px 20px !important;
+          }
+          .dirigent-panel {
+            padding: 24px 20px !important;
+            gap: 24px !important;
+          }
+          .dirigent-foto {
+            width: 100% !important;
           }
         }
       `}</style>

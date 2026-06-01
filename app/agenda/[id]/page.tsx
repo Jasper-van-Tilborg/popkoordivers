@@ -43,7 +43,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
       <main style={{ minHeight: "100vh", background: "#FFFFFF" }}>
 
         {/* ── Hero ── */}
-        <section style={{ background: "var(--primary)", padding: "140px 24px 100px", minHeight: "380px", position: "relative", overflow: "hidden" }}>
+        <section className="page-hero" style={{ background: "var(--primary)", padding: "140px 24px 100px", minHeight: "380px", position: "relative", overflow: "hidden" }}>
           <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%)", pointerEvents: "none" }} />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
@@ -107,7 +107,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
         </section>
 
         {/* ── Content ── */}
-        <section style={{ padding: "72px 24px 100px", background: "#FFFFFF" }}>
+        <section className="agenda-detail-content" style={{ padding: "72px 24px 100px", background: "#FFFFFF" }}>
           <div style={{ maxWidth: "760px", margin: "0 auto" }}>
 
             {/* Info grid */}
@@ -201,6 +201,10 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
       <style>{`
         @media (max-width: 600px) {
           .event-detail-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 640px) {
+          .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 300px !important; }
+          .agenda-detail-content { padding: 40px 20px 80px !important; }
         }
       `}</style>
     </>

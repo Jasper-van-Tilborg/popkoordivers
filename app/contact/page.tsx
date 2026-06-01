@@ -160,10 +160,11 @@ export default function ContactPage() {
 
         {/* ── 1. Hero ── */}
         <section
+          className="page-hero"
           style={{
             background: "var(--primary)",
             padding: "140px 24px 100px",
-            height: "420px",
+            minHeight: "420px",
             position: "relative",
             overflow: "hidden",
           }}
@@ -205,7 +206,7 @@ export default function ContactPage() {
         </section>
 
         {/* ── 2. Contactinfo (two-column) ── */}
-        <section style={{ background: "#FFFFFF", padding: "80px 24px 100px", overflow: "hidden", position: "relative" }}>
+        <section className="section-pad" style={{ background: "#FFFFFF", padding: "80px 24px 100px", overflow: "hidden", position: "relative" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "64px" }} className="contact-info-grid">
 
@@ -315,6 +316,7 @@ export default function ContactPage() {
         {/* ── 3. Meezingen aanmelden ── */}
         <section
           id="meezingen"
+          className="section-pad"
           style={{
             background: "var(--gradient-section), #FDE8D8",
             padding: "100px 24px 120px",
@@ -340,7 +342,7 @@ export default function ContactPage() {
                 <form
                   onSubmit={mzSubmit}
                   noValidate
-                  style={{ background: "#FFFFFF", borderRadius: "24px", padding: "48px 40px", boxShadow: "0 4px 24px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: "20px" }}
+                  className="form-card" style={{ background: "#FFFFFF", borderRadius: "24px", padding: "48px 40px", boxShadow: "0 4px 24px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: "20px" }}
                 >
                   <div>
                     <Label text="Naam" />
@@ -396,6 +398,7 @@ export default function ContactPage() {
         {/* ── 4. Optreden boeken ── */}
         <section
           id="boeken"
+          className="section-pad"
           style={{ background: "#FFFFFF", padding: "100px 24px 140px", overflow: "hidden", position: "relative", scrollMarginTop: "72px" }}
         >
           <div style={{ maxWidth: "700px", margin: "0 auto", position: "relative", zIndex: 1 }}>
@@ -415,7 +418,7 @@ export default function ContactPage() {
                 <form
                   onSubmit={bkSubmit}
                   noValidate
-                  style={{ background: "#FFFFFF", border: "1.5px solid rgba(0,0,0,0.08)", borderRadius: "24px", padding: "48px 40px", boxShadow: "0 4px 24px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", gap: "20px" }}
+                  className="form-card" style={{ background: "#FFFFFF", border: "1.5px solid rgba(0,0,0,0.08)", borderRadius: "24px", padding: "48px 40px", boxShadow: "0 4px 24px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", gap: "20px" }}
                 >
                   {/* Two-column: naam + organisatie */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2">
@@ -504,6 +507,11 @@ export default function ContactPage() {
         }
         @media (max-width: 560px) {
           .form-row-2 { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 640px) {
+          .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 320px !important; }
+          .section-pad { padding-top: 60px !important; padding-bottom: 72px !important; padding-left: 20px !important; padding-right: 20px !important; }
+          .form-card { padding: 28px 20px !important; }
         }
       `}</style>
     </>

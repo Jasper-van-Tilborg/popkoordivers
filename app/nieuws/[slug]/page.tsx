@@ -27,6 +27,7 @@ export default async function NieuwsDetailPage({ params }: { params: Promise<{ s
 
         {/* ── Hero ── */}
         <section
+          className="page-hero"
           style={{
             background: "var(--primary)",
             padding: "140px 24px 100px",
@@ -89,7 +90,7 @@ export default async function NieuwsDetailPage({ params }: { params: Promise<{ s
         </Reveal>
 
         {/* ── Artikel tekst ── */}
-        <section style={{ background: "#FFFFFF", padding: "72px 24px 100px" }}>
+        <section className="nieuws-detail-content" style={{ background: "#FFFFFF", padding: "72px 24px 100px" }}>
           <div style={{ maxWidth: "700px", margin: "0 auto" }}>
             <p style={{ fontSize: "19px", lineHeight: 1.75, color: "#333", fontWeight: 500, margin: "0 0 36px", paddingBottom: "36px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
               {bericht.intro}
@@ -120,6 +121,10 @@ export default async function NieuwsDetailPage({ params }: { params: Promise<{ s
       <style>{`
         .detail-back:hover { color: #fff !important; }
         .detail-back-btn:hover { background: var(--primary) !important; color: #fff !important; transform: translateY(-1px) !important; }
+        @media (max-width: 640px) {
+          .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 300px !important; }
+          .nieuws-detail-content { padding: 48px 20px 80px !important; }
+        }
       `}</style>
     </>
   );

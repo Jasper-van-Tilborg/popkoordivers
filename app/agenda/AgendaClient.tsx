@@ -48,7 +48,7 @@ export default function AgendaClient({ komend, archief }: Props) {
       <main style={{ minHeight: "100vh", background: "#FFFFFF" }}>
 
         {/* ── Hero ── */}
-        <section style={{ background: "var(--primary)", padding: "140px 24px 100px", height: "420px", position: "relative", overflow: "hidden" }}>
+        <section className="page-hero" style={{ background: "var(--primary)", padding: "140px 24px 100px", minHeight: "420px", position: "relative", overflow: "hidden" }}>
           <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%)", pointerEvents: "none" }} />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <Reveal delay={0}>
@@ -88,7 +88,7 @@ export default function AgendaClient({ komend, archief }: Props) {
         </section>
 
         {/* ── Content ── */}
-        <section style={{ padding: "60px 24px 100px" }}>
+        <section className="section-pad" style={{ padding: "60px 24px 100px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 
             {tab === "komend" && (
@@ -175,6 +175,7 @@ export default function AgendaClient({ komend, archief }: Props) {
             <Reveal>
               <div
                 id="boeken"
+                className="booking-cta"
                 style={{ marginTop: "80px", background: "linear-gradient(135deg, rgba(243,106,42,0.08) 0%, rgba(243,106,42,0.04) 100%)", border: "1px solid rgba(243,106,42,0.15)", borderRadius: "20px", padding: "48px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px", flexWrap: "wrap" }}
               >
                 <div>
@@ -197,6 +198,24 @@ export default function AgendaClient({ komend, archief }: Props) {
 
       </main>
       <Footer />
+
+      <style>{`
+        @media (max-width: 640px) {
+          .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 320px !important; }
+          .section-pad { padding-top: 48px !important; padding-bottom: 60px !important; padding-left: 20px !important; padding-right: 20px !important; }
+          .booking-cta { padding: 28px 20px !important; }
+          .agenda-event-row {
+            grid-template-columns: 72px 1fr !important;
+            gap: 16px !important;
+            padding: 20px !important;
+          }
+          .agenda-event-row .event-btn {
+            grid-column: 1 / -1 !important;
+            justify-content: center !important;
+            width: 100% !important;
+          }
+        }
+      `}</style>
     </>
   );
 }
@@ -208,6 +227,7 @@ function EventRow({ event, i }: { event: AgendaItem; i: number }) {
       <div
         className="event-row agenda-event-row"
         style={{ display: "grid", gridTemplateColumns: "100px 1fr auto", gap: "28px", alignItems: "center", background: "#FFFFFF", borderRadius: "20px", padding: "28px", border: i === 0 ? "2px solid rgba(243,106,42,0.3)" : "1px solid rgba(0,0,0,0.08)", boxShadow: i === 0 ? "0 4px 24px rgba(243,106,42,0.10)" : "0 2px 12px rgba(0,0,0,0.04)", transition: "transform 0.2s, box-shadow 0.2s" }}
+        data-first={i === 0 ? "true" : "false"}
       >
         <div style={{ textAlign: "center" }}>
           {day && <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 700, color: "#aaa" }}>{day}</p>}
@@ -239,6 +259,7 @@ function EventRow({ event, i }: { event: AgendaItem; i: number }) {
 
         <a
           href={`/agenda/${event.id}`}
+          className="event-btn"
           style={{ display: "inline-flex", alignItems: "center", background: i === 0 ? "var(--primary)" : "rgba(243,106,42,0.08)", color: i === 0 ? "#fff" : "var(--primary)", fontSize: "13px", fontWeight: 700, padding: "11px 22px", borderRadius: "35px", textDecoration: "none", whiteSpace: "nowrap", border: i === 0 ? "none" : "1.5px solid rgba(243,106,42,0.2)", transition: "background 0.15s, transform 0.12s" }}
           onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.transform = "translateY(-1px)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = i === 0 ? "var(--primary)" : "rgba(243,106,42,0.08)"; e.currentTarget.style.color = i === 0 ? "#fff" : "var(--primary)"; e.currentTarget.style.transform = "translateY(0)"; }}

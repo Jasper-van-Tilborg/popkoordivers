@@ -9,19 +9,38 @@ interface Bestand {
   naam: string;
   categorie: string;
   stemgroep: string | null;
-  storage_path: string;
-  bucket: string;
-  bestandsnaam: string;
+  r2_key: string;
   created_at: string;
 }
 
 const cats = ["liedjes", "nieuwsbrieven", "opnames", "choreo", "oude_optredens"];
-const catBuckets: Record<string, string> = { liedjes: "liedjes", nieuwsbrieven: "nieuwsbrieven", opnames: "media", choreo: "media", oude_optredens: "media" };
 const stemgroepen = ["Alt", "Mezzo", "Sopraan", "Tenor", "Bas"];
+
+const catLabel: Record<string, string> = {
+  liedjes: "Liedjes",
+  nieuwsbrieven: "Nieuwsbrieven",
+  opnames: "Opnames",
+  choreo: "Choreo",
+  oude_optredens: "Oude optredens",
+};
+
+function r2Url(key: string) {
+  return `${process.env.NEXT_PUBLIC_CLOUDFLARE_R2_PUBLIC_URL ?? ""}/${key}`;
+}
+
+function buildKey(categorie: string, stemgroep: string, fileName: string): string {
+  const ts = Date.now();
+  const safe = fileName.replace(/\s+/g, "-");
+  const cat = categorie.replace("_", "-");
+  if (categorie === "liedjes" && stemgroep) {
+    return `liedjes/${stemgroep.toLowerCase()}/${ts}-${safe}`;
+  }
+  return `${cat}/${ts}-${safe}`;
+}
 
 export default function BestandenAdminPage() {
   const supabase = createClient();
-  const fileRef  = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [items, setItems]         = useState<Bestand[]>([]);
   const [loading, setLoading]     = useState(true);
@@ -34,7 +53,10 @@ export default function BestandenAdminPage() {
 
   async function load() {
     setLoading(true);
-    const { data } = await supabase.from("bestanden").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("bestanden")
+      .select("id, naam, categorie, stemgroep, r2_key, created_at")
+      .order("created_at", { ascending: false });
     setItems(data || []);
     setLoading(false);
   }
@@ -48,22 +70,24 @@ export default function BestandenAdminPage() {
     setUploadErr("");
     setUploading(true);
 
-    const bucket = catBuckets[form.categorie] || "media";
-    const ext    = file.name.split(".").pop();
-    const path   = `${form.categorie}/${Date.now()}-${file.name}`;
+    const key = buildKey(form.categorie, form.stemgroep, file.name);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("key", key);
 
-    const { error: upErr } = await supabase.storage.from(bucket).upload(path, file);
-    if (upErr) { setUploadErr(upErr.message); setUploading(false); return; }
-
-    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+    const res = await fetch("/api/r2", { method: "POST", body: fd });
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({ error: "Upload mislukt" }));
+      setUploadErr(error || "Upload mislukt");
+      setUploading(false);
+      return;
+    }
 
     await supabase.from("bestanden").insert({
       naam: form.naam,
       categorie: form.categorie,
       stemgroep: form.categorie === "liedjes" && form.stemgroep ? form.stemgroep : null,
-      storage_path: urlData.publicUrl,
-      bucket,
-      bestandsnaam: file.name,
+      r2_key: key,
     });
 
     setForm({ naam: "", categorie: form.categorie, stemgroep: "" });
@@ -74,15 +98,16 @@ export default function BestandenAdminPage() {
 
   async function remove(item: Bestand) {
     if (!confirm("Bestand verwijderen?")) return;
-    const pathInBucket = item.storage_path.split(`/${item.bucket}/`)[1];
-    if (pathInBucket) await supabase.storage.from(item.bucket).remove([pathInBucket]);
+    await fetch("/api/r2", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: item.r2_key }),
+    });
     await supabase.from("bestanden").delete().eq("id", item.id);
     load();
   }
 
   const filtered = filter === "all" ? items : items.filter((i) => i.categorie === filter);
-
-  const catLabel: Record<string, string> = { liedjes: "Liedjes", nieuwsbrieven: "Nieuwsbrieven", opnames: "Opnames", choreo: "Choreo", oude_optredens: "Oude optredens" };
 
   return (
     <div>
@@ -126,7 +151,7 @@ export default function BestandenAdminPage() {
 
       {/* Filter tabs */}
       <div style={{ margin: "24px 32px 0", display: "flex", gap: "6px", flexWrap: "wrap" }}>
-        {[["all","Alles"], ...cats.map((c) => [c, catLabel[c]])].map(([val, lbl]) => (
+        {[["all", "Alles"], ...cats.map((c) => [c, catLabel[c]])].map(([val, lbl]) => (
           <button key={val} onClick={() => setFilter(val)}
             style={{ padding: "6px 14px", fontSize: "12px", fontWeight: 600, borderRadius: "35px", border: "1.5px solid", cursor: "pointer", background: filter === val ? "var(--primary)" : "#fff", color: filter === val ? "#fff" : "#555", borderColor: filter === val ? "var(--primary)" : "rgba(0,0,0,0.15)" }}>
             {lbl}
@@ -136,20 +161,29 @@ export default function BestandenAdminPage() {
 
       {/* Table */}
       <div style={{ margin: "16px 32px 32px", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
-        {loading ? <p style={{ padding: "32px", color: "#888", fontSize: "14px" }}>Laden…</p> : filtered.length === 0 ? <p style={{ padding: "32px", color: "#aaa", fontSize: "14px" }}>Geen bestanden.</p> : (
+        {loading ? (
+          <p style={{ padding: "32px", color: "#888", fontSize: "14px" }}>Laden…</p>
+        ) : filtered.length === 0 ? (
+          <p style={{ padding: "32px", color: "#aaa", fontSize: "14px" }}>Geen bestanden.</p>
+        ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr>{["Naam","Categorie","Stemgroep","Bestandsnaam","Acties"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
+              <tr>{["Naam", "Categorie", "Stemgroep", "Acties"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
             </thead>
             <tbody>
               {filtered.map((item) => (
                 <tr key={item.id}>
                   <td style={{ ...tdStyle, fontWeight: 600 }}>
-                    <a href={item.storage_path} target="_blank" rel="noopener" style={{ color: "var(--primary)", textDecoration: "none" }}>{item.naam}</a>
+                    <a href={r2Url(item.r2_key)} target="_blank" rel="noopener" style={{ color: "var(--primary)", textDecoration: "none" }}>
+                      {item.naam}
+                    </a>
                   </td>
-                  <td style={tdStyle}><span style={{ fontSize: "11px", fontWeight: 700, background: "rgba(243,106,42,0.10)", color: "var(--primary)", padding: "2px 8px", borderRadius: "100px" }}>{catLabel[item.categorie] || item.categorie}</span></td>
+                  <td style={tdStyle}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, background: "rgba(243,106,42,0.10)", color: "var(--primary)", padding: "2px 8px", borderRadius: "100px" }}>
+                      {catLabel[item.categorie] || item.categorie}
+                    </span>
+                  </td>
                   <td style={tdStyle}>{item.stemgroep || "—"}</td>
-                  <td style={{ ...tdStyle, color: "#888", fontSize: "12px" }}>{item.bestandsnaam}</td>
                   <td style={tdStyle}><button style={btnDanger} onClick={() => remove(item)}>Verwijderen</button></td>
                 </tr>
               ))}

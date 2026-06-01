@@ -27,10 +27,11 @@ export default async function NieuwsPage() {
 
         {/* ── 1. Hero ── */}
         <section
+          className="page-hero"
           style={{
             background: "var(--primary)",
             padding: "140px 24px 100px",
-            height: "420px",
+            minHeight: "420px",
             position: "relative",
             overflow: "hidden",
           }}
@@ -62,7 +63,7 @@ export default async function NieuwsPage() {
         </section>
 
         {/* ── 2. Nieuwsoverzicht ── */}
-        <section style={{ background: "#FFFFFF", padding: "80px 24px 120px", overflow: "hidden", position: "relative" }}>
+        <section className="section-pad" style={{ background: "#FFFFFF", padding: "80px 24px 120px", overflow: "hidden", position: "relative" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
             <Reveal style={{ marginBottom: "48px" }}>
@@ -154,6 +155,10 @@ export default async function NieuwsPage() {
         }
         @media (max-width: 900px) { .nieuws-grid { grid-template-columns: 1fr 1fr !important; } }
         @media (max-width: 580px) { .nieuws-grid { grid-template-columns: 1fr !important; } }
+        @media (max-width: 640px) {
+          .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 320px !important; }
+          .section-pad { padding-top: 60px !important; padding-bottom: 72px !important; padding-left: 20px !important; padding-right: 20px !important; }
+        }
       `}</style>
     </>
   );
