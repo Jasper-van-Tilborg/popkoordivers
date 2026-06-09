@@ -3,26 +3,33 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
-import { listFiles, getPublicUrl } from "@/lib/r2";
-import { ALBUMS } from "@/lib/albums";
+import { createClient } from "@/lib/supabase/server";
+import { getPublicUrl } from "@/lib/r2";
 import Gallery from "./Gallery";
 
 export const dynamic = "force-dynamic";
 
 export default async function AlbumPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const album = ALBUMS.find((a) => a.slug === slug);
+  const supabase = await createClient();
+
+  const { data: album } = await supabase
+    .from("albums")
+    .select("id, slug, titel, datum")
+    .eq("slug", slug)
+    .single();
+
   if (!album) notFound();
 
-  let photos: string[] = [];
-  try {
-    const files = await listFiles(album.prefix);
-    photos = files
-      .filter((f) => f.Key && !f.Key.endsWith("/"))
-      .map((f) => getPublicUrl(f.Key!));
-  } catch {
-    photos = [];
-  }
+  const { data: fotosData } = await supabase
+    .from("fotos")
+    .select("r2_key")
+    .eq("album_id", album.id)
+    .eq("impressies", true)
+    .order("volgorde")
+    .order("created_at");
+
+  const photos = (fotosData ?? []).map((f) => getPublicUrl(f.r2_key));
 
   return (
     <>
@@ -34,16 +41,9 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
           <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%)", pointerEvents: "none" }} />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <Reveal delay={0}>
-              <a href="/media" className="album-back-link">
-                ← Terug naar Media
-              </a>
+              <a href="/media" className="album-back-link">← Terug naar Impressies</a>
             </Reveal>
-            <Reveal delay={40}>
-              <p style={{ margin: "0 0 8px", fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                Fotogalerij
-              </p>
-            </Reveal>
-            <RevealText text={album.title} as="h1" pageDelay={0} style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 16px" }} />
+            <RevealText text={album.titel} as="h1" pageDelay={0} style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 16px" }} />
             <Reveal delay={180}>
               <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.75)", margin: 0, fontWeight: 500 }}>
                 {album.datum}{photos.length > 0 ? ` · ${photos.length} foto${photos.length !== 1 ? "'s" : ""}` : ""}
@@ -66,6 +66,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
 
       </main>
       <Footer />
+
       <style>{`
         @media (max-width: 640px) {
           .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 320px !important; }

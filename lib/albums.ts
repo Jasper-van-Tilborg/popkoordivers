@@ -1,15 +1,15 @@
 export interface Album {
+  id: string;
   slug: string;
-  prefix: string;
-  title: string;
+  titel: string;
   datum: string;
+  volgorde: number;
 }
 
-export const ALBUMS: Album[] = [
-  {
-    slug: "abg-korenfestival-april-2026",
-    prefix: "media/ABG Korenfestival April 2026/",
-    title: "ABG Korenfestival",
-    datum: "April 2026",
-  },
-];
+export interface Foto {
+  id: string;
+  album_id: string;
+  r2_key: string;
+  impressies: boolean;
+  volgorde: number;
+}

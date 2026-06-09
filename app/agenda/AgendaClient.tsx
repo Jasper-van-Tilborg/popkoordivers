@@ -51,11 +51,6 @@ export default function AgendaClient({ komend, archief }: Props) {
         <section className="page-hero" style={{ background: "var(--primary)", padding: "140px 24px 100px", minHeight: "420px", position: "relative", overflow: "hidden" }}>
           <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%)", pointerEvents: "none" }} />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <Reveal delay={0}>
-              <p style={{ margin: "0 0 8px", fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                Komende &amp; afgelopen optredens
-              </p>
-            </Reveal>
             <RevealText
               text="Agenda"
               as="h1"
@@ -93,16 +88,6 @@ export default function AgendaClient({ komend, archief }: Props) {
 
             {tab === "komend" && (
               <>
-                <Reveal>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "40px", flexWrap: "wrap", gap: "16px" }}>
-                    <p style={{ fontSize: "15px", lineHeight: 1.7, color: "#666", maxWidth: "560px", margin: 0 }}>
-                      Hieronder onze geplande optredens. Wil je ons boeken voor een feest of festival?{" "}
-                      <a href="/contact#boeken" style={{ color: "var(--primary)", fontWeight: 600, textDecoration: "none" }}>
-                        Vraag een offerte aan
-                      </a>.
-                    </p>
-                  </div>
-                </Reveal>
 
                 {komend.length === 0 ? (
                   <Reveal>
@@ -144,28 +129,24 @@ export default function AgendaClient({ komend, archief }: Props) {
                     <p style={{ fontSize: "15px", color: "#aaa", padding: "40px 0" }}>Nog geen afgelopen optredens.</p>
                   </Reveal>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    {archief.map((item, i) => {
-                      const { month } = parseDatum(item.datum);
-                      return (
-                        <Reveal key={item.id} delay={i * 60}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 0", borderBottom: i < archief.length - 1 ? "1px solid rgba(0,0,0,0.07)" : "none", gap: "16px" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--primary)", minWidth: "28px" }}>{month}</span>
-                              <span style={{ fontSize: "15px", fontWeight: 500, color: "#333" }}>{item.titel}{item.locatie ? ` · ${item.locatie}` : ""}</span>
-                            </div>
-                            <a
-                              href={`/agenda/${item.id}`}
-                              style={{ fontSize: "12px", fontWeight: 600, color: "#aaa", textDecoration: "none", whiteSpace: "nowrap", transition: "color 0.15s" }}
-                              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--primary)")}
-                              onMouseLeave={(e) => (e.currentTarget.style.color = "#aaa")}
-                            >
-                              Details →
-                            </a>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    {archief.map((item, i) => (
+                      <Reveal key={item.id} delay={i * 60}>
+                        <div style={{ background: "#FFFFFF", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
+                          <div style={{ minWidth: 0 }}>
+                            <p style={{ margin: "0 0 4px", fontSize: "17px", fontWeight: 700, color: "#111", letterSpacing: "-0.02em", lineHeight: 1.3 }}>
+                              {item.titel}
+                            </p>
+                            {item.locatie && (
+                              <span style={{ fontSize: "13px", color: "#888", fontWeight: 500 }}>{item.locatie}</span>
+                            )}
                           </div>
-                        </Reveal>
-                      );
-                    })}
+                          <p style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#aaa", flexShrink: 0, textAlign: "right" }}>
+                            {item.datum}
+                          </p>
+                        </div>
+                      </Reveal>
+                    ))}
                   </div>
                 )}
               </>
@@ -176,15 +157,15 @@ export default function AgendaClient({ komend, archief }: Props) {
               <div
                 id="boeken"
                 className="booking-cta"
-                style={{ marginTop: "80px", background: "linear-gradient(135deg, rgba(243,106,42,0.08) 0%, rgba(243,106,42,0.04) 100%)", border: "1px solid rgba(243,106,42,0.15)", borderRadius: "20px", padding: "48px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px", flexWrap: "wrap" }}
+                style={{ marginTop: "80px", background: "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(124,58,237,0.04) 100%)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "20px", padding: "48px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px", flexWrap: "wrap" }}
               >
                 <div>
-                  <p style={{ margin: "0 0 4px", fontSize: "12px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Iets te vieren?</p>
+                  <p style={{ margin: "0 0 4px", fontSize: "12px", fontWeight: 700, color: "#7C3AED", letterSpacing: "0.08em", textTransform: "uppercase" }}>Iets te vieren?</p>
                   <h3 style={{ fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: "#111", margin: 0, letterSpacing: "-0.02em" }}>Boek ons voor jouw optreden</h3>
                 </div>
                 <a
                   href="/contact#boeken"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--primary)", color: "#fff", fontWeight: 700, fontSize: "15px", padding: "14px 28px", borderRadius: "35px", textDecoration: "none", boxShadow: "0 4px 20px rgba(243,106,42,0.28)", transition: "transform 0.12s, opacity 0.15s", whiteSpace: "nowrap" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#7C3AED", color: "#fff", fontWeight: 700, fontSize: "15px", padding: "14px 28px", borderRadius: "35px", textDecoration: "none", boxShadow: "0 4px 20px rgba(124,58,237,0.28)", transition: "transform 0.12s, opacity 0.15s", whiteSpace: "nowrap" }}
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; e.currentTarget.style.transform = "translateY(-1px)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
                 >
@@ -204,15 +185,10 @@ export default function AgendaClient({ komend, archief }: Props) {
           .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 320px !important; }
           .section-pad { padding-top: 48px !important; padding-bottom: 60px !important; padding-left: 20px !important; padding-right: 20px !important; }
           .booking-cta { padding: 28px 20px !important; }
-          .agenda-event-row {
-            grid-template-columns: 72px 1fr !important;
-            gap: 16px !important;
+          .agenda-card {
+            flex-direction: column !important;
+            align-items: flex-start !important;
             padding: 20px !important;
-          }
-          .agenda-event-row .event-btn {
-            grid-column: 1 / -1 !important;
-            justify-content: center !important;
-            width: 100% !important;
           }
         }
       `}</style>
@@ -221,51 +197,41 @@ export default function AgendaClient({ komend, archief }: Props) {
 }
 
 function EventRow({ event, i }: { event: AgendaItem; i: number }) {
-  const { day, month, year } = parseDatum(event.datum);
   return (
     <Reveal delay={i * 120}>
       <div
-        className="event-row agenda-event-row"
-        style={{ display: "grid", gridTemplateColumns: "100px 1fr auto", gap: "28px", alignItems: "center", background: "#FFFFFF", borderRadius: "20px", padding: "28px", border: i === 0 ? "2px solid rgba(243,106,42,0.3)" : "1px solid rgba(0,0,0,0.08)", boxShadow: i === 0 ? "0 4px 24px rgba(243,106,42,0.10)" : "0 2px 12px rgba(0,0,0,0.04)", transition: "transform 0.2s, box-shadow 0.2s" }}
-        data-first={i === 0 ? "true" : "false"}
+        style={{
+          background: "#FFFFFF",
+          borderRadius: "16px",
+          border: "1px solid rgba(0,0,0,0.07)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+          padding: "24px 32px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "24px",
+        }}
+        className="agenda-card"
       >
-        <div style={{ textAlign: "center" }}>
-          {day && <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 700, color: "#aaa" }}>{day}</p>}
-          <p style={{ margin: 0, fontSize: "28px", fontWeight: 800, color: "var(--primary)", lineHeight: 1, letterSpacing: "-0.5px" }}>{month}</p>
-          <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#aaa", fontWeight: 600 }}>{year}</p>
-        </div>
-
         <div style={{ minWidth: 0 }}>
-          {event.label && (
-            <div style={{ marginBottom: "8px" }}>
-              <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.05em", color: "#fff", background: event.label_kleur ?? "var(--primary)", padding: "3px 10px", borderRadius: "100px", whiteSpace: "nowrap" }}>
-                {event.label}
-              </span>
-            </div>
-          )}
-          <p style={{ margin: "0 0 4px", fontSize: "19px", fontWeight: 800, color: "#111", letterSpacing: "-0.02em", lineHeight: 1.25 }}>
-            {event.locatie ?? event.titel}
+          <p style={{ margin: "0 0 8px", fontSize: "19px", fontWeight: 800, color: "#111", letterSpacing: "-0.03em", lineHeight: 1.25 }}>
+            {event.titel}
           </p>
-          <p style={{ margin: "0 0 8px", fontSize: "14px", color: "#666", lineHeight: 1.5 }}>{event.beschrijving}</p>
-          {event.tijd && (
-            <span style={{ fontSize: "12px", color: "#aaa", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" /><path strokeLinecap="round" d="M12 6v6l4 2" />
-              </svg>
-              {event.tijd}
-            </span>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            {event.locatie && (
+              <span style={{ fontSize: "13px", color: "#777", fontWeight: 500 }}>{event.locatie}</span>
+            )}
+            {event.locatie && event.tijd && (
+              <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "#ccc", flexShrink: 0, display: "inline-block" }} />
+            )}
+            {event.tijd && (
+              <span style={{ fontSize: "13px", color: "#aaa", fontWeight: 500 }}>{event.tijd}</span>
+            )}
+          </div>
         </div>
-
-        <a
-          href={`/agenda/${event.id}`}
-          className="event-btn"
-          style={{ display: "inline-flex", alignItems: "center", background: i === 0 ? "var(--primary)" : "rgba(243,106,42,0.08)", color: i === 0 ? "#fff" : "var(--primary)", fontSize: "13px", fontWeight: 700, padding: "11px 22px", borderRadius: "35px", textDecoration: "none", whiteSpace: "nowrap", border: i === 0 ? "none" : "1.5px solid rgba(243,106,42,0.2)", transition: "background 0.15s, transform 0.12s" }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = i === 0 ? "var(--primary)" : "rgba(243,106,42,0.08)"; e.currentTarget.style.color = i === 0 ? "#fff" : "var(--primary)"; e.currentTarget.style.transform = "translateY(0)"; }}
-        >
-          Details →
-        </a>
+        <p style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "var(--primary)", letterSpacing: "-0.5px", lineHeight: 1, flexShrink: 0, textAlign: "right" }}>
+          {event.datum}
+        </p>
       </div>
     </Reveal>
   );

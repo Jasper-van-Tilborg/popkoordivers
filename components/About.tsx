@@ -19,13 +19,14 @@ export default function About() {
         >
           {/* Left: groepsfoto */}
           <Reveal>
-            <div
-              style={{
-                borderRadius: "24px",
-                aspectRatio: "4/3",
-                background: "linear-gradient(135deg, rgba(243,106,42,0.18) 0%, #FDE8D8 45%, rgba(243,106,42,0.06) 100%)",
-              }}
-            />
+            <div style={{ borderRadius: "24px", aspectRatio: "4/3", overflow: "hidden" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/homescreen_section_1.jpeg"
+                alt="Popkoor Divers"
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              />
+            </div>
           </Reveal>
 
           {/* Right: text */}
@@ -38,11 +39,11 @@ export default function About() {
 
             <p style={{ fontSize: "16px", lineHeight: 1.8, color: "#555", margin: "0 0 28px" }}>
               Popkoor Divers is een enthousiast en swingend koor uit Gilze, verdeeld over{" "}
-              <span style={{ fontWeight: 700, color: "#111", background: "rgba(243,106,42,0.10)", padding: "1px 7px", borderRadius: "6px" }}>5 stemgroepen</span>{" "}
+              <span style={{ fontWeight: 700, color: "#111", background: "rgba(124,58,237,0.10)", padding: "1px 7px", borderRadius: "6px" }}>5 stemgroepen</span>{" "}
               (alt, mezzo, sopraan, tenor, bas). Sinds{" "}
-              <span style={{ fontWeight: 700, color: "#111", background: "rgba(243,106,42,0.10)", padding: "1px 7px", borderRadius: "6px" }}>2008</span>{" "}
+              <span style={{ fontWeight: 700, color: "#111", background: "rgba(124,58,237,0.10)", padding: "1px 7px", borderRadius: "6px" }}>2008</span>{" "}
               onder leiding van dirigent{" "}
-              <span style={{ fontWeight: 700, color: "#111", background: "rgba(243,106,42,0.10)", padding: "1px 7px", borderRadius: "6px" }}>Tom Mordang</span>.
+              <span style={{ fontWeight: 700, color: "#111", background: "rgba(124,58,237,0.10)", padding: "1px 7px", borderRadius: "6px" }}>Tom Mordang</span>.
               {" "}Met piano, band of a-capella.
             </p>
 

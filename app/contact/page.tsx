@@ -40,6 +40,10 @@ function onFocus(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTML
   e.currentTarget.style.borderColor = "var(--primary)";
   e.currentTarget.style.boxShadow = "0 0 0 3px rgba(243,106,42,0.12)";
 }
+function onFocusPurple(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+  e.currentTarget.style.borderColor = "#7C3AED";
+  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(124,58,237,0.12)";
+}
 function onBlur(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>, hasError?: string) {
   e.currentTarget.style.borderColor = hasError ? "#e53e3e" : "rgba(0,0,0,0.12)";
   e.currentTarget.style.boxShadow = "none";
@@ -50,18 +54,21 @@ function FieldError({ msg }: { msg?: string }) {
   return <p style={{ margin: "6px 0 0", fontSize: "12px", color: "#e53e3e", fontWeight: 600 }}>{msg}</p>;
 }
 
-function Label({ text, optional }: { text: string; optional?: boolean }) {
+function Label({ text, optional, accent = "orange" }: { text: string; optional?: boolean; accent?: "orange" | "purple" }) {
   return (
     <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#333", marginBottom: "6px" }}>
       {text}{" "}
       {optional
         ? <span style={{ fontSize: "12px", fontWeight: 500, color: "#aaa" }}>(optioneel)</span>
-        : <span style={{ color: "var(--primary)" }}>*</span>}
+        : <span style={{ color: accent === "purple" ? "#7C3AED" : "var(--primary)" }}>*</span>}
     </label>
   );
 }
 
-function SubmitBtn({ status, label }: { status: FormStatus; label: string }) {
+function SubmitBtn({ status, label, accent = "orange" }: { status: FormStatus; label: string; accent?: "orange" | "purple" }) {
+  const bg = accent === "purple" ? "#7C3AED" : "var(--primary)";
+  const bgSending = accent === "purple" ? "rgba(124,58,237,0.55)" : "rgba(243,106,42,0.55)";
+  const shadow = accent === "purple" ? "0 4px 20px rgba(124,58,237,0.28)" : "0 4px 20px rgba(243,106,42,0.28)";
   return (
     <button
       type="submit"
@@ -71,7 +78,7 @@ function SubmitBtn({ status, label }: { status: FormStatus; label: string }) {
         alignItems: "center",
         justifyContent: "center",
         gap: "8px",
-        background: status === "sending" ? "rgba(243,106,42,0.55)" : "var(--primary)",
+        background: status === "sending" ? bgSending : bg,
         color: "#FFFFFF",
         fontWeight: 700,
         fontSize: "15px",
@@ -81,7 +88,7 @@ function SubmitBtn({ status, label }: { status: FormStatus; label: string }) {
         cursor: status === "sending" ? "default" : "pointer",
         width: "100%",
         fontFamily: "inherit",
-        boxShadow: "0 4px 20px rgba(243,106,42,0.28)",
+        boxShadow: shadow,
         transition: "transform 0.12s, opacity 0.15s",
       }}
       onMouseEnter={(e) => { if (status !== "sending") { e.currentTarget.style.opacity = "0.9"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
@@ -99,10 +106,10 @@ function SubmitBtn({ status, label }: { status: FormStatus; label: string }) {
   );
 }
 
-function SentCard({ message }: { message: string }) {
+function SentCard({ message, accent = "orange" }: { message: string; accent?: "orange" | "purple" }) {
   return (
     <div style={{ background: "#FFFFFF", borderRadius: "20px", padding: "52px 40px", textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
-      <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: "rgba(243,106,42,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", margin: "0 auto 18px", color: "var(--primary)", fontWeight: 800 }}>✓</div>
+      <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: accent === "purple" ? "rgba(124,58,237,0.12)" : "rgba(243,106,42,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", margin: "0 auto 18px", color: accent === "purple" ? "#7C3AED" : "var(--primary)", fontWeight: 800 }}>✓</div>
       <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#111", margin: "0 0 10px", letterSpacing: "-0.5px" }}>Verstuurd!</h3>
       <p style={{ fontSize: "15px", color: "#666", margin: 0, lineHeight: 1.7 }}>{message}</p>
     </div>
@@ -179,11 +186,6 @@ export default function ContactPage() {
             }}
           />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <Reveal delay={0}>
-              <p style={{ margin: "0 0 8px", fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                Contact
-              </p>
-            </Reveal>
             <RevealText
               text="Contact"
               as="h1"
@@ -233,7 +235,7 @@ export default function ContactPage() {
                     <a
                       href="#boeken"
                       style={{ fontSize: "15px", fontWeight: 500, color: "#444", textDecoration: "none", borderBottom: "1.5px solid rgba(0,0,0,0.12)", paddingBottom: "1px", transition: "border-color 0.15s, color 0.15s" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = "var(--primary)"; e.currentTarget.style.borderColor = "var(--primary)"; }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "#7C3AED"; e.currentTarget.style.borderColor = "#7C3AED"; }}
                       onMouseLeave={(e) => { e.currentTarget.style.color = "#444"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; }}
                     >
                       Aanvraag via formulier hieronder →
@@ -244,29 +246,45 @@ export default function ContactPage() {
                     <p style={{ margin: "0 0 10px", fontSize: "11px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em" }}>Volg ons</p>
                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                       {[
-                        { label: "Facebook", href: "#" },
-                        { label: "Instagram", href: "#" },
-                        { label: "YouTube", href: "#" },
+                        {
+                          label: "Facebook",
+                          href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL",
+                          icon: <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>,
+                        },
+                        {
+                          label: "Instagram",
+                          href: "https://www.instagram.com/popkoordivers/",
+                          icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>,
+                        },
+                        {
+                          label: "YouTube",
+                          href: "https://www.youtube.com/@popkoordivers",
+                          icon: <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="#fff" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>,
+                        },
                       ].map((s) => (
                         <a
                           key={s.label}
                           href={s.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={s.label}
+                          title={s.label}
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
-                            padding: "7px 16px",
-                            borderRadius: "35px",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            color: "#333",
+                            justifyContent: "center",
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "50%",
+                            color: "#555",
                             background: "rgba(0,0,0,0.05)",
                             textDecoration: "none",
                             transition: "background 0.15s, color 0.15s",
                           }}
                           onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(243,106,42,0.10)"; e.currentTarget.style.color = "var(--primary)"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.05)"; e.currentTarget.style.color = "#333"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.05)"; e.currentTarget.style.color = "#555"; }}
                         >
-                          {s.label}
+                          {s.icon}
                         </a>
                       ))}
                     </div>
@@ -293,7 +311,7 @@ export default function ContactPage() {
                   ))}
                 </div>
 
-                <div style={{ marginTop: "24px", background: "rgba(243,106,42,0.07)", border: "1px solid rgba(243,106,42,0.15)", borderRadius: "14px", padding: "16px 20px" }}>
+                <div style={{ marginTop: "24px", background: "rgba(243,106,42,0.12)", border: "1px solid rgba(243,106,42,0.15)", borderRadius: "14px", padding: "16px 20px" }}>
                   <p style={{ margin: 0, fontSize: "14px", color: "#555", lineHeight: 1.6 }}>
                     Wil je een keer komen proeven?{" "}
                     <a href="#meezingen" style={{ color: "var(--primary)", fontWeight: 700, textDecoration: "none" }}>
@@ -335,7 +353,7 @@ export default function ContactPage() {
 
             {mzStatus === "sent" ? (
               <Reveal>
-                <SentCard message="We nemen zo snel mogelijk contact met je op. Tot dinsdag!" />
+                <SentCard message="We nemen zo snel mogelijk contact met je op. We hopen je snel te verwelkomen!" />
               </Reveal>
             ) : (
               <Reveal>
@@ -379,18 +397,15 @@ export default function ContactPage() {
                   </div>
 
                   <SubmitBtn status={mzStatus} label="Verstuur aanmelding →" />
-                  <p style={{ margin: 0, fontSize: "12px", color: "#aaa", textAlign: "center", lineHeight: 1.6 }}>
-                    Je gegevens worden alleen gebruikt om contact met je op te nemen.
-                  </p>
                 </form>
               </Reveal>
             )}
           </div>
 
-          {/* Wave → white */}
+          {/* Wave → purple */}
           <div aria-hidden="true" style={{ position: "absolute", bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
             <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "80px" }}>
-              <path d="M0,80 L0,48 Q360,12 720,44 Q1080,72 1440,25 L1440,80 Z" fill="#FFFFFF" />
+              <path d="M0,80 L0,48 Q360,12 720,44 Q1080,72 1440,25 L1440,80 Z" fill="#F5F3FF" />
             </svg>
           </div>
         </section>
@@ -399,7 +414,7 @@ export default function ContactPage() {
         <section
           id="boeken"
           className="section-pad"
-          style={{ background: "#FFFFFF", padding: "100px 24px 140px", overflow: "hidden", position: "relative", scrollMarginTop: "72px" }}
+          style={{ background: "radial-gradient(ellipse 100% 70% at 50% 50%, rgba(124,58,237,0.08) 0%, rgba(255,255,255,0) 75%), #F5F3FF", padding: "100px 24px 140px", overflow: "hidden", position: "relative", scrollMarginTop: "72px" }}
         >
           <div style={{ maxWidth: "700px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <Reveal style={{ textAlign: "center", marginBottom: "48px" }}>
@@ -411,7 +426,7 @@ export default function ContactPage() {
 
             {bkStatus === "sent" ? (
               <Reveal>
-                <SentCard message="We bekijken je aanvraag en nemen zo snel mogelijk contact met je op." />
+                <SentCard message="We bekijken je aanvraag en nemen zo snel mogelijk contact met je op." accent="purple" />
               </Reveal>
             ) : (
               <Reveal>
@@ -423,40 +438,40 @@ export default function ContactPage() {
                   {/* Two-column: naam + organisatie */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2">
                     <div>
-                      <Label text="Naam" />
+                      <Label text="Naam" accent="purple" />
                       <input name="naam" type="text" placeholder="Jouw naam" value={bk.naam} onChange={bkChange}
-                        style={inputStyle(bkErr.naam)} onFocus={onFocus} onBlur={(e) => onBlur(e, bkErr.naam)} />
+                        style={inputStyle(bkErr.naam)} onFocus={onFocusPurple} onBlur={(e) => onBlur(e, bkErr.naam)} />
                       <FieldError msg={bkErr.naam} />
                     </div>
                     <div>
-                      <Label text="Organisatie" optional />
+                      <Label text="Organisatie" optional accent="purple" />
                       <input name="organisatie" type="text" placeholder="Bedrijf of vereniging" value={bk.organisatie} onChange={bkChange}
-                        style={inputStyle()} onFocus={onFocus} onBlur={(e) => onBlur(e)} />
+                        style={inputStyle()} onFocus={onFocusPurple} onBlur={(e) => onBlur(e)} />
                     </div>
                   </div>
 
                   {/* Two-column: email + telefoon */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2">
                     <div>
-                      <Label text="E-mailadres" />
+                      <Label text="E-mailadres" accent="purple" />
                       <input name="email" type="email" placeholder="jouw@email.nl" value={bk.email} onChange={bkChange}
-                        style={inputStyle(bkErr.email)} onFocus={onFocus} onBlur={(e) => onBlur(e, bkErr.email)} />
+                        style={inputStyle(bkErr.email)} onFocus={onFocusPurple} onBlur={(e) => onBlur(e, bkErr.email)} />
                       <FieldError msg={bkErr.email} />
                     </div>
                     <div>
-                      <Label text="Telefoonnummer" optional />
+                      <Label text="Telefoonnummer" optional accent="purple" />
                       <input name="telefoon" type="tel" placeholder="06 – – – –" value={bk.telefoon} onChange={bkChange}
-                        style={inputStyle()} onFocus={onFocus} onBlur={(e) => onBlur(e)} />
+                        style={inputStyle()} onFocus={onFocusPurple} onBlur={(e) => onBlur(e)} />
                     </div>
                   </div>
 
                   {/* Two-column: type + datum */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2">
                     <div style={{ position: "relative" }}>
-                      <Label text="Type evenement" optional />
+                      <Label text="Type evenement" optional accent="purple" />
                       <div style={{ position: "relative" }}>
                         <select name="type" value={bk.type} onChange={bkChange}
-                          style={{ ...inputStyle(), cursor: "pointer", paddingRight: "40px" }} onFocus={onFocus} onBlur={(e) => onBlur(e)}>
+                          style={{ ...inputStyle(), cursor: "pointer", paddingRight: "40px" }} onFocus={onFocusPurple} onBlur={(e) => onBlur(e)}>
                           <option value="">Kies een type</option>
                           {eventTypes.map((t) => <option key={t} value={t}>{t}</option>)}
                         </select>
@@ -466,24 +481,21 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div>
-                      <Label text="Datum" optional />
+                      <Label text="Datum" optional accent="purple" />
                       <input name="datum" type="text" placeholder="bijv. juni 2026" value={bk.datum} onChange={bkChange}
-                        style={inputStyle()} onFocus={onFocus} onBlur={(e) => onBlur(e)} />
+                        style={inputStyle()} onFocus={onFocusPurple} onBlur={(e) => onBlur(e)} />
                     </div>
                   </div>
 
                   {/* Bericht */}
                   <div>
-                    <Label text="Bericht" />
+                    <Label text="Bericht" accent="purple" />
                     <textarea name="bericht" rows={5} placeholder="Vertel iets over het evenement — locatie, verwacht aantal gasten, wensen..." value={bk.bericht} onChange={bkChange}
-                      style={{ ...inputStyle(bkErr.bericht), resize: "vertical", minHeight: "120px" }} onFocus={onFocus} onBlur={(e) => onBlur(e, bkErr.bericht)} />
+                      style={{ ...inputStyle(bkErr.bericht), resize: "vertical", minHeight: "120px" }} onFocus={onFocusPurple} onBlur={(e) => onBlur(e, bkErr.bericht)} />
                     <FieldError msg={bkErr.bericht} />
                   </div>
 
-                  <SubmitBtn status={bkStatus} label="Aanvraag doen →" />
-                  <p style={{ margin: 0, fontSize: "12px", color: "#aaa", textAlign: "center", lineHeight: 1.6 }}>
-                    Vrijblijvend — we reageren binnen 2 werkdagen.
-                  </p>
+                  <SubmitBtn status={bkStatus} label="Aanvraag doen →" accent="purple" />
                 </form>
               </Reveal>
             )}

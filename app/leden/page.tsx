@@ -39,13 +39,28 @@ export default async function LedenPage() {
     { data: leden },
     { data: oudeOptredens },
     { data: bestandenRaw },
+    { data: albumsRaw },
   ] = await Promise.all([
     supabase.from("liedjes").select("titel, componist, stemgroep, pdf_url").order("volgorde"),
     supabase.from("bestuur").select("naam, rol, initialen").order("volgorde"),
     supabase.from("smoelenboek").select("naam, stemgroep, initialen").order("naam"),
     supabase.from("oude_optredens").select("titel, datum, locatie, youtube_id").order("volgorde", { ascending: false }),
     supabase.from("bestanden").select("id, naam, categorie, stemgroep, r2_key").order("created_at", { ascending: false }),
+    supabase.from("albums").select("id, slug, titel, datum").order("created_at", { ascending: false }),
   ]);
+
+  // Alle fotos per album (inclusief niet-impressies)
+  const albumsMetFotos = await Promise.all(
+    (albumsRaw ?? []).map(async (album) => {
+      const { data: fotos } = await supabase
+        .from("fotos")
+        .select("r2_key")
+        .eq("album_id", album.id)
+        .order("volgorde")
+        .order("created_at");
+      return { ...album, fotos: (fotos ?? []).map((f) => getPublicUrl(f.r2_key)) };
+    })
+  );
 
   const bestanden: (BestandRaw & { url: string })[] = (bestandenRaw ?? []).map((b) => ({
     ...b,
@@ -234,7 +249,38 @@ export default async function LedenPage() {
           </div>
         </section>
 
-        {/* ── 7. Oude optredens ── */}
+        {/* ── 7. Foto albums ── */}
+        {albumsMetFotos.length > 0 && (
+          <section id="fotoalbums" style={{ background: "#FFFFFF", padding: "80px 24px" }}>
+            <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+              <Reveal><SectionHeader title="Foto albums" /></Reveal>
+              {albumsMetFotos.map((album) => (
+                <Reveal key={album.id} delay={80}>
+                  <div style={{ marginBottom: "48px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
+                      <div>
+                        <p style={{ margin: 0, fontSize: "17px", fontWeight: 800, color: "#111", letterSpacing: "-0.3px" }}>{album.titel}</p>
+                        <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#aaa", fontWeight: 500 }}>{album.datum} · {album.fotos.length} foto{album.fotos.length !== 1 ? "'s" : ""}</p>
+                      </div>
+                    </div>
+                    {album.fotos.length === 0 ? (
+                      <p style={{ fontSize: "14px", color: "#aaa" }}>Nog geen foto's in dit album.</p>
+                    ) : (
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "10px" }}>
+                        {album.fotos.map((url, i) => (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img key={i} src={url} alt="" style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: "12px", display: "block" }} loading="lazy" />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── 8. Oude optredens ── */}
         <section id="optredens" style={{ background: "#FFFFFF", padding: "80px 24px 120px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <Reveal><SectionHeader title="Oude optredens" /></Reveal>

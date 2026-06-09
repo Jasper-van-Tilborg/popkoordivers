@@ -24,10 +24,13 @@ export default function Footer() {
         >
           {/* Brand */}
           <div>
-            <p style={{ fontSize: "18px", fontWeight: 800, color: "#fff", margin: "0 0 8px", letterSpacing: "-0.02em" }}>
-              Popkoor <span style={{ color: "var(--primary)" }}>Divers</span>
-            </p>
-            <p style={{ fontSize: "13px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", margin: "0 0 0", maxWidth: "260px" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo_popkoor_divers.svg"
+              alt="Popkoor Divers"
+              style={{ height: "40px", width: "auto", display: "block", marginBottom: "16px", opacity: 0.9 }}
+            />
+            <p style={{ fontSize: "13px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", margin: 0, maxWidth: "260px" }}>
               Een swingend popkoor uit Gilze met 60 stemmen, piano, band en bijpassende choreo.
             </p>
           </div>

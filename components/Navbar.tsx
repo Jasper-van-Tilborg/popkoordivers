@@ -1,19 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const links = [
   { label: "Home",     href: "/" },
   { label: "Over ons", href: "/over-ons" },
   { label: "Agenda",   href: "/agenda" },
   { label: "Nieuws",   href: "/nieuws" },
-  { label: "Media",    href: "/media" },
+  { label: "Impressies", href: "/media" },
   { label: "Contact",  href: "/contact" },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen]         = useState(false);
+  const pathname                = usePathname();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -69,7 +71,8 @@ export default function Navbar() {
               <li key={l.href}>
                 <a
                   href={l.href}
-                  style={{ fontSize: "14px", fontWeight: 500, color: scrolled ? "#444" : "rgba(255,255,255,0.85)", textDecoration: "none", transition: "color 0.15s" }}
+                  className={`nav-link${(l.href === "/" ? pathname === "/" : pathname.startsWith(l.href)) ? " nav-link--active" : ""}`}
+                  style={{ fontSize: "14px", fontWeight: 500, color: scrolled ? "#444" : "rgba(255,255,255,0.85)", textDecoration: "none", transition: "color 0.15s", position: "relative", paddingBottom: "6px" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = scrolled ? "var(--primary)" : "#fff")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = scrolled ? "#444" : "rgba(255,255,255,0.85)")}
                 >
@@ -83,9 +86,9 @@ export default function Navbar() {
           <a
             href="/contact#meezingen"
             className="nav-cta"
-            style={{ background: scrolled ? "#111" : "rgba(255,255,255,0.15)", border: scrolled ? "none" : "1.5px solid rgba(255,255,255,0.5)", color: "#fff", fontSize: "13px", fontWeight: 600, padding: "9px 22px", borderRadius: "35px", textDecoration: "none", transition: "background 0.2s, transform 0.12s", flexShrink: 0, alignItems: "center", gap: "6px" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = scrolled ? "#111" : "rgba(255,255,255,0.15)"; e.currentTarget.style.transform = "translateY(0)"; }}
+            style={{ background: (pathname === "/" || pathname === "/over-ons" || scrolled) ? "var(--primary)" : "rgba(255,255,255,0.15)", border: (pathname === "/" || pathname === "/over-ons" || scrolled) ? "1.5px solid var(--primary)" : "1.5px solid rgba(255,255,255,0.5)", color: "#fff", fontSize: "13px", fontWeight: 600, padding: "9px 22px", borderRadius: "35px", textDecoration: "none", transition: "background 0.2s, border-color 0.2s, transform 0.12s", flexShrink: 0, alignItems: "center", gap: "6px" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary-light)"; e.currentTarget.style.borderColor = "var(--primary-light)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = (pathname === "/" || pathname === "/over-ons" || scrolled) ? "var(--primary)" : "rgba(255,255,255,0.15)"; e.currentTarget.style.borderColor = (pathname === "/" || pathname === "/over-ons" || scrolled) ? "var(--primary)" : "rgba(255,255,255,0.5)"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
             Kom meezingen →
           </a>
@@ -139,6 +142,19 @@ export default function Navbar() {
       </div>
 
       <style>{`
+        /* Desktop nav link underline */
+        .nav-link::after {
+          content: "";
+          position: absolute;
+          bottom: 0; left: 0;
+          width: 0; height: 2px;
+          border-radius: 2px;
+          background: currentColor;
+          transition: width 0.3s cubic-bezier(0.5, 0, 0.5, 1);
+        }
+        .nav-link:hover::after,
+        .nav-link--active::after { width: 100%; }
+
         /* Desktop: links en CTA zichtbaar, hamburger verborgen */
         .nav-desktop  { display: flex; }
         .nav-cta      { display: inline-flex; }

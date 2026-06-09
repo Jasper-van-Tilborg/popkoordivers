@@ -73,22 +73,21 @@ export default function JoinUs() {
             <div
               className="joinus-card"
               style={{
-                background: "#FFFFFF",
-                border: "1.5px solid rgba(0,0,0,0.09)",
+                background: "#7C3AED",
                 borderRadius: "24px",
                 padding: "48px 40px",
                 height: "100%",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+                boxShadow: "0 8px 40px rgba(124,58,237,0.25)",
               }}
             >
-              <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "rgba(243,106,42,0.10)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", color: "var(--primary)" }}>
+              <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", color: "#fff" }}>
                 <IconCalendar size={22} />
               </div>
-              <p style={{ margin: "0 0 4px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Boek ons</p>
-              <h3 style={{ fontSize: "clamp(20px, 2.5vw, 28px)", fontWeight: 800, color: "#111", margin: "0 0 16px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+              <p style={{ margin: "0 0 4px", fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Boek ons</p>
+              <h3 style={{ fontSize: "clamp(20px, 2.5vw, 28px)", fontWeight: 800, color: "#FFFFFF", margin: "0 0 16px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
                 Boek ons optreden
               </h3>
-              <p style={{ fontSize: "15px", lineHeight: 1.7, color: "#666", margin: "0 0 28px" }}>
+              <p style={{ fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.82)", margin: "0 0 28px" }}>
                 Voor feesten, jubilea, festivals of een intieme setting. Wij zingen. Vraag een vrijblijvende offerte aan.
               </p>
               <a
@@ -97,17 +96,17 @@ export default function JoinUs() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  background: "#111",
-                  color: "#FFFFFF",
+                  background: "#FFFFFF",
+                  color: "#7C3AED",
                   fontWeight: 700,
                   fontSize: "14px",
                   padding: "12px 24px",
                   borderRadius: "35px",
                   textDecoration: "none",
-                  transition: "background 0.15s, transform 0.12s",
+                  transition: "opacity 0.15s, transform 0.12s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "#111"; e.currentTarget.style.transform = "translateY(0)"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               >
                 Aanvraag doen →
               </a>
