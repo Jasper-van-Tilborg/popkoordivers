@@ -40,7 +40,6 @@ Zet deze in `.env.local` (lokaal) en in de projectinstellingen op Vercel.
 - `lib/supabase/` — Supabase-clients voor browser, server en admin, getypeerd met `lib/database.types.ts`.
 - `lib/r2.ts` — de twee R2-buckets: tijdelijke upload- en downloadlinks, kopiëren en verwijderen.
 - `supabase/migrations/` — databaseschema als migraties. Nieuwe wijziging: `npx supabase migration new <naam>`, toepassen met `npx supabase db push`.
-- `supabase/na-merge/` — opruimstap die pas mag als deze versie live staat (zie het bestand).
 - `supabase/archief/` — oude SQL-scripts van vóór de migraties, alleen ter referentie.
 
 Na een databasewijziging de types opnieuw maken: `npx supabase gen types typescript --linked > lib/database.types.ts`.

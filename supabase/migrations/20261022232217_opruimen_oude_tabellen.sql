@@ -1,9 +1,4 @@
--- Pas toepassen nadat de branch acceptatie-voorbereiding op main staat en live is.
--- De oude code op main gebruikt deze tabellen en kolommen nog.
---
--- Toepassen:  mv supabase/na-merge/opruimen_oude_tabellen.sql \
---               supabase/migrations/$(date -u +%Y%m%d%H%M%S)_opruimen_oude_tabellen.sql
---             npx supabase db push
+-- Opruimen van wat de nieuwe code niet meer gebruikt.
 
 -- Labels zijn uit de agenda gehaald
 ALTER TABLE agenda

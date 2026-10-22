@@ -23,8 +23,6 @@ export type Database = {
           fotos_url: string | null
           gepubliceerd: boolean
           id: number
-          label: string | null
-          label_kleur: string | null
           link: string | null
           locatie: string | null
           tijd: string | null
@@ -38,8 +36,6 @@ export type Database = {
           fotos_url?: string | null
           gepubliceerd?: boolean
           id?: never
-          label?: string | null
-          label_kleur?: string | null
           link?: string | null
           locatie?: string | null
           tijd?: string | null
@@ -53,8 +49,6 @@ export type Database = {
           fotos_url?: string | null
           gepubliceerd?: boolean
           id?: never
-          label?: string | null
-          label_kleur?: string | null
           link?: string | null
           locatie?: string | null
           tijd?: string | null
@@ -134,7 +128,7 @@ export type Database = {
           created_at: string
           id: number
           naam: string
-          r2_key: string | null
+          r2_key: string
           stemgroep: Database["public"]["Enums"]["stemgroep_type"] | null
         }
         Insert: {
@@ -142,7 +136,7 @@ export type Database = {
           created_at?: string
           id?: never
           naam: string
-          r2_key?: string | null
+          r2_key: string
           stemgroep?: Database["public"]["Enums"]["stemgroep_type"] | null
         }
         Update: {
@@ -150,38 +144,8 @@ export type Database = {
           created_at?: string
           id?: never
           naam?: string
-          r2_key?: string | null
+          r2_key?: string
           stemgroep?: Database["public"]["Enums"]["stemgroep_type"] | null
-        }
-        Relationships: []
-      }
-      bestuur: {
-        Row: {
-          created_at: string
-          foto_url: string | null
-          id: number
-          initialen: string
-          naam: string
-          rol: string
-          volgorde: number
-        }
-        Insert: {
-          created_at?: string
-          foto_url?: string | null
-          id?: never
-          initialen: string
-          naam: string
-          rol: string
-          volgorde?: number
-        }
-        Update: {
-          created_at?: string
-          foto_url?: string | null
-          id?: never
-          initialen?: string
-          naam?: string
-          rol?: string
-          volgorde?: number
         }
         Relationships: []
       }
@@ -220,69 +184,6 @@ export type Database = {
           },
         ]
       }
-      liedjes: {
-        Row: {
-          componist: string | null
-          created_at: string
-          id: number
-          pdf_url: string | null
-          stemgroep: Database["public"]["Enums"]["stemgroep_type"]
-          titel: string
-          volgorde: number
-        }
-        Insert: {
-          componist?: string | null
-          created_at?: string
-          id?: never
-          pdf_url?: string | null
-          stemgroep: Database["public"]["Enums"]["stemgroep_type"]
-          titel: string
-          volgorde?: number
-        }
-        Update: {
-          componist?: string | null
-          created_at?: string
-          id?: never
-          pdf_url?: string | null
-          stemgroep?: Database["public"]["Enums"]["stemgroep_type"]
-          titel?: string
-          volgorde?: number
-        }
-        Relationships: []
-      }
-      oude_optredens: {
-        Row: {
-          afbeelding_url: string | null
-          created_at: string
-          datum: string
-          id: number
-          locatie: string
-          titel: string
-          volgorde: number
-          youtube_id: string | null
-        }
-        Insert: {
-          afbeelding_url?: string | null
-          created_at?: string
-          datum: string
-          id?: never
-          locatie: string
-          titel: string
-          volgorde?: number
-          youtube_id?: string | null
-        }
-        Update: {
-          afbeelding_url?: string | null
-          created_at?: string
-          datum?: string
-          id?: never
-          locatie?: string
-          titel?: string
-          volgorde?: number
-          youtube_id?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           bestuursfunctie: string | null
@@ -313,33 +214,6 @@ export type Database = {
           naam?: string | null
           rol?: Database["public"]["Enums"]["user_rol"]
           stemgroep?: Database["public"]["Enums"]["stemgroep_type"] | null
-        }
-        Relationships: []
-      }
-      smoelenboek: {
-        Row: {
-          created_at: string
-          foto_url: string | null
-          id: number
-          initialen: string
-          naam: string
-          stemgroep: Database["public"]["Enums"]["stemgroep_type"]
-        }
-        Insert: {
-          created_at?: string
-          foto_url?: string | null
-          id?: never
-          initialen: string
-          naam: string
-          stemgroep: Database["public"]["Enums"]["stemgroep_type"]
-        }
-        Update: {
-          created_at?: string
-          foto_url?: string | null
-          id?: never
-          initialen?: string
-          naam?: string
-          stemgroep?: Database["public"]["Enums"]["stemgroep_type"]
         }
         Relationships: []
       }
