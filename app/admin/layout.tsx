@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Sidebar from "./_components/Sidebar";
+import "./admin.css";
 
 export const metadata = { title: "Admin — Popkoor Divers" };
 
@@ -19,9 +20,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (profile?.rol !== "admin") redirect("/leden");
 
   return (
-    <div className="admin-shell" style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "var(--font-manrope), system-ui, sans-serif" }}>
+    <div className="admin-shell">
       <Sidebar />
-      <main style={{ flex: 1, overflow: "auto", background: "#F7F6F3" }}>
+      <main className="adm-main">
         {children}
       </main>
     </div>

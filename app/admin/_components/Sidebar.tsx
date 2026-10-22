@@ -1,21 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { IconCalendar, IconNewspaper, IconFolder, IconUsers, IconEye, IconCamera } from "@/components/icons";
 
 const nav = [
-  { label: "Agenda",       href: "/admin/agenda",      icon: <IconCalendar size={15} /> },
-  { label: "Nieuws",       href: "/admin/nieuws",       icon: <IconNewspaper size={15} /> },
-  { label: "Media",        href: "/admin/albums",       icon: <IconCamera size={15} /> },
-  { label: "Bestanden",    href: "/admin/bestanden",    icon: <IconFolder size={15} /> },
-  { label: "Leden",        href: "/admin/leden",        icon: <IconUsers size={15} /> },
+  { label: "Agenda",    href: "/admin/agenda",    icon: <IconCalendar size={17} /> },
+  { label: "Nieuws",    href: "/admin/nieuws",    icon: <IconNewspaper size={17} /> },
+  { label: "Media",     href: "/admin/albums",    icon: <IconCamera size={17} /> },
+  { label: "Bestanden", href: "/admin/bestanden", icon: <IconFolder size={17} /> },
+  { label: "Leden",     href: "/admin/leden",     icon: <IconUsers size={17} /> },
 ];
+
+function Brand() {
+  return (
+    <a href="/" target="_blank" rel="noopener" className="adm-brand">
+      <p className="adm-brand-name">Popkoor <span>Divers</span></p>
+      <p className="adm-brand-sub">Beheer van de website</p>
+    </a>
+  );
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router   = useRouter();
+  const [open, setOpen] = useState(false);
 
   const logout = async () => {
     await createClient().auth.signOut();
@@ -24,103 +35,38 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="admin-sidebar" style={{ width: "220px", minWidth: "220px", background: "#111111", display: "flex", flexDirection: "column", height: "100vh" }}>
-
-      {/* Brand */}
-      <div style={{ padding: "22px 20px 16px" }}>
-        <a href="/" target="_blank" rel="noopener" style={{ textDecoration: "none" }}>
-          <p style={{ margin: 0, fontSize: "15px", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
-            Popkoor <span style={{ color: "var(--primary)" }}>Divers</span>
-          </p>
-        </a>
-        <p style={{ margin: "3px 0 0", fontSize: "10px", fontWeight: 600, color: "rgba(255,255,255,0.3)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-          Admin dashboard
-        </p>
-      </div>
-
-      <div style={{ height: "1px", background: "rgba(255,255,255,0.07)", margin: "0 16px" }} />
-
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: "8px 0", overflow: "auto" }}>
-        {nav.map((item) => {
-          const active = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              aria-current={active ? "page" : undefined}
-              href={item.href}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                margin: "2px 10px",
-                padding: "9px 12px",
-                borderRadius: "10px",
-                fontSize: "13px",
-                fontWeight: active ? 700 : 500,
-                color: active ? "#fff" : "rgba(255,255,255,0.6)",
-                textDecoration: "none",
-                background: active ? "rgba(243,106,42,0.18)" : "transparent",
-                boxShadow: active ? "inset 0 0 0 1px rgba(243,106,42,0.35)" : "none",
-                transition: "background 0.15s, color 0.15s",
-              }}
-            >
-              <span style={{ lineHeight: 1, display: "flex" }}>{item.icon}</span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Ledenomgeving bekijken */}
-      <div style={{ padding: "0 16px 12px" }}>
-        <Link
-          href="/leden"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "9px 14px",
-            fontSize: "12px",
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.45)",
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "8px",
-            textDecoration: "none",
-            transition: "color 0.15s, border-color 0.15s",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.8)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.45)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
-        >
-          <IconEye size={13} />
-          Ledenomgeving
-        </Link>
-      </div>
-
-      {/* Logout */}
-      <div style={{ padding: "12px 16px 20px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-        <button
-          onClick={logout}
-          style={{
-            width: "100%",
-            padding: "9px 14px",
-            fontSize: "13px",
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.45)",
-            background: "none",
-            border: "1px solid rgba(255,255,255,0.10)",
-            borderRadius: "8px",
-            cursor: "pointer",
-            textAlign: "left",
-            transition: "color 0.15s, border-color 0.15s",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.8)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.45)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)"; }}
-        >
-          Uitloggen →
+    <>
+      <div className="adm-topbar">
+        <Brand />
+        <button onClick={() => setOpen(true)} aria-label="Menu openen" aria-expanded={open} aria-controls="adm-sidebar">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
         </button>
       </div>
-    </aside>
+      {open && <div className="adm-scrim" onClick={() => setOpen(false)} />}
+
+      <aside id="adm-sidebar" className="adm-sidebar" data-open={open || undefined}>
+        <Brand />
+        <nav className="adm-nav" aria-label="Beheer">
+          {nav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={pathname.startsWith(item.href) ? "page" : undefined}
+              onClick={() => setOpen(false)}
+            >
+              {item.icon}
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="adm-side-foot">
+          <Link href="/leden" onClick={() => setOpen(false)}><IconEye size={15} /> Ledenomgeving bekijken</Link>
+          <button onClick={logout}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
+            Uitloggen
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

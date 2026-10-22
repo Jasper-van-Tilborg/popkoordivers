@@ -151,32 +151,3 @@ a, button { -webkit-tap-highlight-color: transparent; }
   .reveal, .reveal-fade { opacity: 1 !important; }
   html { scroll-behavior: auto; }
 }
-
-/* ── Admin ── */
-.admin-shell button {
-  transition: transform 0.12s var(--ease-out), filter 0.15s, box-shadow 0.15s, background 0.15s;
-}
-.admin-shell button:hover:not(:disabled) { filter: brightness(0.97); }
-.admin-shell button:active:not(:disabled) { transform: scale(0.98); }
-.admin-shell button:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.admin-shell input:not([type="checkbox"]):not([type="color"]):not([type="file"]),
-.admin-shell textarea,
-.admin-shell select {
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.admin-shell input:not([type="checkbox"]):not([type="color"]):not([type="file"]):focus,
-.admin-shell textarea:focus,
-.admin-shell select:focus {
-  border-color: var(--primary) !important;
-  box-shadow: 0 0 0 3px rgba(243,106,42,0.15) !important;
-}
-
-.admin-shell tbody tr { transition: background 0.12s; }
-.admin-shell tbody tr:hover { background: #FBFAF8; }
-.admin-shell tbody tr:last-child td { border-bottom: none !important; }
-
-.admin-sidebar nav a:not([aria-current]):hover {
-  background: rgba(255,255,255,0.06) !important;
-  color: #fff !important;
-}

@@ -1,132 +1,247 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { createUser, deleteUser, updateUserRol } from "./actions";
-import { btnPrimary, btnOutline, btnDanger, inputStyle, labelStyle, thStyle, tdStyle } from "../_components/adminStyles";
+import { useCallback, useMemo, useState } from "react";
+import { Drawer, DeleteButton, IconPlus, IconSearch, useToast } from "../_components/ui";
+import { maakLid, verwijderLid, wijzigLid, zetWachtwoord, type LidInput } from "./actions";
 
-interface Lid { id: string; email: string; naam: string | null; rol: string; stemgroep: string | null; created_at: string; }
+type Stemgroep = NonNullable<LidInput["stemgroep"]>;
 
-const stemgroepen = ["", "Alt", "Mezzo", "Sopraan", "Tenor", "Bas"];
-const rollen = ["lid", "admin"];
+interface Lid {
+  id: string;
+  email: string;
+  naam: string | null;
+  rol: LidInput["rol"];
+  stemgroep: Stemgroep | null;
+  bestuursfunctie: string | null;
+  in_smoelenboek: boolean;
+  laatst_ingelogd: string | null;
+}
 
-export default function LedenClient({ leden }: { leden: Lid[] }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm]         = useState({ email: "", password: "", naam: "", stemgroep: "", rol: "lid" });
-  const [saving, setSaving]     = useState(false);
-  const [error, setError]       = useState("");
+const STEMGROEPEN: Stemgroep[] = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas"];
+const FUNCTIES = ["Voorzitter", "Secretaris", "Penningmeester", "Algemeen bestuurslid"];
 
-  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+const initialen = (naam: string) =>
+  naam.split(/\s+/).filter((w) => w && w[0] === w[0].toUpperCase()).map((w) => w[0]).join("").slice(0, 2) || naam.slice(0, 2).toUpperCase();
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setSaving(true);
-    const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-    const result = await createUser(fd);
-    setSaving(false);
-    if (result?.error) { setError(result.error); return; }
-    setShowForm(false);
-    setForm({ email: "", password: "", naam: "", stemgroep: "", rol: "lid" });
-    router.refresh();
+function maakWachtwoord() {
+  const tekens = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const r = crypto.getRandomValues(new Uint32Array(12));
+  return Array.from(r, (n) => tekens[n % tekens.length]).join("");
+}
+
+function LidDrawer({ lid, eigen, onClose, onDone }: {
+  lid: Lid | null;
+  eigen: boolean;
+  onClose: () => void;
+  onDone: (melding: string) => void;
+}) {
+  const [form, setForm] = useState<LidInput>({
+    naam: lid?.naam ?? "",
+    email: lid?.email ?? "",
+    stemgroep: lid?.stemgroep ?? null,
+    rol: lid?.rol ?? "lid",
+    bestuursfunctie: lid?.bestuursfunctie ?? "",
+    in_smoelenboek: lid?.in_smoelenboek ?? true,
+  });
+  const [wachtwoord, setWachtwoord] = useState(lid ? "" : maakWachtwoord());
+  const [fout, setFout]   = useState("");
+  const [info, setInfo]   = useState("");
+  const [busy, setBusy]   = useState<"save" | "delete" | "pw" | null>(null);
+  const set = <K extends keyof LidInput>(k: K, v: LidInput[K]) => setForm((f) => ({ ...f, [k]: v }));
+
+  async function save() {
+    if (!form.naam.trim()) { setFout("Vul de naam in."); return; }
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) { setFout("Vul een geldig e-mailadres in."); return; }
+    setBusy("save");
+    setFout("");
+    const res = lid ? await wijzigLid(lid.id, form) : await maakLid(form, wachtwoord);
+    setBusy(null);
+    if (res.error) setFout(res.error);
+    else onDone(lid ? "Wijzigingen opgeslagen" : `${form.naam} is toegevoegd`);
   }
 
-  async function handleDelete(id: string, email: string) {
-    if (!confirm(`Account van ${email} verwijderen?`)) return;
-    startTransition(async () => {
-      await deleteUser(id);
-      router.refresh();
-    });
+  async function nieuwWachtwoord() {
+    if (!lid) return;
+    setBusy("pw");
+    setFout("");
+    setInfo("");
+    const res = await zetWachtwoord(lid.id, wachtwoord);
+    setBusy(null);
+    if (res.error) setFout(res.error);
+    else setInfo("Nieuw wachtwoord ingesteld. Geef het door aan het lid.");
   }
 
-  async function handleRol(id: string, rol: string) {
-    startTransition(async () => {
-      await updateUserRol(id, rol);
-      router.refresh();
-    });
+  async function remove() {
+    if (!lid) return;
+    setBusy("delete");
+    const res = await verwijderLid(lid.id);
+    setBusy(null);
+    if (res.error) setFout(res.error);
+    else onDone(`${lid.naam ?? lid.email} is verwijderd`);
   }
 
   return (
-    <div>
-      <div style={{ padding: "28px 32px 24px", background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 20, borderBottom: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px" }}>Leden</h1>
-          <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#888" }}>{leden.length} accounts</p>
+    <Drawer
+      title={lid ? (lid.naam ?? lid.email) : "Lid toevoegen"}
+      onClose={onClose}
+      footer={
+        <>
+          {fout && <p className="adm-server-err" role="alert">{fout}</p>}
+          <div className="adm-foot-actions">
+            {lid && !eigen && <DeleteButton onConfirm={remove} busy={busy === "delete"} label="Account verwijderen" />}
+            <span className="adm-spacer" />
+            <button type="button" className="adm-btn adm-btn--ghost" onClick={onClose}>Annuleren</button>
+            <button type="button" className="adm-btn adm-btn--primary" onClick={save} disabled={!!busy}>
+              {busy === "save" ? "Opslaan…" : lid ? "Wijzigingen opslaan" : "Lid toevoegen"}
+            </button>
+          </div>
+        </>
+      }
+    >
+      <section className="adm-fieldset">
+        <div className="adm-field">
+          <label htmlFor="ld-naam">Naam</label>
+          <input id="ld-naam" className="adm-input" value={form.naam} onChange={(e) => set("naam", e.target.value)} placeholder="Voor- en achternaam" />
         </div>
-        <button style={btnPrimary} onClick={() => setShowForm(!showForm)}>+ Nieuw account</button>
+        <div className="adm-field">
+          <label htmlFor="ld-email">E-mailadres</label>
+          <input id="ld-email" type="email" className="adm-input" value={form.email} onChange={(e) => set("email", e.target.value)} />
+          <p className="adm-hint">Hiermee logt het lid in.</p>
+        </div>
+        <div className="adm-grid-2">
+          <div className="adm-field">
+            <label htmlFor="ld-stem">Stemgroep</label>
+            <select id="ld-stem" className="adm-input" value={form.stemgroep ?? ""} onChange={(e) => set("stemgroep", (e.target.value || null) as Stemgroep | null)}>
+              <option value="">Geen (bijv. dirigent)</option>
+              {STEMGROEPEN.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="adm-field">
+            <label htmlFor="ld-functie">Bestuursfunctie <span className="adm-optional">optioneel</span></label>
+            <input id="ld-functie" className="adm-input" list="ld-functies" value={form.bestuursfunctie} onChange={(e) => set("bestuursfunctie", e.target.value)} placeholder="Geen" />
+            <datalist id="ld-functies">{FUNCTIES.map((f) => <option key={f} value={f} />)}</datalist>
+          </div>
+        </div>
+        <p className="adm-hint">Met een bestuursfunctie staat het lid in het blok &ldquo;Bestuur&rdquo; in de ledenomgeving.</p>
+        <label className="adm-check" style={{ marginTop: 16 }}>
+          <input type="checkbox" checked={form.in_smoelenboek} onChange={(e) => set("in_smoelenboek", e.target.checked)} style={{ width: 16, height: 16, accentColor: "var(--primary)" }} />
+          Tonen in het smoelenboek
+        </label>
+      </section>
+
+      <section className="adm-fieldset">
+        <h3>Toegang</h3>
+        <div className="adm-field">
+          <label htmlFor="ld-rol" className="adm-label">Rol</label>
+          <select id="ld-rol" className="adm-input" value={form.rol} onChange={(e) => set("rol", e.target.value as LidInput["rol"])} disabled={eigen}>
+            <option value="lid">Lid: ziet de ledenomgeving</option>
+            <option value="admin">Beheerder: kan ook de website aanpassen</option>
+          </select>
+          {eigen && <p className="adm-hint">Je eigen rol kun je niet wijzigen.</p>}
+        </div>
+        <div className="adm-field">
+          <label htmlFor="ld-pw">{lid ? "Nieuw wachtwoord" : "Wachtwoord"}</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input id="ld-pw" className="adm-input" value={wachtwoord} onChange={(e) => setWachtwoord(e.target.value)} placeholder={lid ? "Laat leeg om niets te wijzigen" : ""} autoComplete="off" />
+            <button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={() => setWachtwoord(maakWachtwoord())}>Maak er een</button>
+          </div>
+          {lid ? (
+            <>
+              {wachtwoord && <button type="button" className="adm-btn adm-btn--ghost adm-btn--small" style={{ marginTop: 8 }} onClick={nieuwWachtwoord} disabled={!!busy}>{busy === "pw" ? "Instellen…" : "Wachtwoord instellen"}</button>}
+              {info && <p className="adm-hint" role="status" style={{ color: "var(--ok)", fontWeight: 600 }}>{info}</p>}
+              {lid.laatst_ingelogd && <p className="adm-hint">Laatst ingelogd: {new Date(lid.laatst_ingelogd).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}</p>}
+            </>
+          ) : (
+            <p className="adm-hint">Geef dit wachtwoord door aan het nieuwe lid. Minstens 8 tekens.</p>
+          )}
+        </div>
+      </section>
+    </Drawer>
+  );
+}
+
+export default function LedenClient({ leden, eigenId }: { leden: Lid[]; eigenId: string }) {
+  const [zoek, setZoek]     = useState("");
+  const [drawer, setDrawer] = useState<{ lid: Lid | null } | null>(null);
+  const [toast, melding]    = useToast();
+  const sluit = useCallback(() => setDrawer(null), []);
+
+  const groepen = useMemo(() => {
+    const q = zoek.trim().toLowerCase();
+    const gefilterd = leden.filter((l) => !q || (l.naam ?? "").toLowerCase().includes(q) || l.email.toLowerCase().includes(q));
+    return [...STEMGROEPEN, null]
+      .map((s) => ({ titel: s ?? "Zonder stemgroep", items: gefilterd.filter((l) => l.stemgroep === s) }))
+      .filter((g) => g.items.length > 0);
+  }, [leden, zoek]);
+
+  const bestuur = leden.filter((l) => l.bestuursfunctie).length;
+  const admins  = leden.filter((l) => l.rol === "admin").length;
+
+  return (
+    <div>
+      <header className="adm-head">
+        <div>
+          <h1>Leden</h1>
+          <p className="adm-sub">{leden.length} accounts, {bestuur} in het bestuur, {admins} beheerder{admins === 1 ? "" : "s"}.</p>
+        </div>
+        <button className="adm-btn adm-btn--primary" onClick={() => setDrawer({ lid: null })}><IconPlus /> Lid toevoegen</button>
+      </header>
+
+      <div className="adm-toolbar">
+        <span />
+        <div className="adm-search">
+          <IconSearch />
+          <input type="search" value={zoek} onChange={(e) => setZoek(e.target.value)} placeholder="Zoek op naam of e-mail" aria-label="Zoek op naam of e-mail" />
+        </div>
       </div>
 
-      {showForm && (
-        <form onSubmit={handleCreate} style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", padding: "24px" }}>
-          <h2 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700, color: "#111" }}>Nieuw account aanmaken</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <div>
-              <label style={labelStyle}>Naam</label>
-              <input type="text" value={form.naam} onChange={(e) => set("naam", e.target.value)} style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>E-mailadres *</label>
-              <input type="email" required value={form.email} onChange={(e) => set("email", e.target.value)} style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Wachtwoord *</label>
-              <input type="password" required minLength={8} value={form.password} onChange={(e) => set("password", e.target.value)} style={inputStyle} placeholder="Minimaal 8 tekens" />
-            </div>
-            <div>
-              <label style={labelStyle}>Stemgroep</label>
-              <select value={form.stemgroep} onChange={(e) => set("stemgroep", e.target.value)} style={inputStyle}>
-                {stemgroepen.map((s) => <option key={s} value={s}>{s || "— geen —"}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={labelStyle}>Rol</label>
-              <select value={form.rol} onChange={(e) => set("rol", e.target.value)} style={inputStyle}>
-                {rollen.map((r) => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
-              </select>
-            </div>
+      <div className="adm-content">
+        {groepen.length === 0 ? (
+          <div className="adm-empty">
+            {zoek ? <p className="adm-empty-title">Niemand gevonden voor &ldquo;{zoek}&rdquo;</p> : (
+              <>
+                <p className="adm-empty-title">Nog geen leden</p>
+                <button className="adm-btn adm-btn--primary" onClick={() => setDrawer({ lid: null })}>Lid toevoegen</button>
+              </>
+            )}
           </div>
-          {error && <p style={{ margin: "12px 0 0", fontSize: "13px", color: "#dc2626", background: "#fef2f2", padding: "10px 14px", borderRadius: "8px" }}>{error}</p>}
-          <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-            <button type="submit" style={{ ...btnPrimary, opacity: saving ? 0.6 : 1 }} disabled={saving}>{saving ? "Aanmaken…" : "Account aanmaken"}</button>
-            <button type="button" style={btnOutline} onClick={() => { setShowForm(false); setError(""); }}>Annuleren</button>
-          </div>
-        </form>
-      )}
-
-      <div style={{ margin: "24px 32px 32px", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", overflow: "hidden", opacity: isPending ? 0.7 : 1 }}>
-        {leden.length === 0 ? <p style={{ padding: "32px", color: "#aaa", fontSize: "14px" }}>Nog geen accounts.</p> : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>{["E-mail","Naam","Stemgroep","Rol","Aangemaakt","Acties"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
-            </thead>
-            <tbody>
-              {leden.map((lid) => (
-                <tr key={lid.id}>
-                  <td style={{ ...tdStyle, fontWeight: 600 }}>{lid.email}</td>
-                  <td style={tdStyle}>{lid.naam || <span style={{ color: "#ccc" }}>—</span>}</td>
-                  <td style={tdStyle}>{lid.stemgroep || <span style={{ color: "#ccc" }}>—</span>}</td>
-                  <td style={tdStyle}>
-                    <select
-                      value={lid.rol}
-                      onChange={(e) => handleRol(lid.id, e.target.value)}
-                      style={{ fontSize: "12px", fontWeight: 700, color: lid.rol === "admin" ? "var(--primary)" : "#555", background: lid.rol === "admin" ? "rgba(243,106,42,0.10)" : "rgba(0,0,0,0.05)", border: "none", borderRadius: "100px", padding: "4px 10px", cursor: "pointer", outline: "none" }}
-                    >
-                      {rollen.map((r) => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
-                    </select>
-                  </td>
-                  <td style={{ ...tdStyle, color: "#888", fontSize: "12px" }}>{new Date(lid.created_at).toLocaleDateString("nl-NL")}</td>
-                  <td style={tdStyle}>
-                    <button style={btnDanger} onClick={() => handleDelete(lid.id, lid.email)}>Verwijderen</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        ) : (
+          groepen.map((g) => (
+            <section key={g.titel} className="adm-group">
+              <h2 className="adm-group-title">{g.titel} <span className="adm-count">{g.items.length}</span></h2>
+              <ul className="adm-list">
+                {g.items.map((l) => (
+                  <li key={l.id} className="adm-row adm-row--avatar" onClick={() => setDrawer({ lid: l })}>
+                    <span className="adm-avatar" aria-hidden="true">{initialen(l.naam ?? l.email)}</span>
+                    <div className="adm-main-col">
+                      <button className="adm-title" onClick={(e) => { e.stopPropagation(); setDrawer({ lid: l }); }}>{l.naam ?? l.email}</button>
+                      <div className="adm-meta">
+                        <span>{l.email}</span>
+                        {!l.in_smoelenboek && <span className="adm-missing">Niet in het smoelenboek</span>}
+                      </div>
+                    </div>
+                    <div className="adm-actions">
+                      {l.bestuursfunctie && <span className="adm-pill adm-pill--brand">{l.bestuursfunctie}</span>}
+                      {l.rol === "admin" && <span className="adm-pill">Beheerder</span>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
         )}
       </div>
+
+      {drawer && (
+        <LidDrawer
+          key={drawer.lid?.id ?? "new"}
+          lid={drawer.lid}
+          eigen={drawer.lid?.id === eigenId}
+          onClose={sluit}
+          onDone={(m) => { setDrawer(null); melding(m); }}
+        />
+      )}
+      {toast}
     </div>
   );
 }

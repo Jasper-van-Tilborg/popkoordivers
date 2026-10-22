@@ -3,8 +3,9 @@ import LedenNavbar from "@/components/LedenNavbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import { createClient } from "@/lib/supabase/server";
-import { getPublicUrl } from "@/lib/r2";
-import { IconPlay, IconSparkle, IconFolder, IconClock, IconMapPin } from "@/components/icons";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { downloadUrl } from "@/lib/r2";
+import { IconPlay, IconSparkle, IconFolder, IconClock, IconMapPin, IconCamera } from "@/components/icons";
 import StemTabs from "./components/StemTabs";
 
 function SectionHeader({ title, count }: { title: string; count?: number }) {
@@ -29,12 +30,12 @@ const card = {
   boxShadow: "var(--shadow-sm)",
 } as const;
 
-interface BestandRaw {
-  id: number;
-  naam: string;
-  categorie: string;
-  stemgroep: string | null;
-  r2_key: string;
+const BESTUUR_VOLGORDE = ["voorzitter", "secretaris", "penningmeester"];
+const STEMGROEPEN = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas"];
+
+function initialen(naam: string) {
+  const delen = naam.split(/\s+/).filter((w) => w && w[0] === w[0].toUpperCase());
+  return (delen.map((w) => w[0]).join("") || naam.slice(0, 2)).slice(0, 2).toUpperCase();
 }
 
 export default async function LedenPage() {
@@ -44,67 +45,59 @@ export default async function LedenPage() {
 
   const { data: profile } = await supabase.from("profiles").select("rol").eq("id", user.id).single();
   const rol = (profile?.rol ?? "lid") as "lid" | "admin";
+  const today = new Date().toISOString().split("T")[0];
 
   const [
-    { data: liedjesRaw },
-    { data: bestuur },
-    { data: leden },
-    { data: oudeOptredens },
+    { data: ledenRaw },
     { data: bestandenRaw },
     { data: albumsRaw },
+    { data: fotosRaw },
+    { data: optredensRaw },
   ] = await Promise.all([
-    supabase.from("liedjes").select("titel, componist, stemgroep, pdf_url").order("volgorde"),
-    supabase.from("bestuur").select("naam, rol, initialen").order("volgorde"),
-    supabase.from("smoelenboek").select("naam, stemgroep, initialen").order("naam"),
-    supabase.from("oude_optredens").select("titel, datum, locatie, youtube_id").order("volgorde", { ascending: false }),
+    // Leden mogen elkaars profiel niet rechtstreeks lezen (e-mailadressen); de server
+    // haalt alleen naam, stemgroep en bestuursfunctie op, na de login-check hierboven.
+    createAdminClient().from("profiles").select("naam, stemgroep, bestuursfunctie, in_smoelenboek").not("naam", "is", null).order("naam"),
     supabase.from("bestanden").select("id, naam, categorie, stemgroep, r2_key").order("created_at", { ascending: false }),
     supabase.from("albums").select("id, slug, titel, datum").order("created_at", { ascending: false }),
+    supabase.from("fotos").select("album_id, r2_key").order("volgorde").order("created_at"),
+    supabase.from("agenda").select("id, titel, datum, locatie, fotos_url").eq("gepubliceerd", true).lt("datum_sorteer", today).order("datum_sorteer", { ascending: false }),
   ]);
 
-  // Alle fotos per album (inclusief niet-impressies)
-  const albumsMetFotos = await Promise.all(
-    (albumsRaw ?? []).map(async (album) => {
-      const { data: fotos } = await supabase
-        .from("fotos")
-        .select("r2_key")
-        .eq("album_id", album.id)
-        .order("volgorde")
-        .order("created_at");
-      return { ...album, fotos: (fotos ?? []).map((f) => getPublicUrl(f.r2_key)) };
-    })
-  );
+  const leden = (ledenRaw ?? []).filter((l) => l.in_smoelenboek).map((l) => ({ ...l, naam: l.naam!, initialen: initialen(l.naam!) }));
+  const bestuur = (ledenRaw ?? [])
+    .filter((l) => l.bestuursfunctie)
+    .map((l) => ({ naam: l.naam!, rol: l.bestuursfunctie!, initialen: initialen(l.naam!) }))
+    .sort((a, b) => {
+      const ia = BESTUUR_VOLGORDE.indexOf(a.rol.toLowerCase()), ib = BESTUUR_VOLGORDE.indexOf(b.rol.toLowerCase());
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.naam.localeCompare(b.naam, "nl");
+    });
 
-  const bestanden: (BestandRaw & { url: string })[] = (bestandenRaw ?? []).map((b) => ({
+  // Alle bestanden en foto's staan in de privé bucket: tijdelijke links (1 uur geldig)
+  const bestanden = await Promise.all((bestandenRaw ?? []).filter((b) => b.r2_key).map(async (b) => ({
     ...b,
-    url: getPublicUrl(b.r2_key),
-  }));
+    url: await downloadUrl(b.r2_key!),
+  })));
+  const albumsMetFotos = await Promise.all((albumsRaw ?? []).map(async (album) => ({
+    ...album,
+    fotos: await Promise.all((fotosRaw ?? []).filter((f) => f.album_id === album.id).map((f) => downloadUrl(f.r2_key))),
+  })));
 
-  // Group bestanden by categorie
-  const byCategorie = bestanden.reduce<Record<string, typeof bestanden>>((acc, b) => {
-    acc[b.categorie] = acc[b.categorie] ?? [];
-    acc[b.categorie].push(b);
-    return acc;
-  }, {});
+  const perCategorie = (c: string) => bestanden.filter((b) => b.categorie === c);
 
-  // Liedjes: merge pdf_url from bestanden by stemgroep + naam matching
-  const bestandenLiedjesPerStem = (byCategorie["liedjes"] ?? []).reduce<Record<string, Record<string, string>>>((acc, b) => {
-    const sg = b.stemgroep ?? "";
-    acc[sg] = acc[sg] ?? {};
-    acc[sg][b.naam.toLowerCase()] = b.url;
-    return acc;
-  }, {});
-
-  const liedjesPerStem: Record<string, { titel: string; componist?: string | null; pdf_url?: string | null }[]> = {};
-  for (const lied of liedjesRaw ?? []) {
-    if (!liedjesPerStem[lied.stemgroep]) liedjesPerStem[lied.stemgroep] = [];
-    const stemMap = bestandenLiedjesPerStem[lied.stemgroep] ?? {};
-    const matchedUrl = stemMap[lied.titel.toLowerCase()] ?? lied.pdf_url ?? null;
-    liedjesPerStem[lied.stemgroep].push({ titel: lied.titel, componist: lied.componist, pdf_url: matchedUrl });
+  // Liedjes per stemgroep; bestanden zonder stemgroep zijn voor iedereen
+  const liedjesPerStem: Record<string, { titel: string; pdf_url: string }[]> = {};
+  for (const stem of STEMGROEPEN) {
+    liedjesPerStem[stem] = perCategorie("liedjes")
+      .filter((b) => !b.stemgroep || b.stemgroep === stem)
+      .map((b) => ({ titel: b.naam, pdf_url: b.url }))
+      .sort((a, b) => a.titel.localeCompare(b.titel, "nl"));
   }
 
-  const nieuwsbrieven = byCategorie["nieuwsbrieven"] ?? [];
-  const opnames       = byCategorie["opnames"] ?? [];
-  const choreo        = byCategorie["choreo"] ?? [];
+  const nieuwsbrieven = perCategorie("nieuwsbrieven");
+  const alv           = perCategorie("alv");
+  const opnames       = perCategorie("opnames");
+  const choreo        = perCategorie("choreo");
+  const oudeOptredens = optredensRaw ?? [];
 
   return (
     <>
@@ -144,24 +137,32 @@ export default async function LedenPage() {
           </div>
         </section>
 
-        {/* ── 3. Nieuwsbrieven ── */}
+        {/* ── 3. Nieuwsbrieven en ALV-stukken ── */}
         <section id="nieuwsbrieven" className="leden-section" style={{ background: "#FFFFFF" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader title="Nieuwsbrieven" count={nieuwsbrieven.length} /></Reveal>
+            <Reveal><SectionHeader title="Nieuwsbrieven en ALV-stukken" count={nieuwsbrieven.length + alv.length} /></Reveal>
             <Reveal delay={80}>
-              {nieuwsbrieven.length === 0 ? (
-                <p style={{ fontSize: "14px", color: "#aaa" }}>Binnenkort beschikbaar.</p>
-              ) : (
-                <div style={{ ...card, overflow: "hidden" }}>
-                  {nieuwsbrieven.map((nb) => (
-                    <a key={nb.id} href={nb.url} download className="leden-row">
-                      <span className="leden-row__icon"><IconFolder size={16} /></span>
-                      <span className="leden-row__title">{nb.naam}</span>
-                      <span className="leden-row__action">Downloaden ↓</span>
-                    </a>
-                  ))}
-                </div>
-              )}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }} className="opnames-grid">
+                {[
+                  { titel: "Nieuwsbrieven", items: nieuwsbrieven },
+                  { titel: "ALV-stukken", items: alv },
+                ].map((groep) => (
+                  <div key={groep.titel} style={{ ...card, overflow: "hidden" }}>
+                    <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#111", margin: 0, padding: "18px 22px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                      {groep.titel}
+                    </h3>
+                    {groep.items.length === 0 ? (
+                      <p style={{ fontSize: "14px", color: "#aaa", padding: "18px 22px", margin: 0 }}>Binnenkort beschikbaar.</p>
+                    ) : groep.items.map((doc) => (
+                      <a key={doc.id} href={doc.url} target="_blank" rel="noopener" className="leden-row">
+                        <span className="leden-row__icon"><IconFolder size={16} /></span>
+                        <span className="leden-row__title">{doc.naam}</span>
+                        <span className="leden-row__action">Openen</span>
+                      </a>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </Reveal>
           </div>
         </section>
@@ -171,9 +172,12 @@ export default async function LedenPage() {
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <Reveal><SectionHeader title="Samenstelling bestuur" /></Reveal>
             <Reveal delay={80}>
+              {bestuur.length === 0 ? (
+                <p style={{ fontSize: "14px", color: "#aaa" }}>Binnenkort beschikbaar.</p>
+              ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }} className="bestuur-grid">
-                {(bestuur ?? []).map((lid) => (
-                  <div key={lid.naam} style={{ ...card, padding: "22px 24px", display: "flex", alignItems: "center", gap: "16px" }}>
+                {bestuur.map((lid, i) => (
+                  <div key={i} style={{ ...card, padding: "22px 24px", display: "flex", alignItems: "center", gap: "16px" }}>
                     <div className="leden-avatar" style={{ width: "52px", height: "52px", fontSize: "16px" }}>
                       {lid.initialen}
                     </div>
@@ -184,6 +188,7 @@ export default async function LedenPage() {
                   </div>
                 ))}
               </div>
+              )}
             </Reveal>
           </div>
         </section>
@@ -191,21 +196,25 @@ export default async function LedenPage() {
         {/* ── 5. Smoelenboek ── */}
         <section id="smoelenboek" className="leden-section" style={{ background: "#FFFFFF" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader title="Smoelenboek" count={(leden ?? []).length} /></Reveal>
+            <Reveal><SectionHeader title="Smoelenboek" count={leden.length} /></Reveal>
             <Reveal delay={80}>
+              {leden.length === 0 ? (
+                <p style={{ fontSize: "14px", color: "#aaa" }}>Binnenkort beschikbaar.</p>
+              ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "14px" }} className="smoelenboek-grid">
-                {(leden ?? []).map((lid) => (
-                  <div key={lid.naam} style={{ ...card, borderRadius: "16px", padding: "20px 12px", textAlign: "center" }}>
+                {leden.map((lid, i) => (
+                  <div key={i} style={{ ...card, borderRadius: "16px", padding: "20px 12px", textAlign: "center" }}>
                     <div className="leden-avatar" style={{ width: "56px", height: "56px", fontSize: "17px", margin: "0 auto 12px" }}>
                       {lid.initialen}
                     </div>
                     <p style={{ margin: "0 0 8px", fontSize: "13px", fontWeight: 700, color: "#111", lineHeight: 1.3 }}>{lid.naam}</p>
                     <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--primary)", background: "rgba(243,106,42,0.08)", padding: "3px 10px", borderRadius: "100px", letterSpacing: "0.04em" }}>
-                      {lid.stemgroep}
+                      {lid.stemgroep ?? "Divers"}
                     </span>
                   </div>
                 ))}
               </div>
+              )}
             </Reveal>
           </div>
         </section>
@@ -280,40 +289,27 @@ export default async function LedenPage() {
           </section>
         )}
 
-        {/* ── 8. Oude optredens ── */}
+        {/* ── 8. Afgelopen optredens (uit de agenda) ── */}
         <section id="optredens" className="leden-section" style={{ background: albumsMetFotos.length > 0 ? "#FFF8F4" : "#FFFFFF", paddingBottom: "120px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader title="Oude optredens" count={(oudeOptredens ?? []).length} /></Reveal>
+            <Reveal><SectionHeader title="Afgelopen optredens" count={oudeOptredens.length} /></Reveal>
             <Reveal delay={80}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }} className="optredens-grid">
-                {(oudeOptredens ?? []).map((optreden) => {
-                  const inhoud = (
-                    <>
-                      <div style={{ position: "relative", aspectRatio: "16/9", background: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 50%, rgba(243,106,42,0.08) 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {optreden.youtube_id && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={`https://img.youtube.com/vi/${optreden.youtube_id}/mqdefault.jpg`} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-                        )}
-                        <div style={{ position: "relative", width: "44px", height: "44px", borderRadius: "50%", background: "rgba(255,255,255,0.92)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary)", boxShadow: "0 4px 16px rgba(0,0,0,0.15)" }}>
-                          <IconPlay size={15} />
-                        </div>
-                      </div>
-                      <div style={{ padding: "16px 20px" }}>
-                        <p style={{ margin: "0 0 4px", fontSize: "15px", fontWeight: 700, color: "#111" }}>{optreden.titel}</p>
-                        <p style={{ margin: 0, fontSize: "12px", color: "#888" }}>{[optreden.datum, optreden.locatie].filter(Boolean).join(" · ")}</p>
-                      </div>
-                    </>
-                  );
-                  const stijl = { ...card, display: "block", borderRadius: "16px", overflow: "hidden", textDecoration: "none" } as const;
-                  return optreden.youtube_id ? (
-                    <a key={optreden.titel} href={`https://www.youtube.com/watch?v=${optreden.youtube_id}`} target="_blank" rel="noopener noreferrer" style={stijl} className="card-hover">
-                      {inhoud}
+              {oudeOptredens.length === 0 ? (
+                <p style={{ fontSize: "14px", color: "#aaa" }}>Nog geen afgelopen optredens.</p>
+              ) : (
+                <div style={{ ...card, overflow: "hidden" }}>
+                  {oudeOptredens.map((o) => (
+                    <a key={o.id} href={o.fotos_url ?? `/agenda/${o.id}`} className="leden-row">
+                      <span className="leden-row__icon">{o.fotos_url ? <IconCamera size={16} /> : <IconPlay size={14} />}</span>
+                      <span className="leden-row__title">
+                        {o.titel}
+                        <span style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "#888", marginTop: "2px" }}>{[o.datum, o.locatie].filter(Boolean).join(", ")}</span>
+                      </span>
+                      <span className="leden-row__action">{o.fotos_url ? "Foto's" : "Bekijken"}</span>
                     </a>
-                  ) : (
-                    <div key={optreden.titel} style={stijl}>{inhoud}</div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
             </Reveal>
           </div>
         </section>
