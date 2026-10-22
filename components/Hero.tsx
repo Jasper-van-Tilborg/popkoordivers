@@ -3,15 +3,10 @@
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
-import { IconFacebook, IconInstagram, IconYoutube } from "@/components/icons";
-
-const socials = [
-  { label: "Facebook",  href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL", color: "#1877F2", icon: <IconFacebook size={18} /> },
-  { label: "Instagram", href: "https://www.instagram.com/popkoordivers/", color: "#E1306C", icon: <IconInstagram size={18} /> },
-  { label: "YouTube",   href: "https://www.youtube.com/@popkoordivers", color: "#FF0000", icon: <IconYoutube size={20} /> },
-];
+import { useSocials } from "@/components/InstellingenProvider";
 
 export default function Hero() {
+  const socials = useSocials(18);
   return (
     <section
       style={{

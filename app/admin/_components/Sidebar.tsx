@@ -12,6 +12,9 @@ const nav = [
   { label: "Media",     href: "/admin/albums",    icon: <IconCamera size={17} /> },
   { label: "Bestanden", href: "/admin/bestanden", icon: <IconFolder size={17} /> },
   { label: "Leden",     href: "/admin/leden",     icon: <IconUsers size={17} /> },
+  { label: "Instellingen", href: "/admin/instellingen", icon: (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" /><circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" /></svg>
+  ) },
 ];
 
 function Brand() {

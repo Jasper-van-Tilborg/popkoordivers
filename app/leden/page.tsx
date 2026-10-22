@@ -5,6 +5,7 @@ import Reveal from "@/components/Reveal";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { downloadUrl } from "@/lib/r2";
+import { getInstellingen } from "@/lib/instellingen";
 import { IconPlay, IconSparkle, IconFolder, IconClock, IconMapPin, IconCamera } from "@/components/icons";
 import StemTabs from "./components/StemTabs";
 
@@ -46,6 +47,7 @@ export default async function LedenPage() {
   const { data: profile } = await supabase.from("profiles").select("rol").eq("id", user.id).single();
   const rol = (profile?.rol ?? "lid") as "lid" | "admin";
   const today = new Date().toISOString().split("T")[0];
+  const inst = await getInstellingen();
 
   const [
     { data: ledenRaw },
@@ -118,8 +120,8 @@ export default async function LedenPage() {
                 Bladmuziek, nieuwsbrieven, opnames en foto&apos;s — alles voor repetities en optredens op één plek.
               </p>
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <span className="leden-chip"><IconClock size={14} /> Dinsdag · 19:30 – 21:30</span>
-                <span className="leden-chip"><IconMapPin size={14} /> CCGR De Schakel, Gilze</span>
+                <span className="leden-chip"><IconClock size={14} /> {inst.repetitie_dag} · {inst.repetitie_tijd}</span>
+                <span className="leden-chip"><IconMapPin size={14} /> {inst.repetitie_locatie}</span>
               </div>
             </Reveal>
           </div>

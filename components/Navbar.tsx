@@ -3,13 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconFacebook, IconInstagram, IconYoutube } from "@/components/icons";
-
-const socials = [
-  { label: "Facebook",  href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL", icon: <IconFacebook size={20} /> },
-  { label: "Instagram", href: "https://www.instagram.com/popkoordivers/", icon: <IconInstagram size={20} /> },
-  { label: "YouTube",   href: "https://www.youtube.com/@popkoordivers", icon: <IconYoutube size={22} /> },
-];
+import { useSocials } from "@/components/InstellingenProvider";
 
 const links = [
   { label: "Home",     href: "/" },
@@ -21,6 +15,7 @@ const links = [
 ];
 
 export default function Navbar() {
+  const socials                 = useSocials(20);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen]         = useState(false);
   const pathname                = usePathname();

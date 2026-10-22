@@ -8,6 +8,7 @@ export interface BerichtInput {
   titel: string;
   datumIso: string;           // "2026-10-22"
   datum: string;              // "22 oktober 2026"
+  categorie: string;
   intro: string;
   inhoud: string;
   gepubliceerd: boolean;
@@ -53,6 +54,7 @@ export async function bewaarBericht(id: number | null, input: BerichtInput) {
     intro: input.intro.trim(),
     inhoud: input.inhoud.trim(),
     afbeelding,
+    categorie: input.categorie.trim() || "Nieuws",
     gepubliceerd: input.gepubliceerd,
     created_at: `${input.datumIso}T12:00:00Z`,
   };
@@ -68,7 +70,7 @@ export async function bewaarBericht(id: number | null, input: BerichtInput) {
     let slug = basis;
     for (let n = 2; bezet.has(slug); n++) slug = `${basis}-${n}`;
 
-    const { error } = await supabase.from("berichten").insert({ ...velden, slug, categorie: "Nieuws" });
+    const { error } = await supabase.from("berichten").insert({ ...velden, slug });
     if (error) return { error: error.message };
   }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useInstellingen } from "@/components/InstellingenProvider";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
@@ -8,7 +9,7 @@ const media = [
   {
     gradient: "linear-gradient(135deg, rgba(220,38,38,0.12) 0%, rgba(243,106,42,0.06) 100%)",
     label: "YouTube",
-    href: "https://www.youtube.com/@popkoordivers",
+    href: "youtube",
     title: "Jubileum 15 jaar",
     sub: "Optreden VÓLkoren",
   },
@@ -29,6 +30,7 @@ const media = [
 ];
 
 export default function WhatWeDo() {
+  const { youtube } = useInstellingen();
   return (
     <section id="sfeer" className="sfeer-section" style={{ position: "relative", padding: "100px 24px 140px", overflow: "hidden", background: "#FFFFFF" }}>
       <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 100% 70% at 50% 50%, rgba(243,106,42,0.07) 0%, rgba(255,255,255,0) 70%)", pointerEvents: "none" }} />
@@ -56,7 +58,7 @@ export default function WhatWeDo() {
 
         {/* Media grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }} className="sfeer-grid">
-          {media.map((item, i) => (
+          {media.map((m) => ({ ...m, href: m.href === "youtube" ? youtube : m.href })).filter((m) => m.href).map((item, i) => (
             <Reveal key={item.title} delay={i * 100}>
               <Link
                 href={item.href}

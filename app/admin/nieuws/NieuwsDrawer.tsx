@@ -10,6 +10,7 @@ export interface Bericht {
   slug: string;
   titel: string;
   datum: string;
+  categorie: string;
   intro: string;
   inhoud: string;
   afbeelding: string;
@@ -29,6 +30,7 @@ const heeftFoto = (url: string) => /^(https?:\/\/|\/)/.test(url);
 export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete }: Props) {
   const [titel, setTitel]   = useState(bericht?.titel ?? "");
   const [datum, setDatum]   = useState(bericht?.created_at.slice(0, 10) ?? vandaag());
+  const [categorie, setCategorie] = useState(bericht?.categorie ?? "Nieuws");
   const [intro, setIntro]   = useState(bericht?.intro ?? "");
   const [inhoud, setInhoud] = useState(bericht?.inhoud ?? "");
   const [online, setOnline] = useState(bericht?.gepubliceerd ?? true);
@@ -69,7 +71,7 @@ export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete }: Pro
     setBusy("save");
     setServerErr("");
     const err = await onSave({
-      titel, intro, inhoud,
+      titel, intro, inhoud, categorie,
       datumIso: datum,
       datum: formatDatum(datum),
       gepubliceerd: online,
@@ -116,10 +118,18 @@ export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete }: Pro
           <input id="nw-titel" className="adm-input" value={titel} onChange={(e) => setTitel(e.target.value)} placeholder="bijv. Geslaagd kerstconcert in De Schakel" aria-invalid={!!errors.titel} />
           {errors.titel ? <p className="adm-err">{errors.titel}</p> : bericht && <p className="adm-hint">Adres: /nieuws/{bericht.slug}</p>}
         </div>
+        <div className="adm-grid-2">
         <div className="adm-field">
           <label htmlFor="nw-datum">Datum</label>
           <input id="nw-datum" type="date" className="adm-input" value={datum} onChange={(e) => setDatum(e.target.value)} aria-invalid={!!errors.datum} />
           {errors.datum ? <p className="adm-err">{errors.datum}</p> : <p className="adm-hint">Nieuwste berichten staan bovenaan.</p>}
+        </div>
+        <div className="adm-field">
+          <label htmlFor="nw-categorie">Categorie</label>
+          <input id="nw-categorie" className="adm-input" list="nw-categorieen" value={categorie} onChange={(e) => setCategorie(e.target.value)} />
+          <datalist id="nw-categorieen">{["Nieuws", "Optreden", "Vereniging", "Ledenwerving"].map((c) => <option key={c} value={c} />)}</datalist>
+          <p className="adm-hint">Staat boven het bericht op de website.</p>
+        </div>
         </div>
       </section>
 

@@ -217,6 +217,48 @@ export type Database = {
         }
         Relationships: []
       }
+      website_instellingen: {
+        Row: {
+          email: string
+          facebook: string
+          id: number
+          instagram: string
+          repetitie_adres: string
+          repetitie_dag: string
+          repetitie_locatie: string
+          repetitie_tijd: string
+          sponsorkliks: string
+          updated_at: string
+          youtube: string
+        }
+        Insert: {
+          email?: string
+          facebook?: string
+          id?: number
+          instagram?: string
+          repetitie_adres?: string
+          repetitie_dag?: string
+          repetitie_locatie?: string
+          repetitie_tijd?: string
+          sponsorkliks?: string
+          updated_at?: string
+          youtube?: string
+        }
+        Update: {
+          email?: string
+          facebook?: string
+          id?: number
+          instagram?: string
+          repetitie_adres?: string
+          repetitie_dag?: string
+          repetitie_locatie?: string
+          repetitie_tijd?: string
+          sponsorkliks?: string
+          updated_at?: string
+          youtube?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -38,6 +38,7 @@ Zet deze in `.env.local` (lokaal) en in de projectinstellingen op Vercel.
 - `proxy.ts` — stuurt niet-ingelogde bezoekers van `/leden` en `/admin` naar de loginpagina.
 - `app/admin/*/actions.ts` — server actions: alles wat de admin wijzigt. Elke action begint met `requireAdmin()` uit `lib/auth.ts`.
 - `lib/supabase/` — Supabase-clients voor browser, server en admin, getypeerd met `lib/database.types.ts`.
+- `lib/instellingen.ts` — repetitietijden, contactgegevens en sociale media uit de tabel `website_instellingen`, aan te passen via Admin → Instellingen.
 - `lib/r2.ts` — de twee R2-buckets: tijdelijke upload- en downloadlinks, kopiëren en verwijderen.
 - `supabase/migrations/` — databaseschema als migraties. Nieuwe wijziging: `npx supabase migration new <naam>`, toepassen met `npx supabase db push`.
 - `supabase/archief/` — oude SQL-scripts van vóór de migraties, alleen ter referentie.

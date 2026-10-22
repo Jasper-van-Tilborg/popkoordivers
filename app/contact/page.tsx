@@ -5,16 +5,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
-import { IconFacebook, IconInstagram, IconYoutube } from "@/components/icons";
+import { useInstellingen, useSocials } from "@/components/InstellingenProvider";
 
 type FormStatus = "idle" | "sending" | "sent";
 
 // Tijdelijk: formulieren openen het mailprogramma van de bezoeker, tot er een echte verzendroute is.
-const CONTACT_EMAIL = "popkoordivers@gmail.com";
-
-function openMail(subject: string, fields: [string, string][]) {
+function openMail(email: string, subject: string, fields: [string, string][]) {
   const body = fields.filter(([, v]) => v.trim()).map(([k, v]) => `${k}: ${v}`).join("\n");
-  window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 const stemgroepen = ["Alt", "Mezzo", "Sopraan", "Tenor", "Bas"];
@@ -116,6 +114,7 @@ function SubmitBtn({ status, label, accent = "orange" }: { status: FormStatus; l
 }
 
 function SentCard({ message, accent = "orange" }: { message: string; accent?: "orange" | "purple" }) {
+  const { email } = useInstellingen();
   return (
     <div style={{ background: "#FFFFFF", borderRadius: "20px", padding: "52px 40px", textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
       <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: accent === "purple" ? "rgba(124,58,237,0.12)" : "rgba(243,106,42,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", margin: "0 auto 18px", color: accent === "purple" ? "#7C3AED" : "var(--primary)", fontWeight: 800 }}>✓</div>
@@ -125,13 +124,16 @@ function SentCard({ message, accent = "orange" }: { message: string; accent?: "o
       </p>
       <p style={{ fontSize: "13px", color: "#767676", margin: 0, lineHeight: 1.6 }}>
         Opende er niets? Mail ons dan op{" "}
-        <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: accent === "purple" ? "#7C3AED" : "var(--primary)", fontWeight: 700 }}>{CONTACT_EMAIL}</a>.
+        <a href={`mailto:${email}`} style={{ color: accent === "purple" ? "#7C3AED" : "var(--primary)", fontWeight: 700 }}>{email}</a>.
       </p>
     </div>
   );
 }
 
 export default function ContactPage() {
+  const inst = useInstellingen();
+  const socials = useSocials(18);
+  const dag = inst.repetitie_dag.toLowerCase();
   // ── Meezingen form ──
   const [mz, setMz] = useState({ naam: "", email: "", stemgroep: "", bericht: "" });
   const [mzStatus, setMzStatus] = useState<FormStatus>("idle");
@@ -148,7 +150,7 @@ export default function ContactPage() {
     if (!mz.naam.trim()) err.naam = "Vul je naam in";
     if (!mz.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mz.email)) err.email = "Vul een geldig e-mailadres in";
     if (Object.keys(err).length) { setMzErr(err); return; }
-    openMail(`Aanmelding meezingen — ${mz.naam}`, [
+    openMail(inst.email, `Aanmelding meezingen — ${mz.naam}`, [
       ["Naam", mz.naam],
       ["E-mail", mz.email],
       ["Stemgroep", mz.stemgroep || "Weet ik nog niet"],
@@ -174,7 +176,7 @@ export default function ContactPage() {
     if (!bk.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bk.email)) err.email = "Vul een geldig e-mailadres in";
     if (!bk.bericht.trim()) err.bericht = "Vertel iets over het evenement";
     if (Object.keys(err).length) { setBkErr(err); return; }
-    openMail(`Boekingsaanvraag — ${bk.organisatie || bk.naam}`, [
+    openMail(inst.email, `Boekingsaanvraag — ${bk.organisatie || bk.naam}`, [
       ["Naam", bk.naam],
       ["Organisatie", bk.organisatie],
       ["E-mail", bk.email],
@@ -247,12 +249,12 @@ export default function ContactPage() {
                   <div>
                     <p style={{ margin: "0 0 4px", fontSize: "11px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em" }}>E-mail</p>
                     <a
-                      href="mailto:popkoordivers@gmail.com"
+                      href={`mailto:${inst.email}`}
                       style={{ fontSize: "16px", fontWeight: 600, color: "var(--primary)", textDecoration: "none", transition: "opacity 0.15s" }}
                       onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.75")}
                       onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                     >
-                      popkoordivers@gmail.com
+                      {inst.email}
                     </a>
                   </div>
 
@@ -271,11 +273,7 @@ export default function ContactPage() {
                   <div>
                     <p style={{ margin: "0 0 10px", fontSize: "11px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em" }}>Volg ons</p>
                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                      {[
-                        { label: "Facebook",  href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL", color: "#1877F2", icon: <IconFacebook size={18} /> },
-                        { label: "Instagram", href: "https://www.instagram.com/popkoordivers/", color: "#E1306C", icon: <IconInstagram size={18} /> },
-                        { label: "YouTube",   href: "https://www.youtube.com/@popkoordivers", color: "#FF0000", icon: <IconYoutube size={20} /> },
-                      ].map((s) => (
+                      {socials.map((s) => (
                         <a
                           key={s.label}
                           href={s.href}
@@ -310,14 +308,14 @@ export default function ContactPage() {
               {/* Right: repetitie info */}
               <Reveal delay={120}>
                 <p style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Repetities</p>
-                <RevealText text="Elke dinsdag" pageDelay={200} style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, letterSpacing: "-1px", color: "#111", margin: "0 0 28px" }} />
+                <RevealText text={`Elke ${dag}`} pageDelay={200} style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, letterSpacing: "-1px", color: "#111", margin: "0 0 28px" }} />
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
                   {[
-                    { label: "Dag", value: "Elke dinsdag" },
-                    { label: "Tijd", value: "19:30 – 21:30 uur" },
-                    { label: "Locatie", value: "CCGR De Schakel" },
-                    { label: "Adres", value: "Kerkstraat 104, 5126 GD Gilze" },
+                    { label: "Dag", value: `Elke ${dag}` },
+                    { label: "Tijd", value: `${inst.repetitie_tijd} uur` },
+                    { label: "Locatie", value: inst.repetitie_locatie },
+                    { label: "Adres", value: inst.repetitie_adres },
                   ].map((row, i, arr) => (
                     <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 0", borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.07)" : "none" }}>
                       <span style={{ fontSize: "13px", fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.05em" }}>{row.label}</span>
@@ -353,7 +351,7 @@ export default function ContactPage() {
             <Reveal style={{ textAlign: "center", marginBottom: "48px" }}>
               <RevealText text="Wil je meezingen?" pageDelay={350} style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 14px" }} />
               <p style={{ fontSize: "16px", color: "#555", margin: 0, lineHeight: 1.75, maxWidth: "520px", marginLeft: "auto", marginRight: "auto" }}>
-                De drempel is laag — iedereen is welkom om een avond te komen proberen. Geen auditie, geen voorbereiding nodig. Stuur ons een berichtje en we verwelkomen je de eerstvolgende dinsdag.
+                De drempel is laag — iedereen is welkom om een avond te komen proberen. Geen auditie, geen voorbereiding nodig. Stuur ons een berichtje en we verwelkomen je de eerstvolgende {dag}.
               </p>
             </Reveal>
 

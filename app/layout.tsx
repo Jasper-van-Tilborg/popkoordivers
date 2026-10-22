@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Manrope, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
+import { getInstellingen } from "@/lib/instellingen";
+import { InstellingenProvider } from "@/components/InstellingenProvider";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -33,12 +35,15 @@ export const metadata: Metadata = {
   manifest: "/favicon/site.webmanifest",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const instellingen = await getInstellingen();
   return (
     <html lang="nl" className={`${manrope.variable} ${bricolage.variable}`}>
-      <body>{children}</body>
+      <body>
+        <InstellingenProvider value={instellingen}>{children}</InstellingenProvider>
+      </body>
     </html>
   );
 }

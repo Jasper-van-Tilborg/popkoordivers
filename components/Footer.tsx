@@ -1,15 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { IconFacebook, IconInstagram, IconYoutube } from "@/components/icons";
-
-const socials = [
-  { label: "Facebook",  href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL", icon: <IconFacebook size={17} /> },
-  { label: "Instagram", href: "https://www.instagram.com/popkoordivers/", icon: <IconInstagram size={17} /> },
-  { label: "YouTube",   href: "https://www.youtube.com/@popkoordivers", icon: <IconYoutube size={17} /> },
-];
+import { useInstellingen, useSocials } from "@/components/InstellingenProvider";
 
 export default function Footer() {
+  const i = useInstellingen();
+  const socials = useSocials(17);
   return (
     <footer className="footer-outer" style={{ background: "#111111", padding: "64px 24px 32px" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -41,21 +37,21 @@ export default function Footer() {
           {/* Repetities */}
           <div>
             <p style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 16px" }}>Repetities</p>
-            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", margin: "0 0 4px", fontWeight: 500 }}>Dinsdag · 19:30 – 21:30 uur</p>
-            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.45)", margin: "0 0 4px" }}>CCGR De Schakel</p>
-            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.45)", margin: 0 }}>Kerkstraat 104, Gilze</p>
+            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", margin: "0 0 4px", fontWeight: 500 }}>{i.repetitie_dag} · {i.repetitie_tijd} uur</p>
+            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.45)", margin: "0 0 4px" }}>{i.repetitie_locatie}</p>
+            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.45)", margin: 0 }}>{i.repetitie_adres}</p>
           </div>
 
           {/* Contact */}
           <div>
             <p style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 16px" }}>Contact</p>
             <a
-              href="mailto:popkoordivers@gmail.com"
+              href={`mailto:${i.email}`}
               style={{ display: "block", fontSize: "13px", color: "rgba(255,255,255,0.7)", textDecoration: "none", margin: "0 0 8px", transition: "color 0.15s" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--primary)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
             >
-              popkoordivers@gmail.com
+              {i.email}
             </a>
             <Link
               href="/contact#boeken"
@@ -106,7 +102,7 @@ export default function Footer() {
           </p>
           <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
             {[
-              { label: "SponsorKliks", href: "https://www.sponsorkliks.com/products/shops.php?club=13468&cn=nl&ln=nl" },
+              ...(i.sponsorkliks ? [{ label: "SponsorKliks", href: i.sponsorkliks }] : []),
               { label: "Log in", href: "/leden" },
             ].map((l) =>
               l.href.startsWith("http") ? (

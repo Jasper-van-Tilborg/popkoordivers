@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
+import { useInstellingen } from "@/components/InstellingenProvider";
 
 const infographics = [
   { titel: "Swingend & veelstemmig", sub: "Vijf stemgroepen" },
@@ -13,12 +14,13 @@ const infographics = [
 ];
 
 const sfeerItems = [
-  { gradient: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 100%)", label: "Repetitie", sub: "Dinsdag · De Schakel" },
+  { gradient: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 100%)", label: "Repetitie", sub: "" },
   { gradient: "linear-gradient(135deg, rgba(243,106,42,0.12) 0%, rgba(243,106,42,0.22) 100%)", label: "Optreden", sub: "Op het podium" },
   { gradient: "linear-gradient(135deg, #FDE8D8 0%, rgba(243,106,42,0.08) 60%, rgba(243,106,42,0.18) 100%)", label: "Groepsfoto", sub: "Het hele koor" },
 ];
 
 export default function OverOnsPage() {
+  const inst = useInstellingen();
   return (
     <>
       <Navbar />
@@ -128,8 +130,8 @@ export default function OverOnsPage() {
                   <img src="/deschakel.jpg" alt="CCGR De Schakel" style={{ width: "112px", height: "112px", borderRadius: "18px", objectFit: "cover", flexShrink: 0 }} />
                   <div>
                     <p style={{ fontSize: "11px", fontWeight: 700, color: "#7C3AED", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>Repetities</p>
-                    <p style={{ fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px", margin: "0 0 6px" }}>Dinsdag · 19:30 – 21:30</p>
-                    <p style={{ fontSize: "14px", color: "#555", lineHeight: 1.6, margin: 0 }}>CCGR De Schakel, Gilze — meezingen is altijd welkom.</p>
+                    <p style={{ fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px", margin: "0 0 6px" }}>{inst.repetitie_dag} · {inst.repetitie_tijd}</p>
+                    <p style={{ fontSize: "14px", color: "#555", lineHeight: 1.6, margin: 0 }}>{inst.repetitie_locatie} — meezingen is altijd welkom.</p>
                   </div>
                 </div>
               </Reveal>
@@ -266,7 +268,7 @@ export default function OverOnsPage() {
                       <p style={{ margin: "0 0 2px", fontSize: "15px", fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>
                         {item.label}
                       </p>
-                      <p style={{ margin: 0, fontSize: "12px", color: "rgba(255,255,255,0.65)" }}>{item.sub}</p>
+                      <p style={{ margin: 0, fontSize: "12px", color: "rgba(255,255,255,0.65)" }}>{item.sub || `${inst.repetitie_dag} · ${inst.repetitie_locatie}`}</p>
                     </div>
                   </Link>
                 </Reveal>
@@ -308,7 +310,7 @@ export default function OverOnsPage() {
                   maxWidth: "500px",
                 }}
               >
-                Nieuwsgierig? Kom gewoon langs op dinsdagavond. Geen auditie, geen verplichtingen — gewoon meezingen en kijken of het iets voor jou is.
+                Nieuwsgierig? Kom gewoon langs op {inst.repetitie_dag.toLowerCase()}avond. Geen auditie, geen verplichtingen — gewoon meezingen en kijken of het iets voor jou is.
               </p>
               <Link
                 href="/contact#meezingen"

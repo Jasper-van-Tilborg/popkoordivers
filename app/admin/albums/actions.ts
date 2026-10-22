@@ -118,3 +118,15 @@ export async function verwijderFoto(fotoId: string) {
   vernieuw(foto.album_id);
   return {};
 }
+
+// Nieuwe volgorde na slepen of de pijltjes: ids in de gewenste volgorde.
+export async function zetFotoVolgorde(albumId: string, ids: string[]) {
+  const { supabase } = await requireAdmin();
+  const resultaten = await Promise.all(
+    ids.map((id, volgorde) => supabase.from("fotos").update({ volgorde }).eq("id", id).eq("album_id", albumId))
+  );
+  const fout = resultaten.find((r) => r.error);
+  if (fout?.error) return { error: fout.error.message };
+  vernieuw(albumId);
+  return {};
+}

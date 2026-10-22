@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { IconBack, IconStarSmall, IconTrash, IconUpload, useToast } from "../../_components/ui";
 import { uploadNaarR2 } from "../../_components/upload";
 import AlbumDrawer from "../AlbumDrawer";
-import { fotoToevoegen, verwijderAlbum, verwijderFoto, wijzigAlbum, zetImpressie, type AlbumInput } from "../actions";
+import { fotoToevoegen, verwijderAlbum, verwijderFoto, wijzigAlbum, zetFotoVolgorde, zetImpressie, type AlbumInput } from "../actions";
 
 interface Foto { id: string; impressies: boolean; url: string }
 interface Upload { naam: string; voortgang: number; fout?: string }
+type Actie = { soort: "impressie"; id: string; impressies: boolean } | { soort: "volgorde"; ids: string[] };
 
 export default function AlbumClient({ album, fotos }: {
   album: { id: string; slug: string; titel: string; datum: string };
@@ -23,8 +24,11 @@ export default function AlbumClient({ album, fotos }: {
   const [bezig, setBezig]     = useState<Set<string>>(new Set());
   const [bevestig, setBevestig] = useState<string | null>(null);
   const [, startTransition]   = useTransition();
-  const [lijst, zetOptimistisch] = useOptimistic(fotos, (state, u: { id: string; impressies: boolean }) =>
-    state.map((f) => (f.id === u.id ? { ...f, impressies: u.impressies } : f))
+  const [sleep, setSleep]     = useState<number | null>(null);
+  const [lijst, pasToe] = useOptimistic(fotos, (state, a: Actie) =>
+    a.soort === "impressie"
+      ? state.map((f) => (f.id === a.id ? { ...f, impressies: a.impressies } : f))
+      : a.ids.map((id) => state.find((f) => f.id === id)).filter((f): f is Foto => !!f)
   );
 
   const sluit = useCallback(() => setBewerken(false), []);
@@ -66,9 +70,21 @@ export default function AlbumClient({ album, fotos }: {
   function toggleImpressie(f: Foto) {
     const aan = !f.impressies;
     startTransition(async () => {
-      zetOptimistisch({ id: f.id, impressies: aan });
+      pasToe({ soort: "impressie", id: f.id, impressies: aan });
       const res = await zetImpressie(f.id, aan);
       melding(res.error ? `Lukte niet: ${res.error}` : aan ? "Foto staat nu op de website" : "Foto staat niet meer op de website");
+    });
+  }
+
+  function verplaats(van: number, naar: number) {
+    if (van === naar || naar < 0 || naar >= lijst.length) return;
+    const ids = lijst.map((f) => f.id);
+    const [id] = ids.splice(van, 1);
+    ids.splice(naar, 0, id);
+    startTransition(async () => {
+      pasToe({ soort: "volgorde", ids });
+      const res = await zetFotoVolgorde(album.id, ids);
+      if (res.error) melding(`Volgorde opslaan lukte niet: ${res.error}`);
     });
   }
 
@@ -150,9 +166,25 @@ export default function AlbumClient({ album, fotos }: {
             <p>Voeg hierboven foto&apos;s toe. Ze zijn eerst alleen voor leden te zien.</p>
           </div>
         ) : (
+          <>
+          <p className="adm-hint" style={{ margin: "0 0 12px" }}>Sleep foto&apos;s of gebruik de pijltjes om de volgorde te veranderen. Zo staan ze ook op de website; de eerste foto met een ster is de omslag.</p>
           <ul className="adm-photos" style={{ listStyle: "none", margin: 0, padding: 0 }}>
-            {lijst.map((f) => (
-              <li key={f.id} className="adm-photo" data-busy={bezig.has(f.id) || undefined}>
+            {lijst.map((f, i) => (
+              <li
+                key={f.id}
+                className="adm-photo"
+                data-busy={bezig.has(f.id) || undefined}
+                data-sleep={sleep === i || undefined}
+                draggable
+                onDragStart={(e) => { setSleep(i); e.dataTransfer.effectAllowed = "move"; }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => { e.preventDefault(); if (sleep !== null) verplaats(sleep, i); setSleep(null); }}
+                onDragEnd={() => setSleep(null)}
+              >
+                <div className="adm-photo-move">
+                  <button className="adm-photo-btn adm-photo-btn--icon" onClick={() => verplaats(i, i - 1)} disabled={i === 0} aria-label="Eén plek naar voren">‹</button>
+                  <button className="adm-photo-btn adm-photo-btn--icon" onClick={() => verplaats(i, i + 1)} disabled={i === lijst.length - 1} aria-label="Eén plek naar achteren">›</button>
+                </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={f.url} alt="" loading="lazy" />
                 <div className="adm-photo-tools">
@@ -178,6 +210,7 @@ export default function AlbumClient({ album, fotos }: {
               </li>
             ))}
           </ul>
+          </>
         )}
       </div>
 

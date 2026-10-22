@@ -100,7 +100,7 @@ export default function NieuwsClient({ items, loadError }: { items: Bericht[]; l
                 </span>
                 <div className="adm-main-col">
                   <button className="adm-title" onClick={(e) => { e.stopPropagation(); setDrawer({ bericht: b }); }}>{b.titel}</button>
-                  <div className="adm-meta"><span>{b.datum}</span></div>
+                  <div className="adm-meta"><span>{b.datum}</span><span>{b.categorie}</span></div>
                 </div>
                 <div className="adm-actions" onClick={(e) => e.stopPropagation()}>
                   <Switch checked={b.gepubliceerd} onChange={() => togglePublish(b)} label={`${b.titel} zichtbaar op de website`} />

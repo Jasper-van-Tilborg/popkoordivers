@@ -207,6 +207,13 @@ textarea.adm-input { resize: vertical; line-height: 1.55; }
 .adm-photo-btn[aria-pressed="true"] { background: var(--primary); color: #fff; }
 .adm-photo-btn--icon { width: 30px; padding: 0; justify-content: center; }
 .adm-photo-btn:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.adm-photo[draggable] { cursor: grab; }
+.adm-photo[data-sleep] { opacity: 0.4; }
+.adm-photo-move { position: absolute; top: 8px; left: 8px; display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+.adm-photo:hover .adm-photo-move, .adm-photo:focus-within .adm-photo-move { opacity: 1; }
+.adm-photo-move .adm-photo-btn { font-size: 18px; line-height: 1; }
+.adm-photo-btn:disabled { opacity: 0.35; cursor: default; }
+@media (hover: none) { .adm-photo-move { opacity: 1; } }
 
 /* Melding */
 .adm-toast {
