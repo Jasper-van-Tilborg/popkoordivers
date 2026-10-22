@@ -12,7 +12,7 @@ export default async function Home() {
 
   const { data: events } = await supabase
     .from("agenda")
-    .select("id, titel, datum, datum_sorteer, tijd, locatie, label, label_kleur, beschrijving, link")
+    .select("id, titel, datum, datum_sorteer, tijd, locatie, beschrijving, link")
     .eq("gepubliceerd", true)
     .or(`datum_sorteer.is.null,datum_sorteer.gte.${today}`)
     .order("datum_sorteer", { ascending: true, nullsFirst: false })

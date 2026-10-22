@@ -14,8 +14,6 @@ interface AgendaItem {
   datum_sorteer: string | null;
   tijd: string | null;
   locatie: string | null;
-  label: string | null;
-  label_kleur: string | null;
   beschrijving: string | null;
   link: string | null;
   fotos_url: string | null;
@@ -24,20 +22,6 @@ interface AgendaItem {
 interface Props {
   komend: AgendaItem[];
   archief: AgendaItem[];
-}
-
-const maanden: Record<string, string> = {
-  januari: "jan", februari: "feb", maart: "mrt", april: "apr",
-  mei: "mei", juni: "jun", juli: "jul", augustus: "aug",
-  september: "sep", oktober: "okt", november: "nov", december: "dec",
-};
-
-function parseDatum(datum: string) {
-  const parts = datum.toLowerCase().split(/\s+/);
-  const month = parts.find((p) => maanden[p]);
-  const year  = parts.find((p) => /^\d{4}$/.test(p));
-  const day   = parts.find((p) => /^\d{1,2}$/.test(p));
-  return { day: day ?? "", month: month ? maanden[month] : datum.slice(0, 3), year: year ?? "" };
 }
 
 export default function AgendaClient({ komend, archief }: Props) {

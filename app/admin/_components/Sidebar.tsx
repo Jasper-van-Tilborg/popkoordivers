@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { IconCalendar, IconNewspaper, IconFolder, IconStar, IconUsers, IconEye, IconCamera } from "@/components/icons";
+import { IconCalendar, IconNewspaper, IconFolder, IconUsers, IconEye, IconCamera } from "@/components/icons";
 
 const nav = [
   { label: "Agenda",       href: "/admin/agenda",      icon: <IconCalendar size={15} /> },
   { label: "Nieuws",       href: "/admin/nieuws",       icon: <IconNewspaper size={15} /> },
+  { label: "Media",        href: "/admin/albums",       icon: <IconCamera size={15} /> },
   { label: "Bestanden",    href: "/admin/bestanden",    icon: <IconFolder size={15} /> },
   { label: "Leden",        href: "/admin/leden",        icon: <IconUsers size={15} /> },
 ];

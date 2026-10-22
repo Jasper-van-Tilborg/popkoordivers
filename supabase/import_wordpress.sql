@@ -47,7 +47,7 @@ SELECT 'afscheid-neil-als-dirigent',
        'Nieuws',
        'Laatste repetitie met Neil Pelkmans als dirigent, 25-02-2025.',
        'Afscheidsvideo Tribute to Neil: https://www.youtube.com/watch?v=fJ0Wj3KXIQY',
-       'https://www.popkoordivers.nl/wp-content/uploads/2025/03/481224844_957472816491165_4290860721707606518_n.jpg',
+       'https://pub-d97932a0fc6743a4ba2177e58cda7648.r2.dev/nieuws/afscheid-neil-als-dirigent.jpg',
        true,
        '2025-03-06 05:40:47+01'
 WHERE NOT EXISTS (SELECT 1 FROM berichten WHERE slug = 'afscheid-neil-als-dirigent');

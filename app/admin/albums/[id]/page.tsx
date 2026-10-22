@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { btnDanger } from "../../_components/adminStyles";
 
 interface Foto {
   id: string;

@@ -108,7 +108,7 @@ export default async function LedenPage() {
 
   return (
     <>
-      <LedenNavbar email={user.email!} rol={rol} />
+      <LedenNavbar rol={rol} />
       <main style={{ minHeight: "100vh", background: "#FFFFFF" }}>
 
         {/* ── 1. Header ── */}

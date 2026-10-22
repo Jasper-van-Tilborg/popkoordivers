@@ -20,11 +20,10 @@ const rolBadge: Record<string, { label: string; bg: string; color: string }> = {
 };
 
 interface Props {
-  email: string;
   rol: "lid" | "admin";
 }
 
-export default function LedenNavbar({ email, rol }: Props) {
+export default function LedenNavbar({ rol }: Props) {
   const router = useRouter();
   const badge  = rolBadge[rol] ?? rolBadge.lid;
 

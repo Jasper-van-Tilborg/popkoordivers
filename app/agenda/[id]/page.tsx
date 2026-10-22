@@ -62,11 +62,6 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
 
             <Reveal delay={80}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
-                {event.label && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", color: "#fff", background: event.label_kleur ?? "rgba(255,255,255,0.25)", padding: "4px 12px", borderRadius: "100px", border: "1px solid rgba(255,255,255,0.3)" }}>
-                    {event.label}
-                  </span>
-                )}
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                   {isKomend ? "Komend optreden" : "Afgelopen optreden"}
                 </span>
@@ -127,8 +122,8 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
               >
                 {[
                   { label: "Datum", value: event.datum },
-                  { label: "Tijd", value: event.tijd ?? "—" },
-                  { label: "Locatie", value: event.locatie ?? "—" },
+                  { label: "Tijd", value: event.tijd || "—" },
+                  { label: "Locatie", value: event.locatie || "—" },
                 ].map((row) => (
                   <div key={row.label} style={{ background: "#FFFFFF", padding: "20px 24px" }}>
                     <p style={{ margin: "0 0 4px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{row.label}</p>
@@ -141,7 +136,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
             {/* Description */}
             {event.beschrijving && (
               <Reveal>
-                <p style={{ fontSize: "18px", lineHeight: 1.8, color: "#444", margin: "0 0 48px", paddingBottom: "48px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                <p style={{ fontSize: "18px", lineHeight: 1.8, color: "#444", whiteSpace: "pre-line", margin: "0 0 48px", paddingBottom: "48px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                   {event.beschrijving}
                 </p>
               </Reveal>

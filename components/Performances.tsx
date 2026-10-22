@@ -10,8 +10,6 @@ interface AgendaEvent {
   datum: string;
   tijd: string | null;
   locatie: string | null;
-  label: string | null;
-  label_kleur: string | null;
   beschrijving: string | null;
   link: string | null;
 }
