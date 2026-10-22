@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
 
@@ -32,14 +33,14 @@ export default function Performances({ events }: Props) {
             pageDelay={500}
             style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
           />
-          <a
+          <Link
             href="/agenda"
             style={{ fontSize: "14px", fontWeight: 600, color: "var(--primary)", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px", paddingBottom: "4px", borderBottom: "2px solid rgba(243,106,42,0.25)", transition: "border-color 0.15s", whiteSpace: "nowrap" }}
             onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(243,106,42,0.25)")}
           >
             Alle data op Agenda →
-          </a>
+          </Link>
         </Reveal>
 
         {/* Events */}
@@ -53,9 +54,11 @@ export default function Performances({ events }: Props) {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {events.map((event, i) => (
               <Reveal key={event.id} delay={i * 100}>
-                <div
-                  className="perf-card"
+                <Link
+                  href={`/agenda/${event.id}`}
+                  className="perf-card card-hover"
                   style={{
+                    textDecoration: "none",
                     background: "#FFFFFF",
                     borderRadius: "16px",
                     border: "1px solid rgba(0,0,0,0.07)",
@@ -91,7 +94,7 @@ export default function Performances({ events }: Props) {
                       {event.datum}
                     </p>
                   </div>
-                </div>
+                </Link>
               </Reveal>
             ))}
           </div>

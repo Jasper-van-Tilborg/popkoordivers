@@ -22,28 +22,43 @@ export default function StemTabs({ liedjes }: Props) {
   return (
     <div>
       {/* Tab bar */}
-      <div style={{ display: "flex", borderBottom: "2px solid rgba(0,0,0,0.08)", marginBottom: "28px", overflowX: "auto" }}>
-        {stemgroepen.map((stem) => (
-          <button
-            key={stem}
-            onClick={() => setActive(stem)}
-            style={{
-              padding: "10px 22px",
-              fontSize: "14px",
-              fontWeight: active === stem ? 700 : 500,
-              color: active === stem ? "var(--primary)" : "#888",
-              background: "none",
-              border: "none",
-              borderBottom: active === stem ? "2px solid var(--primary)" : "2px solid transparent",
-              marginBottom: "-2px",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              transition: "color 0.15s",
-            }}
-          >
-            {stem}
-          </button>
-        ))}
+      <div style={{ overflowX: "auto", marginBottom: "20px" }}>
+        <div role="tablist" style={{ display: "inline-flex", gap: "4px", padding: "4px", background: "#F4F2EF", borderRadius: "14px" }}>
+          {stemgroepen.map((stem) => {
+            const isActive = active === stem;
+            const aantal = (liedjes[stem] ?? []).length;
+            return (
+              <button
+                key={stem}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setActive(stem)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  fontWeight: isActive ? 700 : 500,
+                  fontFamily: "inherit",
+                  color: isActive ? "#111" : "#777",
+                  background: isActive ? "#fff" : "transparent",
+                  border: "none",
+                  borderRadius: "10px",
+                  boxShadow: isActive ? "0 1px 3px rgba(0,0,0,0.08), 0 1px 1px rgba(0,0,0,0.04)" : "none",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
+                }}
+              >
+                {stem}
+                {aantal > 0 && (
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: isActive ? "var(--primary)" : "#aaa" }}>{aantal}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Song list */}

@@ -69,7 +69,7 @@ export default function SponsorklisAdminPage() {
 
   return (
     <div>
-      <div style={{ padding: "28px 32px 24px", background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+      <div style={{ padding: "28px 32px 24px", background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 20, borderBottom: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px" }}>Sponsorkliks</h1>
           <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#888" }}>{items.length} sponsors</p>
@@ -78,7 +78,7 @@ export default function SponsorklisAdminPage() {
       </div>
 
       {showForm && (
-        <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", padding: "24px" }}>
+        <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", padding: "24px" }}>
           <h2 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700, color: "#111" }}>{editing ? "Sponsor bewerken" : "Nieuwe sponsor"}</h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             {[["naam","Naam *","text"],["url","Website URL *","url"],["logo_url","Logo URL (optioneel)","url"]].map(([k, lbl, type]) => (
@@ -103,7 +103,7 @@ export default function SponsorklisAdminPage() {
         </div>
       )}
 
-      <div style={{ margin: "24px 32px 32px", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
+      <div style={{ margin: "24px 32px 32px", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", overflow: "hidden" }}>
         {loading ? <p style={{ padding: "32px", color: "#888", fontSize: "14px" }}>Laden…</p> : items.length === 0 ? <p style={{ padding: "32px", color: "#aaa", fontSize: "14px" }}>Nog geen sponsors.</p> : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>

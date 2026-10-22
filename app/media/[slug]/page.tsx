@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
@@ -41,7 +42,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
           <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%)", pointerEvents: "none" }} />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <Reveal delay={0}>
-              <a href="/media" className="album-back-link">← Terug naar Impressies</a>
+              <Link href="/media" className="album-back-link">← Terug naar Impressies</Link>
             </Reveal>
             <RevealText text={album.titel} as="h1" pageDelay={0} style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 16px" }} />
             <Reveal delay={180}>

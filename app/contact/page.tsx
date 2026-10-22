@@ -5,8 +5,17 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
+import { IconFacebook, IconInstagram, IconYoutube } from "@/components/icons";
 
 type FormStatus = "idle" | "sending" | "sent";
+
+// Tijdelijk: formulieren openen het mailprogramma van de bezoeker, tot er een echte verzendroute is.
+const CONTACT_EMAIL = "popkoordivers@gmail.com";
+
+function openMail(subject: string, fields: [string, string][]) {
+  const body = fields.filter(([, v]) => v.trim()).map(([k, v]) => `${k}: ${v}`).join("\n");
+  window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
 
 const stemgroepen = ["Alt", "Mezzo", "Sopraan", "Tenor", "Bas"];
 const eventTypes = [
@@ -110,8 +119,14 @@ function SentCard({ message, accent = "orange" }: { message: string; accent?: "o
   return (
     <div style={{ background: "#FFFFFF", borderRadius: "20px", padding: "52px 40px", textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
       <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: accent === "purple" ? "rgba(124,58,237,0.12)" : "rgba(243,106,42,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", margin: "0 auto 18px", color: accent === "purple" ? "#7C3AED" : "var(--primary)", fontWeight: 800 }}>✓</div>
-      <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#111", margin: "0 0 10px", letterSpacing: "-0.5px" }}>Verstuurd!</h3>
-      <p style={{ fontSize: "15px", color: "#666", margin: 0, lineHeight: 1.7 }}>{message}</p>
+      <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#111", margin: "0 0 10px", letterSpacing: "-0.5px" }}>Bijna klaar!</h3>
+      <p style={{ fontSize: "15px", color: "#666", margin: "0 0 12px", lineHeight: 1.7 }}>
+        Je mailprogramma is geopend met je bericht. Klik daar op <strong>verzenden</strong>. {message}
+      </p>
+      <p style={{ fontSize: "13px", color: "#767676", margin: 0, lineHeight: 1.6 }}>
+        Opende er niets? Mail ons dan op{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: accent === "purple" ? "#7C3AED" : "var(--primary)", fontWeight: 700 }}>{CONTACT_EMAIL}</a>.
+      </p>
     </div>
   );
 }
@@ -127,14 +142,18 @@ export default function ContactPage() {
     setMz((p) => ({ ...p, [name]: value }));
     if (mzErr[name as keyof typeof mz]) setMzErr((p) => ({ ...p, [name]: undefined }));
   }
-  async function mzSubmit(e: React.FormEvent) {
+  function mzSubmit(e: React.FormEvent) {
     e.preventDefault();
     const err: Partial<typeof mz> = {};
     if (!mz.naam.trim()) err.naam = "Vul je naam in";
     if (!mz.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mz.email)) err.email = "Vul een geldig e-mailadres in";
     if (Object.keys(err).length) { setMzErr(err); return; }
-    setMzStatus("sending");
-    await new Promise((r) => setTimeout(r, 900));
+    openMail(`Aanmelding meezingen — ${mz.naam}`, [
+      ["Naam", mz.naam],
+      ["E-mail", mz.email],
+      ["Stemgroep", mz.stemgroep || "Weet ik nog niet"],
+      ["Bericht", mz.bericht],
+    ]);
     setMzStatus("sent");
   }
 
@@ -148,15 +167,22 @@ export default function ContactPage() {
     setBk((p) => ({ ...p, [name]: value }));
     if (bkErr[name as keyof typeof bk]) setBkErr((p) => ({ ...p, [name]: undefined }));
   }
-  async function bkSubmit(e: React.FormEvent) {
+  function bkSubmit(e: React.FormEvent) {
     e.preventDefault();
     const err: Partial<typeof bk> = {};
     if (!bk.naam.trim()) err.naam = "Vul je naam in";
     if (!bk.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bk.email)) err.email = "Vul een geldig e-mailadres in";
     if (!bk.bericht.trim()) err.bericht = "Vertel iets over het evenement";
     if (Object.keys(err).length) { setBkErr(err); return; }
-    setBkStatus("sending");
-    await new Promise((r) => setTimeout(r, 900));
+    openMail(`Boekingsaanvraag — ${bk.organisatie || bk.naam}`, [
+      ["Naam", bk.naam],
+      ["Organisatie", bk.organisatie],
+      ["E-mail", bk.email],
+      ["Telefoon", bk.telefoon],
+      ["Type evenement", bk.type],
+      ["Datum", bk.datum],
+      ["Bericht", bk.bericht],
+    ]);
     setBkStatus("sent");
   }
 
@@ -221,17 +247,17 @@ export default function ContactPage() {
                   <div>
                     <p style={{ margin: "0 0 4px", fontSize: "11px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em" }}>E-mail</p>
                     <a
-                      href="mailto:info@popkoordivers.nl"
+                      href="mailto:popkoordivers@gmail.com"
                       style={{ fontSize: "16px", fontWeight: 600, color: "var(--primary)", textDecoration: "none", transition: "opacity 0.15s" }}
                       onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.75")}
                       onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                     >
-                      info@popkoordivers.nl
+                      popkoordivers@gmail.com
                     </a>
                   </div>
 
                   <div>
-                    <p style={{ margin: "0 0 4px", fontSize: "11px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em" }}>Boekingen</p>
+                    <p style={{ margin: "0 0 4px", fontSize: "11px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em" }}>Uitnodigen</p>
                     <a
                       href="#boeken"
                       style={{ fontSize: "15px", fontWeight: 500, color: "#444", textDecoration: "none", borderBottom: "1.5px solid rgba(0,0,0,0.12)", paddingBottom: "1px", transition: "border-color 0.15s, color 0.15s" }}
@@ -246,45 +272,34 @@ export default function ContactPage() {
                     <p style={{ margin: "0 0 10px", fontSize: "11px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em" }}>Volg ons</p>
                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                       {[
-                        {
-                          label: "Facebook",
-                          href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL",
-                          icon: <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>,
-                        },
-                        {
-                          label: "Instagram",
-                          href: "https://www.instagram.com/popkoordivers/",
-                          icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>,
-                        },
-                        {
-                          label: "YouTube",
-                          href: "https://www.youtube.com/@popkoordivers",
-                          icon: <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="#fff" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>,
-                        },
+                        { label: "Facebook",  href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL", color: "#1877F2", icon: <IconFacebook size={18} /> },
+                        { label: "Instagram", href: "https://www.instagram.com/popkoordivers/", color: "#E1306C", icon: <IconInstagram size={18} /> },
+                        { label: "YouTube",   href: "https://www.youtube.com/@popkoordivers", color: "#FF0000", icon: <IconYoutube size={20} /> },
                       ].map((s) => (
                         <a
                           key={s.label}
                           href={s.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          aria-label={s.label}
-                          title={s.label}
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "50%",
-                            color: "#555",
-                            background: "rgba(0,0,0,0.05)",
+                            gap: "8px",
+                            padding: "10px 18px",
+                            borderRadius: "35px",
+                            color: "#111",
+                            background: "#fff",
+                            border: "1.5px solid rgba(0,0,0,0.1)",
+                            fontSize: "14px",
+                            fontWeight: 700,
                             textDecoration: "none",
-                            transition: "background 0.15s, color 0.15s",
+                            transition: "border-color 0.15s, transform 0.12s",
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(243,106,42,0.10)"; e.currentTarget.style.color = "var(--primary)"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.05)"; e.currentTarget.style.color = "#555"; }}
+                          onMouseEnter={(e) => { e.currentTarget.style.borderColor = s.color; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"; e.currentTarget.style.transform = "translateY(0)"; }}
                         >
-                          {s.icon}
+                          <span style={{ display: "inline-flex", color: s.color }}>{s.icon}</span>
+                          {s.label}
                         </a>
                       ))}
                     </div>
@@ -300,24 +315,15 @@ export default function ContactPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
                   {[
                     { label: "Dag", value: "Elke dinsdag" },
-                    { label: "Aanvang", value: "20:00 uur" },
-                    { label: "Locatie", value: "De Schakel" },
-                    { label: "Adres", value: "Gilze, Noord-Brabant" },
+                    { label: "Tijd", value: "19:30 – 21:30 uur" },
+                    { label: "Locatie", value: "CCGR De Schakel" },
+                    { label: "Adres", value: "Kerkstraat 104, 5126 GD Gilze" },
                   ].map((row, i, arr) => (
                     <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 0", borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.07)" : "none" }}>
                       <span style={{ fontSize: "13px", fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.05em" }}>{row.label}</span>
                       <span style={{ fontSize: "15px", fontWeight: 700, color: "#111" }}>{row.value}</span>
                     </div>
                   ))}
-                </div>
-
-                <div style={{ marginTop: "24px", background: "rgba(243,106,42,0.12)", border: "1px solid rgba(243,106,42,0.15)", borderRadius: "14px", padding: "16px 20px" }}>
-                  <p style={{ margin: 0, fontSize: "14px", color: "#555", lineHeight: 1.6 }}>
-                    Wil je een keer komen proeven?{" "}
-                    <a href="#meezingen" style={{ color: "var(--primary)", fontWeight: 700, textDecoration: "none" }}>
-                      Meld je hieronder aan →
-                    </a>
-                  </p>
                 </div>
               </Reveal>
             </div>
@@ -347,7 +353,7 @@ export default function ContactPage() {
             <Reveal style={{ textAlign: "center", marginBottom: "48px" }}>
               <RevealText text="Wil je meezingen?" pageDelay={350} style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 14px" }} />
               <p style={{ fontSize: "16px", color: "#555", margin: 0, lineHeight: 1.75, maxWidth: "520px", marginLeft: "auto", marginRight: "auto" }}>
-                De drempel is laag — iedereen is welkom om een avond te komen proeven. Geen auditie, geen voorbereiding nodig. Stuur ons een berichtje en we verwelkomen je de eerstvolgende dinsdag.
+                De drempel is laag — iedereen is welkom om een avond te komen proberen. Geen auditie, geen voorbereiding nodig. Stuur ons een berichtje en we verwelkomen je de eerstvolgende dinsdag.
               </p>
             </Reveal>
 

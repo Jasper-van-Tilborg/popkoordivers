@@ -61,7 +61,7 @@ export default function Contact() {
             {[
               { label: "Locatie", value: "Gilze, Noord-Brabant" },
               { label: "Repetitie", value: "Wekelijks — dag en tijd volgt" },
-              { label: "E-mail", value: "info@popkoordivers.nl", href: "mailto:info@popkoordivers.nl" },
+              { label: "E-mail", value: "popkoordivers@gmail.com", href: "mailto:popkoordivers@gmail.com" },
             ].map((item) => (
               <div key={item.label}>
                 <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 4px" }}>

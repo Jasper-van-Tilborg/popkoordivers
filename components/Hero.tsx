@@ -1,7 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
+import { IconFacebook, IconInstagram, IconYoutube } from "@/components/icons";
+
+const socials = [
+  { label: "Facebook",  href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL", color: "#1877F2", icon: <IconFacebook size={18} /> },
+  { label: "Instagram", href: "https://www.instagram.com/popkoordivers/", color: "#E1306C", icon: <IconInstagram size={18} /> },
+  { label: "YouTube",   href: "https://www.youtube.com/@popkoordivers", color: "#FF0000", icon: <IconYoutube size={20} /> },
+];
 
 export default function Hero() {
   return (
@@ -32,13 +40,13 @@ export default function Hero() {
         }}
       />
 
-      {/* Gradient overlay — dark on left for legibility, fades right */}
+      {/* Gradient overlay — donker achter de tekst, lichter naar onderen zodat de foto meer spreekt */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(0,0,0,0.45)",
+          background: "radial-gradient(ellipse 70% 55% at 50% 35%, rgba(0,0,0,0.35) 0%, transparent 100%), linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.45) 100%)",
           pointerEvents: "none",
         }}
       />
@@ -61,10 +69,10 @@ export default function Hero() {
             <div style={{ maxWidth: "680px", textAlign: "center" }}>
               {/* Headline */}
               <RevealText
-                text="Passie voor popmuziek brengt mensen bij elkaar."
+                text="Swingend Popkoor uit Gilze"
                 as="h1"
                 pageDelay={0}
-                style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-2px", color: "#FFFFFF", margin: "0 0 20px" }}
+                style={{ fontSize: "clamp(40px, 6vw, 76px)", fontWeight: 800, lineHeight: 1.05, letterSpacing: "-2.5px", color: "#FFFFFF", margin: "0 0 20px" }}
               />
 
               {/* Subheadline */}
@@ -77,12 +85,12 @@ export default function Hero() {
                   maxWidth: "460px",
                 }}
               >
-                Swingend popkoor uit Gilze — met piano, band en choreo.
+                Passie voor zingen brengt mensen bij elkaar.
               </p>
 
               {/* CTAs */}
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
-                <a
+                <Link
                   href="/contact#meezingen"
                   style={{
                     display: "inline-flex",
@@ -102,9 +110,9 @@ export default function Hero() {
                   onMouseLeave={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.transform = "translateY(0)"; }}
                 >
                   Kom meezingen →
-                </a>
-                <a
-                  href="/contact#boeken"
+                </Link>
+                <Link
+                  href="/agenda"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -122,8 +130,27 @@ export default function Hero() {
                   onMouseEnter={(e) => { e.currentTarget.style.background = "#a855f7"; e.currentTarget.style.borderColor = "#a855f7"; e.currentTarget.style.transform = "translateY(-1px)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "#7C3AED"; e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.transform = "translateY(0)"; }}
                 >
-                  Boek ons optreden
-                </a>
+                  Waar kun je ons zien
+                </Link>
+              </div>
+
+              {/* Social media */}
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginTop: "28px" }}>
+                {socials.map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    title={s.label}
+                    style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "46px", height: "46px", borderRadius: "50%", background: "#fff", border: "1.5px solid #fff", color: s.color, transition: "border-color 0.15s, transform 0.12s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = s.color; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#fff"; e.currentTarget.style.transform = "translateY(0)"; }}
+                  >
+                    {s.icon}
+                  </a>
+                ))}
               </div>
             </div>
           </Reveal>

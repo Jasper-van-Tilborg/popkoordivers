@@ -71,7 +71,7 @@ export default function DemoAgendaPage() {
       </div>
 
       {/* Header */}
-      <div style={{ padding: "28px 32px 24px", background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+      <div style={{ padding: "28px 32px 24px", background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 20, borderBottom: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px" }}>Agenda</h1>
           <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#888" }}>{items.length} optredens</p>
@@ -81,7 +81,7 @@ export default function DemoAgendaPage() {
 
       {/* Form */}
       {showForm && (
-        <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", padding: "24px" }}>
+        <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", padding: "24px" }}>
           <h2 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700, color: "#111" }}>
             {editing ? "Optreden bewerken" : "Nieuw optreden"}
           </h2>
@@ -117,7 +117,7 @@ export default function DemoAgendaPage() {
       )}
 
       {/* Table */}
-      <div style={{ margin: "24px 32px 32px", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
+      <div style={{ margin: "24px 32px 32px", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>

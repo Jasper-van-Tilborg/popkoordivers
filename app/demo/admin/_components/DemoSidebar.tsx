@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconCalendar, IconNewspaper, IconFolder, IconStar, IconUsers, IconCamera } from "@/components/icons";
 
@@ -16,7 +17,7 @@ export default function DemoSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside style={{ width: "220px", minWidth: "220px", background: "#111111", display: "flex", flexDirection: "column", height: "100vh" }}>
+    <aside className="admin-sidebar" style={{ width: "220px", minWidth: "220px", background: "#111111", display: "flex", flexDirection: "column", height: "100vh" }}>
       {/* Brand */}
       <div style={{ padding: "22px 20px 16px" }}>
         <a href="/" target="_blank" rel="noopener" style={{ textDecoration: "none" }}>
@@ -57,33 +58,36 @@ export default function DemoSidebar() {
         {nav.map((item) => {
           const active = pathname.startsWith(item.href);
           return (
-            <a
+            <Link
               key={item.href}
+              aria-current={active ? "page" : undefined}
               href={item.href}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
-                padding: "10px 20px",
+                margin: "2px 10px",
+                padding: "9px 12px",
+                borderRadius: "10px",
                 fontSize: "13px",
                 fontWeight: active ? 700 : 500,
-                color: active ? "var(--primary)" : "rgba(255,255,255,0.6)",
+                color: active ? "#fff" : "rgba(255,255,255,0.6)",
                 textDecoration: "none",
-                background: active ? "rgba(243,106,42,0.10)" : "transparent",
-                borderLeft: active ? "2px solid var(--primary)" : "2px solid transparent",
-                transition: "all 0.12s",
+                background: active ? "rgba(243,106,42,0.18)" : "transparent",
+                boxShadow: active ? "inset 0 0 0 1px rgba(243,106,42,0.35)" : "none",
+                transition: "background 0.15s, color 0.15s",
               }}
             >
               <span style={{ lineHeight: 1, display: "flex" }}>{item.icon}</span>
               {item.label}
-            </a>
+            </Link>
           );
         })}
       </nav>
 
       {/* Back to demo */}
       <div style={{ padding: "12px 16px 20px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-        <a
+        <Link
           href="/demo"
           style={{
             display: "block",
@@ -102,7 +106,7 @@ export default function DemoSidebar() {
           }}
         >
           ← Demo menu
-        </a>
+        </Link>
       </div>
     </aside>
   );

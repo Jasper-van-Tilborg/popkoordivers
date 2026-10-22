@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function DemoLandingPage() {
   return (
     <div
@@ -29,9 +31,9 @@ export default function DemoLandingPage() {
         Demo omgeving
       </div>
 
-      <a href="/" style={{ textDecoration: "none", marginBottom: "40px", display: "flex", justifyContent: "center" }}>
+      <Link href="/" style={{ textDecoration: "none", marginBottom: "40px", display: "flex", justifyContent: "center" }}>
         <img src="/logo_popkoor_divers.svg" alt="Popkoor Divers" style={{ height: "52px", width: "auto" }} />
-      </a>
+      </Link>
 
       <h1
         style={{
@@ -51,7 +53,7 @@ export default function DemoLandingPage() {
 
       <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" as const, justifyContent: "center" }}>
         {/* Ledenomgeving */}
-        <a href="/demo/leden" style={{ textDecoration: "none" }}>
+        <Link href="/demo/leden" style={{ textDecoration: "none" }}>
           <div
             style={{
               width: "260px",
@@ -109,10 +111,10 @@ export default function DemoLandingPage() {
               Demo bekijken →
             </span>
           </div>
-        </a>
+        </Link>
 
         {/* Admin dashboard */}
-        <a href="/demo/admin" style={{ textDecoration: "none" }}>
+        <Link href="/demo/admin" style={{ textDecoration: "none" }}>
           <div
             style={{
               width: "260px",
@@ -170,10 +172,10 @@ export default function DemoLandingPage() {
               Demo bekijken →
             </span>
           </div>
-        </a>
+        </Link>
       </div>
 
-      <a
+      <Link
         href="/"
         style={{
           marginTop: "40px",
@@ -191,7 +193,7 @@ export default function DemoLandingPage() {
         }}
       >
         ← Terug naar website
-      </a>
+      </Link>
 
       <p style={{ marginTop: "16px", fontSize: "12px", color: "#ccc", textAlign: "center" }}>
         Demo omgeving · Geen echte data · Wijzigingen worden niet opgeslagen

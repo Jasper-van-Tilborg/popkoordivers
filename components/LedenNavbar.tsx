@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -9,6 +10,7 @@ const sections = [
   { href: "#bestuur",        label: "Bestuur" },
   { href: "#smoelenboek",    label: "Smoelenboek" },
   { href: "#opnames",        label: "Opnames" },
+  { href: "#fotoalbums",     label: "Foto's" },
   { href: "#optredens",      label: "Optredens" },
 ];
 
@@ -57,14 +59,14 @@ export default function LedenNavbar({ email, rol }: Props) {
         }}
       >
         {/* Left — logo + label */}
-        <a href="/" style={{ textDecoration: "none", flexShrink: 0, lineHeight: 1.3 }}>
+        <Link href="/" style={{ textDecoration: "none", flexShrink: 0, lineHeight: 1.3 }}>
           <span style={{ display: "block", fontSize: "16px", fontWeight: 800, color: "#111", letterSpacing: "-0.02em" }}>
             Popkoor <span style={{ color: "var(--primary)" }}>Divers</span>
           </span>
           <span style={{ display: "block", fontSize: "10px", fontWeight: 700, color: "#aaa", letterSpacing: "0.07em", textTransform: "uppercase" }}>
             Ledenomgeving
           </span>
-        </a>
+        </Link>
 
         {/* Centre — section jump links (hidden on mobile) */}
         <div className="leden-nav-links" style={{ display: "flex", gap: "2px", flexShrink: 1, overflow: "hidden" }}>
@@ -94,7 +96,7 @@ export default function LedenNavbar({ email, rol }: Props) {
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
           {/* Rol badge */}
           {rol === "admin" ? (
-            <a
+            <Link
               href="/admin"
               style={{
                 fontSize: "13px",
@@ -114,7 +116,7 @@ export default function LedenNavbar({ email, rol }: Props) {
               onMouseLeave={(e) => { e.currentTarget.style.background = badge.bg; }}
             >
               {badge.label} ↗
-            </a>
+            </Link>
           ) : (
             <span
               style={{
@@ -132,7 +134,7 @@ export default function LedenNavbar({ email, rol }: Props) {
           )}
 
           {/* Back to website */}
-          <a
+          <Link
             href="/"
             style={{
               fontSize: "13px",
@@ -149,7 +151,7 @@ export default function LedenNavbar({ email, rol }: Props) {
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; e.currentTarget.style.color = "#555"; }}
           >
             ← Website
-          </a>
+          </Link>
 
           {/* Logout */}
           <button

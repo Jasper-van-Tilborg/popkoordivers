@@ -100,7 +100,7 @@ function BestandenTab() {
   return (
     <div>
       {/* Upload form */}
-      <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", padding: "24px" }}>
+      <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", padding: "24px" }}>
         <h2 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700, color: "#111" }}>Bestand uploaden</h2>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "16px", alignItems: "end" }}>
           <div>
@@ -143,7 +143,7 @@ function BestandenTab() {
       </div>
 
       {/* Table */}
-      <div style={{ margin: "16px 32px 32px", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
+      <div style={{ margin: "16px 32px 32px", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", overflow: "hidden" }}>
         {loading ? <p style={{ padding: "32px", color: "#888", fontSize: "14px" }}>Laden…</p>
           : filtered.length === 0 ? <p style={{ padding: "32px", color: "#aaa", fontSize: "14px" }}>Geen bestanden.</p>
           : (
@@ -214,7 +214,7 @@ function FotoAlbumsTab() {
   return (
     <div>
       {/* Nieuw album */}
-      <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", padding: "24px" }}>
+      <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", padding: "24px" }}>
         <h2 style={{ margin: "0 0 16px", fontSize: "16px", fontWeight: 700, color: "#111" }}>Nieuw album aanmaken</h2>
         <form onSubmit={createAlbum} style={{ display: "grid", gridTemplateColumns: "2fr 1fr auto", gap: "12px", alignItems: "flex-end" }}>
           <div>
@@ -475,7 +475,7 @@ export default function BestandenAdminPage() {
 
   return (
     <div>
-      <div style={{ padding: "28px 32px 24px", background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+      <div style={{ padding: "28px 32px 24px", background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 20, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
         <h1 style={{ margin: "0 0 16px", fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px" }}>Bestanden</h1>
         <div style={{ display: "flex", gap: "8px" }}>
           <button style={tabBtn("bestanden")} onClick={() => setTab("bestanden")}>Bestanden & Liedjes</button>

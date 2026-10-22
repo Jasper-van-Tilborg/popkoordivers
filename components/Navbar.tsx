@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { IconFacebook, IconInstagram, IconYoutube } from "@/components/icons";
+
+const socials = [
+  { label: "Facebook",  href: "https://www.facebook.com/p/Popkoor-Divers-100066853672465/?locale=nl_NL", icon: <IconFacebook size={20} /> },
+  { label: "Instagram", href: "https://www.instagram.com/popkoordivers/", icon: <IconInstagram size={20} /> },
+  { label: "YouTube",   href: "https://www.youtube.com/@popkoordivers", icon: <IconYoutube size={22} /> },
+];
 
 const links = [
   { label: "Home",     href: "/" },
@@ -54,22 +62,22 @@ export default function Navbar() {
         <nav style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
 
           {/* Logo */}
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0, transition: "opacity 0.2s" }}
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, transition: "opacity 0.2s" }}
             onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
             onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           >
             <img
               src="/logo_popkoor_divers.svg"
               alt="Popkoor Divers"
-              style={{ height: scrolled ? "38px" : "44px", width: "auto", display: "block", transition: "height 0.25s ease" }}
+              style={{ height: scrolled ? "48px" : "60px", width: "auto", display: "block", transition: "height 0.25s ease" }}
             />
-          </a>
+          </Link>
 
           {/* Desktop links */}
           <ul className="nav-desktop" style={{ display: "flex", gap: "28px", listStyle: "none", margin: 0, padding: 0, alignItems: "center" }}>
             {links.map((l) => (
               <li key={l.href}>
-                <a
+                <Link
                   href={l.href}
                   className={`nav-link${(l.href === "/" ? pathname === "/" : pathname.startsWith(l.href)) ? " nav-link--active" : ""}`}
                   style={{ fontSize: "14px", fontWeight: 500, color: scrolled ? "#444" : "rgba(255,255,255,0.85)", textDecoration: "none", transition: "color 0.15s", position: "relative", paddingBottom: "6px" }}
@@ -77,13 +85,13 @@ export default function Navbar() {
                   onMouseLeave={(e) => (e.currentTarget.style.color = scrolled ? "#444" : "rgba(255,255,255,0.85)")}
                 >
                   {l.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
 
           {/* Desktop CTA */}
-          <a
+          <Link
             href="/contact#meezingen"
             className="nav-cta"
             style={{ background: (pathname === "/" || pathname === "/over-ons" || scrolled) ? "var(--primary)" : "rgba(255,255,255,0.15)", border: (pathname === "/" || pathname === "/over-ons" || scrolled) ? "1.5px solid var(--primary)" : "1.5px solid rgba(255,255,255,0.5)", color: "#fff", fontSize: "13px", fontWeight: 600, padding: "9px 22px", borderRadius: "35px", textDecoration: "none", transition: "background 0.2s, border-color 0.2s, transform 0.12s", flexShrink: 0, alignItems: "center", gap: "6px" }}
@@ -91,7 +99,7 @@ export default function Navbar() {
             onMouseLeave={(e) => { e.currentTarget.style.background = (pathname === "/" || pathname === "/over-ons" || scrolled) ? "var(--primary)" : "rgba(255,255,255,0.15)"; e.currentTarget.style.borderColor = (pathname === "/" || pathname === "/over-ons" || scrolled) ? "var(--primary)" : "rgba(255,255,255,0.5)"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
             Kom meezingen →
-          </a>
+          </Link>
 
           {/* Hamburger */}
           <button
@@ -119,7 +127,7 @@ export default function Navbar() {
       >
         <nav style={{ padding: "24px 24px 40px", display: "flex", flexDirection: "column" }}>
           {links.map((l, i) => (
-            <a
+            <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
@@ -127,17 +135,32 @@ export default function Navbar() {
               style={{ animationDelay: `${i * 40}ms` }}
             >
               {l.label}
-            </a>
+            </Link>
           ))}
 
-          <a
+          <Link
             href="/contact#meezingen"
             onClick={() => setOpen(false)}
             className="mobile-menu__link"
             style={{ animationDelay: `${links.length * 40}ms`, marginTop: "16px", background: "var(--primary)", color: "#fff", borderRadius: "35px", textAlign: "center", fontWeight: 700, justifyContent: "center" }}
           >
             Kom meezingen →
-          </a>
+          </Link>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: "12px", marginTop: "24px" }}>
+            {socials.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "50%", background: "rgba(243,106,42,0.08)", color: "var(--primary)" }}
+              >
+                {s.icon}
+              </a>
+            ))}
+          </div>
         </nav>
       </div>
 
@@ -175,7 +198,7 @@ export default function Navbar() {
           background: rgba(255,255,255,0.98);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          padding-top: 76px;
+          padding-top: 96px;
           transform: translateY(-100%);
           opacity: 0;
           transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
@@ -211,11 +234,11 @@ export default function Navbar() {
         .mobile-menu--open .mobile-menu__link {
           animation: menu-link-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
-        .mobile-menu__link:last-child {
+        .mobile-menu__link:last-of-type {
           border-bottom: none;
           padding: 14px 16px;
         }
-        .mobile-menu__link:last-child::after { display: none; }
+        .mobile-menu__link:last-of-type::after { display: none; }
         .mobile-menu__link {
           position: relative;
         }

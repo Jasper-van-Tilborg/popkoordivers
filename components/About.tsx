@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
 
@@ -38,16 +39,16 @@ export default function About() {
             />
 
             <p style={{ fontSize: "16px", lineHeight: 1.8, color: "#555", margin: "0 0 28px" }}>
-              Popkoor Divers is een enthousiast en swingend koor uit Gilze, verdeeld over{" "}
-              <span style={{ fontWeight: 700, color: "#111", background: "rgba(124,58,237,0.10)", padding: "1px 7px", borderRadius: "6px" }}>5 stemgroepen</span>{" "}
-              (alt, mezzo, sopraan, tenor, bas). Sinds{" "}
+              Popkoor Divers uit Gilze is een energiek en swingend koor met{" "}
+              <span style={{ fontWeight: 700, color: "#111", background: "rgba(124,58,237,0.10)", padding: "1px 7px", borderRadius: "6px" }}>vijf stemgroepen</span>.
+              {" "}We zingen met piano of a‑capella en brengen popmuziek tot leven. Sinds{" "}
               <span style={{ fontWeight: 700, color: "#111", background: "rgba(124,58,237,0.10)", padding: "1px 7px", borderRadius: "6px" }}>2008</span>{" "}
-              onder leiding van dirigent{" "}
+              zijn we actief, en sinds 2025 staan we onder leiding van dirigent{" "}
               <span style={{ fontWeight: 700, color: "#111", background: "rgba(124,58,237,0.10)", padding: "1px 7px", borderRadius: "6px" }}>Tom Mordang</span>.
-              {" "}Met piano, band of a-capella.
+              {" "}Samen zorgen we voor muziek die bruist, raakt en verbindt.
             </p>
 
-            <a
+            <Link
               href="/over-ons"
               style={{
                 display: "inline-flex",
@@ -65,15 +66,15 @@ export default function About() {
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(243,106,42,0.3)")}
             >
               Meer over ons →
-            </a>
+            </Link>
           </Reveal>
         </div>
       </div>
 
-      {/* Wave into warm section */}
+      {/* Wave into warm */}
       <div aria-hidden="true" style={{ position: "absolute", bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
         <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "80px" }}>
-          <path d="M0,80 L0,42 Q360,5 720,38 Q1080,68 1440,22 L1440,80 Z" fill="#FFF8F4" />
+          <path d="M0,80 L0,48 Q360,12 720,44 Q1080,72 1440,25 L1440,80 Z" fill="#FFF8F4" />
         </svg>
       </div>
 

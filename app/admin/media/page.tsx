@@ -149,12 +149,12 @@ export default function MediaAdminPage() {
 
   return (
     <div>
-      <div style={{ padding: "28px 32px 24px", background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+      <div style={{ padding: "28px 32px 24px", background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 20, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
         <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px" }}>Media</h1>
         <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#888" }}>{items.length} item{items.length !== 1 ? "s" : ""}</p>
       </div>
 
-      <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", padding: "24px" }}>
+      <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", padding: "24px" }}>
         <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
           <button style={tabBtn("foto")} onClick={() => { setTab("foto"); setErr(""); }}>Foto uploaden</button>
           <button style={tabBtn("video")} onClick={() => { setTab("video"); setErr(""); }}>YouTube video</button>
@@ -209,7 +209,7 @@ export default function MediaAdminPage() {
         {err && <p style={{ margin: "12px 0 0", fontSize: "12px", color: "#dc2626" }}>{err}</p>}
       </div>
 
-      <div style={{ margin: "16px 32px 32px", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
+      <div style={{ margin: "16px 32px 32px", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", overflow: "hidden" }}>
         {loading ? (
           <p style={{ padding: "32px", color: "#888", fontSize: "14px" }}>Laden…</p>
         ) : items.length === 0 ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
@@ -118,9 +119,9 @@ export default function AgendaClient({ komend, archief }: Props) {
                       <h2 style={{ fontSize: "24px", fontWeight: 800, color: "#111", margin: "0 0 4px", letterSpacing: "-0.5px" }}>Archief</h2>
                       <p style={{ fontSize: "14px", color: "#888", margin: 0 }}>Afgelopen optredens</p>
                     </div>
-                    <a href="/media" style={{ fontSize: "13px", fontWeight: 600, color: "var(--primary)", textDecoration: "none", borderBottom: "2px solid rgba(243,106,42,0.25)", paddingBottom: "2px" }}>
+                    <Link href="/media" style={{ fontSize: "13px", fontWeight: 600, color: "var(--primary)", textDecoration: "none", borderBottom: "2px solid rgba(243,106,42,0.25)", paddingBottom: "2px" }}>
                       Naar foto&apos;s &amp; video&apos;s →
-                    </a>
+                    </Link>
                   </div>
                 </Reveal>
 
@@ -132,7 +133,7 @@ export default function AgendaClient({ komend, archief }: Props) {
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     {archief.map((item, i) => (
                       <Reveal key={item.id} delay={i * 60}>
-                        <div style={{ background: "#FFFFFF", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
+                        <Link href={`/agenda/${item.id}`} className="card-hover" style={{ textDecoration: "none", background: "#FFFFFF", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
                           <div style={{ minWidth: 0 }}>
                             <p style={{ margin: "0 0 4px", fontSize: "17px", fontWeight: 700, color: "#111", letterSpacing: "-0.02em", lineHeight: 1.3 }}>
                               {item.titel}
@@ -144,7 +145,7 @@ export default function AgendaClient({ komend, archief }: Props) {
                           <p style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#aaa", flexShrink: 0, textAlign: "right" }}>
                             {item.datum}
                           </p>
-                        </div>
+                        </Link>
                       </Reveal>
                     ))}
                   </div>
@@ -161,16 +162,16 @@ export default function AgendaClient({ komend, archief }: Props) {
               >
                 <div>
                   <p style={{ margin: "0 0 4px", fontSize: "12px", fontWeight: 700, color: "#7C3AED", letterSpacing: "0.08em", textTransform: "uppercase" }}>Iets te vieren?</p>
-                  <h3 style={{ fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: "#111", margin: 0, letterSpacing: "-0.02em" }}>Boek ons voor jouw optreden</h3>
+                  <h3 style={{ fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: "#111", margin: 0, letterSpacing: "-0.02em" }}>Popkoor Divers uitnodigen voor een optreden</h3>
                 </div>
-                <a
+                <Link
                   href="/contact#boeken"
                   style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#7C3AED", color: "#fff", fontWeight: 700, fontSize: "15px", padding: "14px 28px", borderRadius: "35px", textDecoration: "none", boxShadow: "0 4px 20px rgba(124,58,237,0.28)", transition: "transform 0.12s, opacity 0.15s", whiteSpace: "nowrap" }}
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; e.currentTarget.style.transform = "translateY(-1px)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
                 >
                   Aanvraag doen →
-                </a>
+                </Link>
               </div>
             </Reveal>
 
@@ -199,8 +200,10 @@ export default function AgendaClient({ komend, archief }: Props) {
 function EventRow({ event, i }: { event: AgendaItem; i: number }) {
   return (
     <Reveal delay={i * 120}>
-      <div
+      <Link
+        href={`/agenda/${event.id}`}
         style={{
+          textDecoration: "none",
           background: "#FFFFFF",
           borderRadius: "16px",
           border: "1px solid rgba(0,0,0,0.07)",
@@ -211,7 +214,7 @@ function EventRow({ event, i }: { event: AgendaItem; i: number }) {
           justifyContent: "space-between",
           gap: "24px",
         }}
-        className="agenda-card"
+        className="agenda-card card-hover"
       >
         <div style={{ minWidth: 0 }}>
           <p style={{ margin: "0 0 8px", fontSize: "19px", fontWeight: 800, color: "#111", letterSpacing: "-0.03em", lineHeight: 1.25 }}>
@@ -232,7 +235,7 @@ function EventRow({ event, i }: { event: AgendaItem; i: number }) {
         <p style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "var(--primary)", letterSpacing: "-0.5px", lineHeight: 1, flexShrink: 0, textAlign: "right" }}>
           {event.datum}
         </p>
-      </div>
+      </Link>
     </Reveal>
   );
 }

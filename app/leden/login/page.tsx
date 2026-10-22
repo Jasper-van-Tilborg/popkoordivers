@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -47,13 +48,13 @@ export default function LoginPage() {
       }}
     >
       {/* Logo */}
-      <a href="/" style={{ textDecoration: "none", marginBottom: "48px", display: "flex", justifyContent: "center" }}>
+      <Link href="/" style={{ textDecoration: "none", marginBottom: "48px", display: "flex", justifyContent: "center" }}>
         <img
           src="/logo_popkoor_divers.svg"
           alt=""
           style={{ height: "56px", width: "auto", display: "block" }}
         />
-      </a>
+      </Link>
 
       {/* Card */}
       <div
@@ -199,7 +200,7 @@ export default function LoginPage() {
         <p style={{ fontSize: "13px", color: "#bbb", margin: "0 0 16px", lineHeight: 1.5 }}>
           Bekijk een demo van de ledenomgeving of het admin dashboard — geen inloggen nodig.
         </p>
-        <a
+        <Link
           href="/demo"
           style={{
             display: "inline-flex",
@@ -217,7 +218,7 @@ export default function LoginPage() {
           }}
         >
           Bekijk de demo →
-        </a>
+        </Link>
       </div>
     </div>
   );

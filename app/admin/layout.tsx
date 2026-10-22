@@ -19,9 +19,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (profile?.rol !== "admin") redirect("/leden");
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "var(--font-manrope), system-ui, sans-serif" }}>
+    <div className="admin-shell" style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "var(--font-manrope), system-ui, sans-serif" }}>
       <Sidebar />
-      <main style={{ flex: 1, overflow: "auto", background: "#F5F5F5" }}>
+      <main style={{ flex: 1, overflow: "auto", background: "#F7F6F3" }}>
         {children}
       </main>
     </div>

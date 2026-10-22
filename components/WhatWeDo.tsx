@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
 
@@ -7,18 +8,21 @@ const media = [
   {
     gradient: "linear-gradient(135deg, rgba(220,38,38,0.12) 0%, rgba(243,106,42,0.06) 100%)",
     label: "YouTube",
+    href: "https://www.youtube.com/@popkoordivers",
     title: "Jubileum 15 jaar",
     sub: "Optreden VÓLkoren",
   },
   {
     gradient: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 100%)",
     label: "Foto's",
+    href: "/media",
     title: "Najaarsconcert 2025",
     sub: "De Schakel, Gilze",
   },
   {
     gradient: "linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(243,106,42,0.06) 100%)",
     label: "Backstage",
+    href: "/media",
     title: "Repetitie",
     sub: "Achter de schermen",
   },
@@ -26,7 +30,7 @@ const media = [
 
 export default function WhatWeDo() {
   return (
-    <section id="sfeer" className="sfeer-section" style={{ position: "relative", padding: "100px 24px 140px", overflow: "hidden", background: "#FFF8F4" }}>
+    <section id="sfeer" className="sfeer-section" style={{ position: "relative", padding: "100px 24px 140px", overflow: "hidden", background: "#FFFFFF" }}>
       <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 100% 70% at 50% 50%, rgba(243,106,42,0.07) 0%, rgba(255,255,255,0) 70%)", pointerEvents: "none" }} />
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
@@ -35,27 +39,29 @@ export default function WhatWeDo() {
         <Reveal style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "16px" }}>
           <div>
             <RevealText
-              text="Zo klinkt Divers"
+              text="Dit is Divers"
               pageDelay={900}
               style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
             />
           </div>
-          <a
+          <Link
             href="/media"
             style={{ fontSize: "14px", fontWeight: 600, color: "var(--primary)", textDecoration: "none", paddingBottom: "4px", borderBottom: "2px solid rgba(243,106,42,0.25)", transition: "border-color 0.15s", whiteSpace: "nowrap" }}
             onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(243,106,42,0.25)")}
           >
             Naar foto&apos;s &amp; video&apos;s →
-          </a>
+          </Link>
         </Reveal>
 
         {/* Media grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }} className="sfeer-grid">
           {media.map((item, i) => (
             <Reveal key={item.title} delay={i * 100}>
-              <div
-                style={{ borderRadius: "20px", overflow: "hidden", position: "relative", aspectRatio: "4/3", cursor: "pointer", background: item.gradient }}
+              <Link
+                href={item.href}
+                {...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                style={{ display: "block", borderRadius: "20px", overflow: "hidden", position: "relative", aspectRatio: "4/3", background: item.gradient }}
                 className="card-hover"
               >
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)" }} />
@@ -84,7 +90,7 @@ export default function WhatWeDo() {
                   <p style={{ margin: "0 0 2px", fontSize: "15px", fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>{item.title}</p>
                   <p style={{ margin: 0, fontSize: "12px", color: "rgba(255,255,255,0.65)" }}>{item.sub}</p>
                 </div>
-              </div>
+              </Link>
             </Reveal>
           ))}
         </div>

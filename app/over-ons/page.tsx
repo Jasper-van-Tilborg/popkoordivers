@@ -1,9 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
+
+const infographics = [
+  { titel: "Swingend & veelstemmig", sub: "Vijf stemgroepen" },
+  { titel: "Eigenwijs", sub: "Met een Divers repertoire" },
+  { titel: "Enthousiast samen", sub: "Een hechte club" },
+];
 
 const sfeerItems = [
   { gradient: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 100%)", label: "Repetitie", sub: "Dinsdag · De Schakel" },
@@ -17,110 +24,138 @@ export default function OverOnsPage() {
       <Navbar />
       <main style={{ minHeight: "100vh", background: "#FFFFFF" }}>
 
-        {/* ── Hero — foto met uitgebreide bento ── */}
-        <section style={{ position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        {/* ── Hero — foto ── */}
+        <section style={{ position: "relative", overflow: "hidden", minHeight: "78svh", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/overons_image.jpg" alt="" aria-hidden="true"
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%" }} />
-          <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)" }} />
+          <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.25) 100%)" }} />
 
-          <div style={{ minHeight: "100svh", padding: "140px 24px 60px", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", zIndex: 1 }}>
+          <div className="overons-hero-inner" style={{ position: "relative", zIndex: 1, maxWidth: "1200px", margin: "0 auto", width: "100%", padding: "160px 24px 120px" }}>
+            <Reveal delay={0}>
+              <RevealText text="Over ons" as="h1" pageDelay={0}
+                style={{ fontSize: "clamp(44px, 7vw, 88px)", fontWeight: 800, letterSpacing: "-3px", lineHeight: 1, color: "#FFFFFF", margin: "0 0 16px" }} />
+              <p style={{ fontSize: "clamp(17px, 1.8vw, 20px)", lineHeight: 1.6, color: "rgba(255,255,255,0.85)", maxWidth: "480px", margin: "0 0 32px" }}>
+                Passie voor zingen sinds 2008
+              </p>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                <Link
+                  href="/contact#meezingen"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--primary)", color: "#fff", fontWeight: 700, fontSize: "15px", padding: "13px 28px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid var(--primary)", transition: "background 0.2s, border-color 0.2s, transform 0.12s" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary-light)"; e.currentTarget.style.borderColor = "var(--primary-light)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.transform = "translateY(0)"; }}
+                >
+                  Kom meezingen →
+                </Link>
+                <Link
+                  href="/agenda"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#7C3AED", color: "#fff", fontWeight: 600, fontSize: "15px", padding: "13px 28px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid #7C3AED", transition: "background 0.2s, border-color 0.2s, transform 0.12s" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#a855f7"; e.currentTarget.style.borderColor = "#a855f7"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#7C3AED"; e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.transform = "translateY(0)"; }}
+                >
+                  Waar kun je ons zien
+                </Link>
+              </div>
+            </Reveal>
+          </div>
 
-            {/* Heading */}
-            <div style={{ maxWidth: "1200px", margin: "0 auto", width: "100%" }}>
-              <Reveal delay={0}>
-                <RevealText text="Over ons" as="h1" pageDelay={0}
-                  style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 14px" }} />
-                <p style={{ fontSize: "clamp(15px, 1.6vw, 17px)", lineHeight: 1.7, color: "rgba(255,255,255,0.80)", maxWidth: "480px", margin: "0 0 28px" }}>
-                  Swingend popkoor uit Gilze — al meer dan 15 jaar passie voor popmuziek.
+          {/* Wave → wit */}
+          <div aria-hidden="true" style={{ position: "absolute", bottom: 0, left: 0, right: 0, lineHeight: 0, zIndex: 1 }}>
+            <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "80px" }}>
+              <path d="M0,80 L0,42 Q360,5 720,38 Q1080,68 1440,22 L1440,80 Z" fill="#FFFFFF" />
+            </svg>
+          </div>
+        </section>
+
+        {/* ── Ons verhaal ── */}
+        <section className="section-pad" style={{ position: "relative", background: "#FFFFFF", padding: "80px 24px 160px", overflow: "hidden" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+
+            {/* Verhaal + cijfers */}
+            <div className="verhaal-grid" style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: "64px", alignItems: "center" }}>
+              <Reveal delay={80}>
+                <h2 style={{ fontSize: "clamp(28px, 3.6vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 20px" }}>
+                  Opgericht met passie, gegroeid met plezier
+                </h2>
+                <p style={{ fontSize: "17px", lineHeight: 1.8, color: "#555", margin: 0, maxWidth: "540px" }}>
+                  Wat begon als een klein ensemble van muziekliefhebbers groeide uit tot meer dan 60 stemmen. Met piano, live band en bijpassende choreografie zorgen we voor een complete show.
                 </p>
-                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                  <a
-                    href="/contact#meezingen"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--primary)", color: "#fff", fontWeight: 700, fontSize: "15px", padding: "13px 28px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid var(--primary)", transition: "background 0.2s, border-color 0.2s, transform 0.12s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary-light)"; e.currentTarget.style.borderColor = "var(--primary-light)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.transform = "translateY(0)"; }}
-                  >
-                    Kom meezingen →
-                  </a>
-                  <a
-                    href="/contact#boeken"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#7C3AED", color: "#fff", fontWeight: 600, fontSize: "15px", padding: "13px 28px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid #7C3AED", transition: "background 0.2s, border-color 0.2s, transform 0.12s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "#a855f7"; e.currentTarget.style.borderColor = "#a855f7"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "#7C3AED"; e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.transform = "translateY(0)"; }}
-                  >
-                    Boek ons optreden
-                  </a>
-                </div>
               </Reveal>
+
+              <div className="cijfers-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <Reveal delay={140} style={{ height: "100%" }}>
+                  <div style={{ background: "#7C3AED", borderRadius: "24px", padding: "32px 28px", display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", minHeight: "200px" }}>
+                    <p style={{ fontSize: "clamp(48px, 5vw, 64px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-3px", margin: "0 0 10px" }}>2008</p>
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.78)", margin: 0, lineHeight: 1.5 }}>Jaar van oprichting · Gilze</p>
+                  </div>
+                </Reveal>
+                <Reveal delay={200} style={{ height: "100%" }}>
+                  <div style={{ background: "var(--primary)", borderRadius: "24px", padding: "32px 28px", display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", minHeight: "200px" }}>
+                    <p style={{ fontSize: "clamp(48px, 5vw, 64px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-3px", margin: "0 0 10px" }}>60<span style={{ fontSize: "0.55em" }}>+</span></p>
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.85)", margin: 0, lineHeight: 1.5 }}>zangers & zangeressen · 5 stemgroepen</p>
+                  </div>
+                </Reveal>
+              </div>
             </div>
 
-            {/* Bento grid — 2 rijen */}
-            <div style={{ maxWidth: "1200px", margin: "0 auto", width: "100%", paddingTop: "40px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }} className="verhaal-bento">
-
-                {/* Rij 1 */}
-                <Reveal delay={80} style={{ gridColumn: "1 / 3", height: "100%" }}>
-                  <div style={{ background: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderRadius: "20px", padding: "28px 32px", border: "1px solid rgba(255,255,255,0.15)", height: "100%" }}>
-                    <p style={{ fontSize: "clamp(17px, 1.8vw, 22px)", fontWeight: 800, letterSpacing: "-0.5px", lineHeight: 1.25, color: "#fff", margin: "0 0 10px" }}>
-                      Opgericht met passie, gegroeid met plezier
-                    </p>
-                    <p style={{ fontSize: "14px", lineHeight: 1.75, color: "rgba(255,255,255,0.72)", margin: 0 }}>
-                      Wat begon als een klein ensemble van muziekliefhebbers groeide uit tot meer dan 60 stemmen. Met piano, live band en bijpassende choreografie zorgen we voor een complete show.
-                    </p>
-                  </div>
+            {/* Kenmerken */}
+            <div className="kenmerken-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "32px", marginTop: "96px", paddingTop: "40px", borderTop: "1px solid var(--border)" }}>
+              {infographics.map((item, i) => (
+                <Reveal key={item.titel} delay={i * 80}>
+                  <span aria-hidden="true" style={{ display: "block", width: "28px", height: "4px", borderRadius: "4px", background: i === 1 ? "#7C3AED" : "var(--primary)", marginBottom: "18px" }} />
+                  <p style={{ fontSize: "18px", fontWeight: 800, color: "#111", letterSpacing: "0.02em", textTransform: "uppercase", lineHeight: 1.25, margin: "0 0 6px" }}>{item.titel}</p>
+                  <p style={{ fontSize: "15px", color: "#666", lineHeight: 1.6, margin: 0 }}>{item.sub}</p>
                 </Reveal>
+              ))}
+            </div>
 
-                <Reveal delay={120} style={{ height: "100%" }}>
-                  <div style={{ background: "#7C3AED", borderRadius: "20px", padding: "28px 32px", display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%" }}>
-                    <p style={{ fontSize: "52px", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-3px", margin: "0 0 4px" }}>2008</p>
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.72)", margin: 0 }}>Jaar van oprichting · Gilze</p>
+            {/* Dirigent + repetities */}
+            <div className="info-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "80px" }}>
+              <Reveal delay={0} style={{ height: "100%" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "24px", background: "#FFF8F4", borderRadius: "24px", padding: "24px", height: "100%", border: "1px solid rgba(243,106,42,0.12)" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/tom_mordang.jpg" alt="Tom Mordang" style={{ width: "112px", height: "112px", borderRadius: "18px", objectFit: "cover", flexShrink: 0 }} />
+                  <div>
+                    <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>Dirigent</p>
+                    <p style={{ fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px", margin: "0 0 6px" }}>Tom Mordang</p>
+                    <p style={{ fontSize: "14px", color: "#555", lineHeight: 1.6, margin: 0 }}>Leidt het koor met een frisse en positieve energie.</p>
                   </div>
-                </Reveal>
-
-                {/* Rij 2 */}
-                <Reveal delay={160} style={{ height: "100%" }}>
-                  <div style={{ background: "var(--primary)", borderRadius: "20px", padding: "28px 32px", display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%" }}>
-                    <p style={{ fontSize: "52px", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-3px", margin: "0 0 4px" }}>60<span style={{ fontSize: "28px" }}>+</span></p>
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.80)", margin: 0 }}>zangers & zangeressen · 5 stemgroepen</p>
+                </div>
+              </Reveal>
+              <Reveal delay={100} style={{ height: "100%" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "24px", background: "#FFF8F4", borderRadius: "24px", padding: "24px", height: "100%", border: "1px solid rgba(243,106,42,0.12)" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/deschakel.jpg" alt="CCGR De Schakel" style={{ width: "112px", height: "112px", borderRadius: "18px", objectFit: "cover", flexShrink: 0 }} />
+                  <div>
+                    <p style={{ fontSize: "11px", fontWeight: 700, color: "#7C3AED", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>Repetities</p>
+                    <p style={{ fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px", margin: "0 0 6px" }}>Dinsdag · 19:30 – 21:30</p>
+                    <p style={{ fontSize: "14px", color: "#555", lineHeight: 1.6, margin: 0 }}>CCGR De Schakel, Gilze — meezingen is altijd welkom.</p>
                   </div>
-                </Reveal>
-
-                <Reveal delay={200} style={{ height: "100%" }}>
-                  <div style={{ background: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderRadius: "20px", padding: "28px 32px", border: "1px solid rgba(255,255,255,0.15)", height: "100%" }}>
-                    <p style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>Dirigent</p>
-                    <p style={{ fontSize: "20px", fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", margin: "0 0 6px" }}>Tom Mordang</p>
-                    <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.70)", lineHeight: 1.6, margin: 0 }}>Leidt het koor met een frisse en positieve energie.</p>
-                  </div>
-                </Reveal>
-
-                <Reveal delay={240} style={{ height: "100%" }}>
-                  <div style={{ background: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderRadius: "20px", padding: "28px 32px", border: "1px solid rgba(255,255,255,0.15)", height: "100%" }}>
-                    <p style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>Repetities</p>
-                    <p style={{ fontSize: "20px", fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", margin: "0 0 6px" }}>Dinsdag · 20:00</p>
-                    <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.70)", lineHeight: 1.6, margin: 0 }}>De Schakel, Gilze — proeven is altijd welkom.</p>
-                  </div>
-                </Reveal>
-
-              </div>
+                </div>
+              </Reveal>
             </div>
           </div>
 
           {/* Wave → warm */}
-          <div aria-hidden="true" style={{ position: "relative", lineHeight: 0, zIndex: 1 }}>
+          <div aria-hidden="true" style={{ position: "absolute", bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
             <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "80px" }}>
-              <path d="M0,80 L0,42 Q360,5 720,38 Q1080,68 1440,22 L1440,80 Z" fill="#FFF8F4" />
+              <path d="M0,80 L0,48 Q360,12 720,44 Q1080,72 1440,25 L1440,80 Z" fill="#FFF8F4" />
             </svg>
           </div>
 
           <style>{`
-            @media (max-width: 768px) {
-              .verhaal-bento { grid-template-columns: 1fr 1fr !important; }
-              .verhaal-bento > div:first-child { grid-column: 1 / 3 !important; }
+            @media (max-width: 900px) {
+              .verhaal-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+              .info-grid { grid-template-columns: 1fr !important; }
             }
-            @media (max-width: 480px) {
-              .verhaal-bento { grid-template-columns: 1fr !important; }
-              .verhaal-bento > div:first-child { grid-column: 1 !important; }
+            @media (max-width: 640px) {
+              .overons-hero-inner { padding: 130px 20px 100px !important; }
+              .kenmerken-grid { grid-template-columns: 1fr !important; gap: 28px !important; margin-top: 64px !important; }
+              .info-grid { margin-top: 56px !important; }
+            }
+            @media (max-width: 420px) {
+              .cijfers-grid { grid-template-columns: 1fr !important; }
+              .info-grid img { width: 80px !important; height: 80px !important; }
             }
           `}</style>
         </section>
@@ -175,7 +210,7 @@ export default function OverOnsPage() {
                   style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
                 />
               </div>
-              <a
+              <Link
                 href="/media"
                 style={{
                   fontSize: "14px",
@@ -191,19 +226,20 @@ export default function OverOnsPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(243,106,42,0.25)")}
               >
                 Naar foto&apos;s &amp; video&apos;s →
-              </a>
+              </Link>
             </Reveal>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }} className="sfeer-grid">
               {sfeerItems.map((item, i) => (
                 <Reveal key={item.label} delay={i * 100}>
-                  <div
+                  <Link
+                    href="/media"
                     style={{
+                      display: "block",
                       borderRadius: "20px",
                       overflow: "hidden",
                       position: "relative",
                       aspectRatio: "4/3",
-                      cursor: "pointer",
                       background: item.gradient,
                     }}
                     className="card-hover"
@@ -232,7 +268,7 @@ export default function OverOnsPage() {
                       </p>
                       <p style={{ margin: 0, fontSize: "12px", color: "rgba(255,255,255,0.65)" }}>{item.sub}</p>
                     </div>
-                  </div>
+                  </Link>
                 </Reveal>
               ))}
             </div>
@@ -274,8 +310,8 @@ export default function OverOnsPage() {
               >
                 Nieuwsgierig? Kom gewoon langs op dinsdagavond. Geen auditie, geen verplichtingen — gewoon meezingen en kijken of het iets voor jou is.
               </p>
-              <a
-                href="/meezingen"
+              <Link
+                href="/contact#meezingen"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -300,7 +336,7 @@ export default function OverOnsPage() {
                 }}
               >
                 Meer info →
-              </a>
+              </Link>
             </Reveal>
           </div>
 

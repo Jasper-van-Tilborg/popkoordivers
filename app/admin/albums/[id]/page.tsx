@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { btnDanger } from "../../_components/adminStyles";
 
 interface Foto {
@@ -99,10 +100,10 @@ export default function AlbumDetailPage({ params }: PageProps) {
   return (
     <div>
       {/* Header */}
-      <div style={{ padding: "28px 32px 24px", background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
-        <a href="/admin/albums" style={{ fontSize: "12px", color: "#aaa", textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px", marginBottom: "12px" }}>
+      <div style={{ padding: "28px 32px 24px", background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 20, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <Link href="/admin/albums" style={{ fontSize: "12px", color: "#aaa", textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px", marginBottom: "12px" }}>
           ← Albums
-        </a>
+        </Link>
         <h1 style={{ margin: "0 0 4px", fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px" }}>{album.titel}</h1>
         <p style={{ margin: 0, fontSize: "13px", color: "#888" }}>
           {album.datum} · {fotos.length} foto{fotos.length !== 1 ? "'s" : ""} ·{" "}

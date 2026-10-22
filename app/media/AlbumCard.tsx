@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 interface AlbumCardProps {
   slug: string;
   title: string;
@@ -9,7 +11,7 @@ export default function AlbumCard({ slug, title, datum, photos }: AlbumCardProps
   if (photos.length === 0) return null;
 
   return (
-    <a
+    <Link
       href={`/media/${slug}`}
       style={{ textDecoration: "none", display: "block", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", transition: "transform 0.2s, box-shadow 0.2s" }}
       className="card-hover"
@@ -25,6 +27,6 @@ export default function AlbumCard({ slug, title, datum, photos }: AlbumCardProps
         <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#111", lineHeight: 1.3 }}>{title}</p>
         <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#aaa", fontWeight: 500 }}>{datum}</p>
       </div>
-    </a>
+    </Link>
   );
 }

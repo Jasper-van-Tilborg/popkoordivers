@@ -21,8 +21,10 @@
   --text-muted: #888888;
 
   --border: rgba(0,0,0,0.08);
-  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-  --shadow-md: 0 2px 8px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.07);
+  --shadow-sm: 0 1px 2px rgba(17,17,17,0.04), 0 4px 16px rgba(17,17,17,0.04);
+  --shadow-md: 0 1px 2px rgba(17,17,17,0.04), 0 12px 40px -8px rgba(17,17,17,0.12);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @theme inline {
@@ -42,6 +44,11 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+::selection {
+  background: rgba(243,106,42,0.22);
+  color: var(--text-primary);
+}
+
 body {
   background: var(--bg);
   color: var(--text-primary);
@@ -49,6 +56,21 @@ body {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typografie ── */
+h1, h2, h3 {
+  font-family: var(--font-display), var(--font-manrope), system-ui, sans-serif;
+  text-wrap: balance;
+}
+p { text-wrap: pretty; }
+
+/* ── Focus ── */
+a, button { -webkit-tap-highlight-color: transparent; }
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
 /* ── Layout ── */
@@ -60,8 +82,8 @@ body {
 
 /* ── Scroll reveal animations ── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(28px); }
-  to   { opacity: 1; transform: translateY(0);    }
+  from { opacity: 0; transform: translateY(24px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0);    filter: none;      }
 }
 
 @keyframes fadeIn {
@@ -73,16 +95,40 @@ body {
   opacity: 0;
 }
 .reveal.in-view {
-  animation: fadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: fadeUp 0.8s var(--ease-out) forwards;
 }
 .reveal-fade.in-view {
   animation: fadeIn 0.65s ease forwards;
 }
 
-.card-hover:hover {
-  box-shadow: 0 8px 28px rgba(0,0,0,0.09) !important;
-  transform: translateY(-3px) !important;
+.card-hover {
+  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out) !important;
 }
+.card-hover:hover {
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-4px) !important;
+}
+/* ── Knoppen ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: 35px;
+  text-decoration: none;
+  border: 1.5px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s, transform 0.12s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn--primary { background: var(--primary); color: #fff; box-shadow: 0 4px 16px rgba(243,106,42,0.28); }
+.btn--primary:hover { opacity: 0.9; }
+.btn--soft { background: rgba(243,106,42,0.08); color: var(--primary); border-color: rgba(243,106,42,0.2); }
+.btn--soft:hover { background: var(--primary); color: #fff; }
+.btn--ghost { background: none; color: #888; font-weight: 600; padding: 12px 20px; border-color: rgba(0,0,0,0.12); }
+.btn--ghost:hover { color: #111; border-color: rgba(0,0,0,0.25); transform: none; }
+
 .event-row:hover {
   transform: translateX(4px) !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
@@ -104,4 +150,33 @@ body {
   }
   .reveal, .reveal-fade { opacity: 1 !important; }
   html { scroll-behavior: auto; }
+}
+
+/* ── Admin ── */
+.admin-shell button {
+  transition: transform 0.12s var(--ease-out), filter 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.admin-shell button:hover:not(:disabled) { filter: brightness(0.97); }
+.admin-shell button:active:not(:disabled) { transform: scale(0.98); }
+.admin-shell button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.admin-shell input:not([type="checkbox"]):not([type="color"]):not([type="file"]),
+.admin-shell textarea,
+.admin-shell select {
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.admin-shell input:not([type="checkbox"]):not([type="color"]):not([type="file"]):focus,
+.admin-shell textarea:focus,
+.admin-shell select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(243,106,42,0.15) !important;
+}
+
+.admin-shell tbody tr { transition: background 0.12s; }
+.admin-shell tbody tr:hover { background: #FBFAF8; }
+.admin-shell tbody tr:last-child td { border-bottom: none !important; }
+
+.admin-sidebar nav a:not([aria-current]):hover {
+  background: rgba(255,255,255,0.06) !important;
+  color: #fff !important;
 }

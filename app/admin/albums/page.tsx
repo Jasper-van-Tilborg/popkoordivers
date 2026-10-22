@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { btnPrimary, btnDanger, inputStyle, labelStyle } from "../_components/adminStyles";
 
 interface Album {
@@ -60,13 +61,13 @@ export default function AlbumsPage() {
 
   return (
     <div>
-      <div style={{ padding: "28px 32px 24px", background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+      <div style={{ padding: "28px 32px 24px", background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 20, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
         <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px" }}>Albums</h1>
         <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#888" }}>{albums.length} album{albums.length !== 1 ? "s" : ""}</p>
       </div>
 
       {/* Nieuw album form */}
-      <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", padding: "24px" }}>
+      <div style={{ margin: "24px 32px 0", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", padding: "24px" }}>
         <p style={{ margin: "0 0 16px", fontSize: "14px", fontWeight: 700, color: "#111" }}>Nieuw album aanmaken</p>
         <form onSubmit={create} style={{ display: "grid", gridTemplateColumns: "2fr 1fr auto", gap: "12px", alignItems: "flex-end" }}>
           <div>
@@ -87,7 +88,7 @@ export default function AlbumsPage() {
       </div>
 
       {/* Albums lijst */}
-      <div style={{ margin: "16px 32px 32px", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
+      <div style={{ margin: "16px 32px 32px", background: "#fff", borderRadius: "16px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "var(--shadow-sm)", overflow: "hidden" }}>
         {loading ? (
           <p style={{ padding: "32px", color: "#888", fontSize: "14px" }}>Laden…</p>
         ) : albums.length === 0 ? (
@@ -105,12 +106,12 @@ export default function AlbumsPage() {
               {albums.map((album) => (
                 <tr key={album.id}>
                   <td style={{ padding: "14px 16px", fontSize: "14px", color: "#111", fontWeight: 600, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-                    <a href={`/admin/albums/${album.id}`} style={{ color: "inherit", textDecoration: "none" }}
+                    <Link href={`/admin/albums/${album.id}`} style={{ color: "inherit", textDecoration: "none" }}
                       onMouseEnter={(e) => (e.currentTarget.style.color = "var(--primary)")}
                       onMouseLeave={(e) => (e.currentTarget.style.color = "#111")}
                     >
                       {album.titel}
-                    </a>
+                    </Link>
                   </td>
                   <td style={{ padding: "14px 16px", fontSize: "14px", color: "#555", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>{album.datum}</td>
                   <td style={{ padding: "14px 16px", fontSize: "14px", color: "#555", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>{album.totaal_fotos}</td>
@@ -121,9 +122,9 @@ export default function AlbumsPage() {
                   </td>
                   <td style={{ padding: "14px 16px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                     <div style={{ display: "flex", gap: "8px" }}>
-                      <a href={`/admin/albums/${album.id}`} style={{ ...btnPrimary, textDecoration: "none", fontSize: "12px", padding: "6px 14px" }}>
+                      <Link href={`/admin/albums/${album.id}`} style={{ ...btnPrimary, textDecoration: "none", fontSize: "12px", padding: "6px 14px" }}>
                         Beheren →
-                      </a>
+                      </Link>
                       <button style={btnDanger} onClick={() => remove(album)}>Verwijderen</button>
                     </div>
                   </td>

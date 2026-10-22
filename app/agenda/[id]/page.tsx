@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
@@ -48,7 +49,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
             <Reveal delay={0}>
-              <a
+              <Link
                 href="/agenda"
                 style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.65)", textDecoration: "none", marginBottom: "28px", transition: "color 0.15s" }}
               >
@@ -56,7 +57,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5M12 5l-7 7 7 7" />
                 </svg>
                 Terug naar agenda
-              </a>
+              </Link>
             </Reveal>
 
             <Reveal delay={80}>
@@ -150,45 +151,23 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
             <Reveal>
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                 {event.link && (
-                  <a
-                    href={event.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--primary)", color: "#fff", fontWeight: 700, fontSize: "14px", padding: "12px 24px", borderRadius: "35px", textDecoration: "none", boxShadow: "0 4px 16px rgba(243,106,42,0.28)", transition: "opacity 0.15s, transform 0.12s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-                  >
+                  <a href={event.link} target="_blank" rel="noopener noreferrer" className="btn btn--primary">
                     Meer info / kaartjes →
                   </a>
                 )}
                 {event.fotos_url && (
-                  <a
-                    href={event.fotos_url}
-                    style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(243,106,42,0.08)", color: "var(--primary)", fontWeight: 700, fontSize: "14px", padding: "12px 24px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid rgba(243,106,42,0.2)", transition: "background 0.15s, color 0.15s, transform 0.12s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(243,106,42,0.08)"; e.currentTarget.style.color = "var(--primary)"; e.currentTarget.style.transform = "translateY(0)"; }}
-                  >
+                  <a href={event.fotos_url} className="btn btn--soft">
                     Foto&apos;s bekijken →
                   </a>
                 )}
                 {!event.fotos_url && !isKomend && (
-                  <a
-                    href="/leden#optredens"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(243,106,42,0.08)", color: "var(--primary)", fontWeight: 700, fontSize: "14px", padding: "12px 24px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid rgba(243,106,42,0.2)", transition: "background 0.15s, color 0.15s, transform 0.12s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(243,106,42,0.08)"; e.currentTarget.style.color = "var(--primary)"; e.currentTarget.style.transform = "translateY(0)"; }}
-                  >
+                  <Link href="/leden#optredens" className="btn btn--soft">
                     Foto&apos;s (ledenomgeving) →
-                  </a>
+                  </Link>
                 )}
-                <a
-                  href="/agenda"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "none", color: "#888", fontWeight: 600, fontSize: "14px", padding: "12px 20px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid rgba(0,0,0,0.12)", transition: "border-color 0.15s, color 0.15s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.25)"; e.currentTarget.style.color = "#111"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; e.currentTarget.style.color = "#888"; }}
-                >
+                <Link href="/agenda" className="btn btn--ghost">
                   ← Terug naar agenda
-                </a>
+                </Link>
               </div>
             </Reveal>
 

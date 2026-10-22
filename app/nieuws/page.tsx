@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
@@ -16,7 +17,7 @@ export default async function NieuwsPage() {
   const supabase = await createClient();
   const { data: berichten } = await supabase
     .from("berichten")
-    .select("id, slug, titel, datum, categorie, intro")
+    .select("id, slug, titel, datum, categorie, intro, afbeelding")
     .eq("gepubliceerd", true)
     .order("created_at", { ascending: false });
 
@@ -61,17 +62,6 @@ export default async function NieuwsPage() {
         <section className="section-pad" style={{ background: "#FFFFFF", padding: "80px 24px 120px", overflow: "hidden", position: "relative" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
-            <Reveal style={{ marginBottom: "48px" }}>
-              <p style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                Alle berichten
-              </p>
-              <RevealText
-                text="Laatste nieuws"
-                pageDelay={200}
-                style={{ fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
-              />
-            </Reveal>
-
             {!berichten || berichten.length === 0 ? (
               <Reveal>
                 <p style={{ fontSize: "16px", color: "#aaa", textAlign: "center", padding: "60px 0" }}>
@@ -82,7 +72,7 @@ export default async function NieuwsPage() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }} className="nieuws-grid">
                 {berichten.map((bericht, i) => (
                   <Reveal key={bericht.id} delay={Math.min(i % 3, 2) * 80}>
-                    <a href={`/nieuws/${bericht.slug}`} style={{ display: "block", textDecoration: "none", height: "100%" }}>
+                    <Link href={`/nieuws/${bericht.slug}`} style={{ display: "block", textDecoration: "none", height: "100%" }}>
                       <article
                         style={{
                           background: "#FFFFFF",
@@ -97,14 +87,20 @@ export default async function NieuwsPage() {
                         }}
                         className="card-hover"
                       >
-                        {/* Gradient image placeholder */}
+                        {/* Afbeelding, of gradient als er geen is */}
                         <div
                           style={{
                             aspectRatio: "16/9",
                             background: cardGradients[i % cardGradients.length],
                             flexShrink: 0,
+                            overflow: "hidden",
                           }}
-                        />
+                        >
+                          {/^(https?:\/\/|\/)/.test(bericht.afbeelding ?? "") && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={bericht.afbeelding} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                          )}
+                        </div>
 
                         {/* Content */}
                         <div style={{ padding: "24px", display: "flex", flexDirection: "column", flex: 1 }}>
@@ -124,7 +120,7 @@ export default async function NieuwsPage() {
                           </span>
                         </div>
                       </article>
-                    </a>
+                    </Link>
                   </Reveal>
                 ))}
               </div>

@@ -1,10 +1,20 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+// Maakt losse URL's in de tekst klikbaar (bijv. YouTube-links)
+function linkify(text: string) {
+  return text.split(/(https?:\/\/\S+)/g).map((part, i) =>
+    /^https?:\/\//.test(part)
+      ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary)", fontWeight: 600, wordBreak: "break-all" }}>{part}</a>
+      : part
+  );
+}
 
 export default async function NieuwsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -19,6 +29,7 @@ export default async function NieuwsDetailPage({ params }: { params: Promise<{ s
   if (!bericht) notFound();
 
   const paragraphs = bericht.inhoud.split("\n\n").filter(Boolean);
+  const heeftAfbeelding = /^(https?:\/\/|\/)/.test(bericht.afbeelding ?? "");
 
   return (
     <>
@@ -39,7 +50,7 @@ export default async function NieuwsDetailPage({ params }: { params: Promise<{ s
           <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%)", pointerEvents: "none" }} />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <Reveal delay={0}>
-              <a
+              <Link
                 href="/nieuws"
                 className="detail-back"
                 style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.65)", textDecoration: "none", marginBottom: "28px", transition: "color 0.15s" }}
@@ -48,7 +59,7 @@ export default async function NieuwsDetailPage({ params }: { params: Promise<{ s
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5M12 5l-7 7 7 7" />
                 </svg>
                 Terug naar nieuws
-              </a>
+              </Link>
             </Reveal>
             <Reveal delay={80}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
@@ -85,7 +96,12 @@ export default async function NieuwsDetailPage({ params }: { params: Promise<{ s
                 aspectRatio: "21/9",
                 background: "linear-gradient(135deg, #FDE8D8 0%, rgba(243,106,42,0.08) 50%, #FFF8F4 100%)",
               }}
-            />
+            >
+              {heeftAfbeelding && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={bericht.afbeelding} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              )}
+            </div>
           </section>
         </Reveal>
 
@@ -97,11 +113,11 @@ export default async function NieuwsDetailPage({ params }: { params: Promise<{ s
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               {paragraphs.map((p: string, i: number) => (
-                <p key={i} style={{ fontSize: "16px", lineHeight: 1.85, color: "#444", margin: 0 }}>{p}</p>
+                <p key={i} style={{ fontSize: "16px", lineHeight: 1.85, color: "#444", margin: 0 }}>{linkify(p)}</p>
               ))}
             </div>
             <div style={{ marginTop: "64px", paddingTop: "32px", borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-              <a
+              <Link
                 href="/nieuws"
                 className="detail-back-btn"
                 style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(243,106,42,0.08)", color: "var(--primary)", fontWeight: 700, fontSize: "14px", padding: "11px 22px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid rgba(243,106,42,0.2)", transition: "background 0.15s, color 0.15s, transform 0.12s" }}
@@ -110,7 +126,7 @@ export default async function NieuwsDetailPage({ params }: { params: Promise<{ s
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5M12 5l-7 7 7 7" />
                 </svg>
                 Terug naar nieuws
-              </a>
+              </Link>
             </div>
           </div>
         </section>
