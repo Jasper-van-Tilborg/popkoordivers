@@ -41,3 +41,7 @@ Zet deze in `.env.local` (lokaal) en in de projectinstellingen op Vercel.
 - `lib/r2.ts` — uploaden naar en verwijderen uit R2.
 - `supabase/migrations/` — databaseschema als migraties. Nieuwe wijziging: `npx supabase migration new <naam>`, toepassen met `npx supabase db push`.
 - `supabase/archief/` — oude SQL-scripts van vóór de migraties, alleen ter referentie.
+
+## Keepalive
+
+Een gratis Supabase-project wordt gepauzeerd na 7 dagen zonder verkeer. Daarom draait in Supabase de cron-job `keepalive` (elke dag om 03:00 UTC). Die doet via `pg_net` een verzoek op `/rest/v1/agenda`. De job staat niet in de migraties, omdat hij de API-sleutel bevat. Bekijken kan met `select * from cron.job;` in de SQL-editor.
