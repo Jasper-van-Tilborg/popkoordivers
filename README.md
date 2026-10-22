@@ -39,4 +39,5 @@ Zet deze in `.env.local` (lokaal) en in de projectinstellingen op Vercel.
 - `proxy.ts` — stuurt niet-ingelogde bezoekers van `/leden` en `/admin` naar de loginpagina.
 - `lib/supabase/` — Supabase-clients voor browser, server en admin.
 - `lib/r2.ts` — uploaden naar en verwijderen uit R2.
-- `supabase/` — SQL-scripts die in de Supabase SQL-editor zijn uitgevoerd.
+- `supabase/migrations/` — databaseschema als migraties. Nieuwe wijziging: `npx supabase migration new <naam>`, toepassen met `npx supabase db push`.
+- `supabase/archief/` — oude SQL-scripts van vóór de migraties, alleen ter referentie.

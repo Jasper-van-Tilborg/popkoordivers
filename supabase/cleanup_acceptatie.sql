@@ -35,9 +35,6 @@ DROP POLICY IF EXISTS "liedjes_select_auth"          ON storage.objects;
 DROP POLICY IF EXISTS "liedjes_insert_admin"         ON storage.objects;
 DROP POLICY IF EXISTS "media_select_auth"            ON storage.objects;
 DROP POLICY IF EXISTS "media_insert_admin"           ON storage.objects;
-DROP POLICY IF EXISTS "Public read fotos bucket"     ON storage.objects;
-DROP POLICY IF EXISTS "Admin upload fotos bucket"    ON storage.objects;
-DROP POLICY IF EXISTS "Admin delete fotos bucket"    ON storage.objects;
 
 COMMIT;
 
