@@ -17,7 +17,7 @@ export default async function BladmuziekPage() {
   return (
     <>
       <Kop titel="Bladmuziek" tekst={stemgroep ? `Per stemgroep. De lijst opent bij ${stemgroep}; bladmuziek voor het hele koor staat bij elke stemgroep.` : "Per stemgroep. Bladmuziek voor het hele koor staat bij elke stemgroep."} />
-      <Sectie warm>
+      <Sectie>
         <div className="leden-kaart" style={{ padding: 28 }}>
           <StemTabs liedjes={perStem} begin={stemgroep} />
         </div>

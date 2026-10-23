@@ -97,18 +97,27 @@ html[data-vt="leden-links"]::view-transition-new(leden-pagina) { animation-name:
 .leden-pagina[data-geschoven] .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
 
 /* ── Pagina's ── */
-.leden-main { min-height: 100vh; background: #fff; overflow-x: clip; }
+/* De achtergrond van de hele ledenomgeving: de oranje gloed van bovenaan, met
+   zachte gloeden lager op de pagina. Staat vast achter alles, ook tijdens het wisselen. */
+.leden-achtergrond {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(1400px 620px at 50% -140px, rgba(243,106,42,0.20), transparent 70%),
+    radial-gradient(900px 700px at 105% 55%, rgba(243,106,42,0.09), transparent 70%),
+    radial-gradient(800px 600px at -10% 100%, rgba(124,58,237,0.06), transparent 70%),
+    #FFFCFA;
+}
+.leden-main { min-height: 100vh; overflow-x: clip; }
 /* Zonder footer: wat ruimte onder de laatste sectie */
 .leden-pagina main { padding-bottom: 48px; }
 .leden-binnen { max-width: 1200px; margin: 0 auto; }
-.leden-kopvlak { background: var(--gradient-hero), #fff; padding: 120px 24px 48px; }
+.leden-kopvlak { padding: 120px 24px 20px; }
 .leden-kopvlak h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 800; letter-spacing: -2px; line-height: 1.05; color: #111; margin: 0 0 12px; }
 .leden-kopvlak p { font-size: 16px; line-height: 1.7; color: #666; margin: 0; max-width: 560px; }
-.leden-section { padding: 64px 24px; }
-.leden-section--warm { background: #FFF8F4; }
+.leden-section { padding: 28px 24px; }
 .leden-h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -1px; line-height: 1.15; color: #111; margin: 0 0 24px; display: flex; align-items: center; gap: 12px; }
 .leden-telling { font-size: 12px; font-weight: 700; color: var(--primary); background: rgba(243,106,42,0.10); padding: 3px 10px; border-radius: 100px; letter-spacing: 0; }
-.leden-kaart { background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: var(--shadow-sm); }
+.leden-kaart { background: rgba(255,255,255,0.86); border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: var(--shadow-sm); }
 .leden-leeg { font-size: 14px; color: #aaa; margin: 0; }
 .leden-twee { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
 .leden-kaart-titel { font-size: 15px; font-weight: 700; color: #111; margin: 0; padding: 18px 22px; border-bottom: 1px solid rgba(0,0,0,0.06); }
@@ -203,8 +212,8 @@ html[data-vt="leden-links"]::view-transition-new(leden-pagina) { animation-name:
   .leden-twee { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .leden-kopvlak { padding: 132px 16px 36px; }
-  .leden-section { padding: 44px 16px; }
+  .leden-kopvlak { padding: 132px 16px 12px; }
+  .leden-section { padding: 20px 16px; }
   .leden-tegels { grid-template-columns: 1fr; gap: 12px; }
   .leden-tegel--groot { grid-column: auto; }
   .leden-tegel { min-height: 0; padding: 20px; }

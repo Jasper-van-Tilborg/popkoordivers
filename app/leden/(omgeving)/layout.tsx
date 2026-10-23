@@ -10,6 +10,8 @@ export default async function LedenLayout({ children }: { children: ReactNode })
   const { rol } = await sessie();
   return (
     <>
+      {/* Eén doorlopende achtergrond die blijft staan; de pagina's schuiven eroverheen */}
+      <div className="leden-achtergrond" aria-hidden="true" />
       <Navbar rol={rol} />
       <div className="leden-main">
         <LedenPagina>

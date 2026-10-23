@@ -90,7 +90,7 @@ export default async function OverzichtPage() {
       </section>
 
       {alles.length > 0 && (
-        <Sectie titel="Laatst toegevoegd" warm>
+        <Sectie titel="Laatst toegevoegd">
           <div className="leden-kaart" style={{ overflow: "hidden" }}>
             {alles.slice(0, 5).map((b) => (
               <a key={b.id} href={b.url} target="_blank" rel="noopener" className="leden-row">

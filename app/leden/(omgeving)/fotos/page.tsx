@@ -22,7 +22,7 @@ export default async function FotosPage() {
   return (
     <>
       <Kop titel="Foto's" tekst="Alle fotoalbums van het koor, en de optredens die we al gehad hebben." />
-      <Sectie titel="Fotoalbums" aantal={metFotos.length} warm>
+      <Sectie titel="Fotoalbums" aantal={metFotos.length}>
         {metFotos.length === 0 ? (
           <p className="leden-leeg">Nog geen albums.</p>
         ) : (

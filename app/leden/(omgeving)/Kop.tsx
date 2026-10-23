@@ -16,9 +16,9 @@ export function Kop({ titel, tekst, children }: { titel: string; tekst: string; 
   );
 }
 
-export function Sectie({ titel, aantal, warm, id, children }: { titel?: string; aantal?: number; warm?: boolean; id?: string; children: ReactNode }) {
+export function Sectie({ titel, aantal, id, children }: { titel?: string; aantal?: number; id?: string; children: ReactNode }) {
   return (
-    <section id={id} className={`leden-section${warm ? " leden-section--warm" : ""}`}>
+    <section id={id} className="leden-section">
       <div className="leden-binnen">
         {titel && (
           <Reveal>

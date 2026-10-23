@@ -30,7 +30,7 @@ export default async function WieIsWiePage() {
     <>
       <Kop titel="Wie is wie" tekst="Het bestuur, de commissies en wie erin zitten, en het smoelenboek van het koor." />
 
-      <Sectie titel="Bestuur" warm id="bestuur">
+      <Sectie titel="Bestuur" id="bestuur">
         {bestuursleden.length === 0 ? (
           <p className="leden-leeg">Binnenkort beschikbaar.</p>
         ) : (
@@ -49,7 +49,7 @@ export default async function WieIsWiePage() {
       </Sectie>
 
       {commissies.length > 0 && (
-        <Sectie titel="Commissies" warm id="commissies">
+        <Sectie titel="Commissies" id="commissies">
           {/* Twee losse kolommen: een commissie openklappen duwt alleen die kolom omlaag */}
           <div className="commissie-kolommen">
             {[0, 1].map((k) => (

@@ -11,7 +11,7 @@ export default async function NieuwsbrievenPage() {
   return (
     <>
       <Kop titel="Nieuwsbrieven & ALV" tekst="De nieuwsbrieven en de stukken voor de algemene ledenvergadering, nieuwste bovenaan." />
-      <Sectie warm>
+      <Sectie>
         <div className="leden-twee">
           {groepen.map((g) => (
             <div key={g.titel} className="leden-kaart" style={{ overflow: "hidden" }}>
