@@ -21,7 +21,7 @@ const rolNaam: Record<Rol, string> = { lid: "lid", redacteur: "redacteur", admin
 
 function vernieuw() {
   revalidatePath("/admin/gebruikers");
-  revalidatePath("/leden");
+  revalidatePath("/leden", "layout");
 }
 
 const profiel = (input: LidInput) => ({

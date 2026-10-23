@@ -20,7 +20,7 @@ export interface GroepInput {
 
 function vernieuw() {
   revalidatePath("/admin/organisatie");
-  revalidatePath("/leden");
+  revalidatePath("/leden", "layout");
 }
 
 // Slaat een groep op met al zijn mensen in de getoonde volgorde. Bestaande mensen

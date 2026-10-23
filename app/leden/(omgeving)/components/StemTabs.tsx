@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const stemgroepen = ["Alt", "Mezzo", "Sopraan", "Tenor", "Bas"] as const;
+const stemgroepen = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas"] as const;
 type Stemgroep = (typeof stemgroepen)[number];
 
 interface Lied {
@@ -13,10 +13,12 @@ interface Lied {
 
 interface Props {
   liedjes: Record<string, Lied[]>;
+  // De stemgroep van het lid zelf; daar opent de lijst mee
+  begin?: string | null;
 }
 
-export default function StemTabs({ liedjes }: Props) {
-  const [active, setActive] = useState<Stemgroep>("Alt");
+export default function StemTabs({ liedjes, begin }: Props) {
+  const [active, setActive] = useState<Stemgroep>(stemgroepen.find((s) => s === begin) ?? "Sopraan");
   const huidigeLiedjes = liedjes[active] ?? [];
 
   return (

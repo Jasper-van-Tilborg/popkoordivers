@@ -24,7 +24,7 @@ function controleer(input: BestandInput) {
 
 function vernieuw() {
   revalidatePath("/admin/bestanden", "layout");
-  revalidatePath("/leden");
+  revalidatePath("/leden", "layout");
 }
 
 export async function bestandToevoegen(key: string, input: BestandInput) {
