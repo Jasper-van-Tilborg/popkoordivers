@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Kop, Sectie } from "../Kop";
-import { initialen, sessie } from "../data";
+import { db, initialen, sessie } from "../data";
 
 const Chevron = () => (
   <span className="leden-album__chevron" aria-hidden="true">
@@ -9,8 +9,10 @@ const Chevron = () => (
 );
 
 export default async function WieIsWiePage() {
-  const { supabase } = await sessie();
-  const [{ data: groepenRaw }, { data: ledenRaw }] = await Promise.all([
+  const supabase = await db();
+  // sessie() hoort erbij: zonder login gaat die naar de loginpagina voordat er iets getoond wordt
+  const [, { data: groepenRaw }, { data: ledenRaw }] = await Promise.all([
+    sessie(),
     supabase.from("groepen").select("id, naam, soort, toelichting, contactpersoon_id, volgorde, leden:groepsleden!groepsleden_groep_id_fkey(id, naam, functie, volgorde)").order("volgorde"),
     // Leden mogen elkaars profiel niet rechtstreeks lezen (e-mailadressen); de server
     // haalt alleen naam en stemgroep op, na de login-check in sessie().

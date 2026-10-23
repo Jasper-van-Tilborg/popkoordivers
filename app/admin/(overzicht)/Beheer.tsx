@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { bucketGebruik } from "@/lib/r2";
+import { bucketGebruikGecachet } from "@/lib/r2";
 import { IconCalendar, IconNewspaper, IconCamera, IconFolder } from "@/components/icons";
 import { version as nextVersie } from "next/package.json";
 import { NL, Zin, geleden } from "../_components/activiteit";
@@ -24,8 +24,8 @@ export default async function Beheer({ nu }: { nu: Date }) {
     supabase.from("bestanden").select("id", { count: "exact", head: true }),
     supabase.from("activiteit").select("id, wanneer, wie_naam, actie, soort, item_id, item_naam").order("id", { ascending: false }).limit(8),
     supabase.rpc("sitestatus"),
-    bucketGebruik("openbaar").catch(() => null),
-    bucketGebruik("prive").catch(() => null),
+    bucketGebruikGecachet("openbaar").catch(() => null),
+    bucketGebruikGecachet("prive").catch(() => null),
     createAdminClient().auth.admin.listUsers({ perPage: 1000 }),
     supabase.from("profiles").select("id, naam, rol"),
   ]);

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { huidigeSessie } from "@/lib/auth";
 import { NL, Zin, type ActiviteitRegel } from "../_components/activiteit";
 
 const PER_PAGINA = 50;
@@ -25,10 +25,9 @@ const dagTitel = (iso: string, nu: Date) => {
 
 export default async function ActiviteitPage({ searchParams }: { searchParams: Promise<{ soort?: string; wie?: string; voor?: string }> }) {
   const { soort = "", wie = "", voor } = await searchParams;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: ik } = await supabase.from("profiles").select("rol").eq("id", user?.id ?? "").single();
+  const ik = await huidigeSessie();
   if (ik?.rol !== "admin") redirect("/admin");
+  const { supabase } = ik;
 
   const filter = FILTERS.find((f) => f.id === soort) ?? FILTERS[0];
   let q = supabase.from("activiteit").select("id, wanneer, wie, wie_naam, actie, soort, item_id, item_naam").order("id", { ascending: false }).limit(PER_PAGINA + 1);

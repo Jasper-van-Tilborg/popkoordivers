@@ -1,14 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
+import { huidigeSessie } from "@/lib/auth";
 import { NL } from "../_components/activiteit";
 import Redactie from "./Redactie";
 import Beheer from "./Beheer";
 
 // Een redacteur ziet hier alles om iets te maken; een beheerder hoe de site ervoor staat.
 export default async function OverzichtPage() {
-  const supabase = await createClient();
   const nu = new Date();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: ik } = await supabase.from("profiles").select("naam, rol").eq("id", user?.id ?? "").single();
+  const ik = await huidigeSessie();
 
   const voornaam = ik?.naam?.split(" ")[0];
   const datumTekst = nu.toLocaleDateString("nl-NL", { timeZone: NL, weekday: "long", day: "numeric", month: "long" });

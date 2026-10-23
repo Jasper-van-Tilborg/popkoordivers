@@ -1,10 +1,10 @@
 import { downloadUrl } from "@/lib/r2";
 import { IconCamera, IconPlay } from "@/components/icons";
 import { Kop, Sectie } from "../Kop";
-import { sessie } from "../data";
+import { db } from "../data";
 
 export default async function FotosPage() {
-  const { supabase } = await sessie();
+  const supabase = await db();
   const vandaag = new Date().toISOString().split("T")[0];
   const [{ data: albums }, { data: fotos }, { data: optredens }] = await Promise.all([
     supabase.from("albums").select("id, slug, titel, datum").order("created_at", { ascending: false }),

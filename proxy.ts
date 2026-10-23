@@ -25,9 +25,9 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims controleert het token lokaal (ES256) en ververst de sessie als die bijna verloopt
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims.sub ? { id: data.claims.sub } : null;
 
   const isLoginPage = request.nextUrl.pathname === "/leden/login";
 

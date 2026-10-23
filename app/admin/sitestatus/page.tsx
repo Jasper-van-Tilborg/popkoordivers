@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { version as nextVersie } from "next/package.json";
-import { createClient } from "@/lib/supabase/server";
+import { huidigeSessie } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { bucketGebruik } from "@/lib/r2";
 import { NL, geleden } from "../_components/activiteit";
@@ -21,10 +21,9 @@ const TABELLEN = [
 ] as const;
 
 export default async function SitestatusPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: ik } = await supabase.from("profiles").select("rol").eq("id", user?.id ?? "").single();
+  const ik = await huidigeSessie();
   if (ik?.rol !== "admin") redirect("/admin");
+  const { supabase } = ik;
 
   const nu = new Date();
   const admin = createAdminClient();

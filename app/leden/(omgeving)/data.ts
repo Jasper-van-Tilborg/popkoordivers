@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import { huidigeSessie } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { downloadUrl } from "@/lib/r2";
 import type { Database } from "@/lib/database.types";
@@ -11,16 +12,18 @@ export const STEMGROEPEN: Stemgroep[] = ["Sopraan", "Mezzo", "Alt", "Tenor", "Ba
 
 // Wie er ingelogd is; één keer per verzoek, ook als layout en pagina het allebei vragen.
 export const sessie = cache(async () => {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/leden/login");
-  const { data: profiel } = await supabase.from("profiles").select("naam, rol, stemgroep").eq("id", user.id).single();
-  return { supabase, user, rol: profiel?.rol ?? "lid", naam: profiel?.naam ?? null, stemgroep: profiel?.stemgroep ?? null };
+  const s = await huidigeSessie();
+  if (!s) redirect("/leden/login");
+  return { ...s, rol: s.rol ?? "lid" };
 });
+
+// Voor de gegevens van een pagina: niet wachten op het profiel. Wie niet is
+// ingelogd, komt hier niet (proxy.ts), en de database laat alleen leden lezen (RLS).
+export const db = cache(createClient);
 
 // Bestanden uit de ledenomgeving, nieuwste eerst, met een tijdelijke link (1 uur geldig).
 export async function bestanden(categorieen: string[]) {
-  const { supabase } = await sessie();
+  const supabase = await db();
   const { data } = await supabase
     .from("bestanden")
     .select("id, naam, categorie, stemgroep, r2_key, created_at")

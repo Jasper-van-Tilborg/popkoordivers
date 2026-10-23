@@ -4,7 +4,7 @@ import { getInstellingen } from "@/lib/instellingen";
 import { IconClock, IconMapPin, IconFolder, IconPlay, IconSparkle, IconCamera, IconUsers } from "@/components/icons";
 import { Kop, Sectie } from "./Kop";
 import PaginaLink from "./PaginaLink";
-import { STEMGROEPEN, bestanden, sessie } from "./data";
+import { STEMGROEPEN, bestanden, db, sessie } from "./data";
 
 const IconMuziek = ({ size = 22 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
@@ -32,8 +32,9 @@ function Tegel({ href, icoon, titel, tekst, groot, children }: { href: string; i
 
 // Het overzicht: welkom, de repetitie en een tegel naar elke pagina.
 export default async function OverzichtPage() {
-  const { supabase, naam, stemgroep } = await sessie();
-  const [inst, alles, albums, groepen] = await Promise.all([
+  const supabase = await db();
+  const [{ naam, stemgroep }, inst, alles, albums, groepen] = await Promise.all([
+    sessie(),
     getInstellingen(),
     bestanden(["liedjes", "nieuwsbrieven", "alv", "opnames", "choreo"]),
     supabase.from("albums").select("id", { count: "exact", head: true }),

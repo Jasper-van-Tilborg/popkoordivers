@@ -1,18 +1,16 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { huidigeSessie } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { inlognaam } from "@/lib/gebruikersnaam";
 import LedenClient from "./LedenClient";
 
 export default async function LedenAdminPage({ searchParams }: { searchParams: Promise<{ id?: string; nieuw?: string }> }) {
   const { id, nieuw } = await searchParams;
-  const supabase = await createClient();
   // Alleen voor admins; een redacteur gaat terug naar het overzicht
-  const { data: { user: ik } } = await supabase.auth.getUser();
-  const { data: mijnProfiel } = await supabase.from("profiles").select("rol").eq("id", ik?.id ?? "").single();
-  if (mijnProfiel?.rol !== "admin") redirect("/admin");
-  const [{ data: { user } }, { data: auth }, { data: profiles }] = await Promise.all([
-    supabase.auth.getUser(),
+  const ik = await huidigeSessie();
+  if (ik?.rol !== "admin") redirect("/admin");
+  const { supabase } = ik;
+  const [{ data: auth }, { data: profiles }] = await Promise.all([
     createAdminClient().auth.admin.listUsers({ perPage: 1000 }),
     supabase.from("profiles").select("id, naam, rol, stemgroep, in_smoelenboek"),
   ]);
@@ -31,5 +29,5 @@ export default async function LedenAdminPage({ searchParams }: { searchParams: P
     };
   }).sort((a, b) => (a.naam ?? a.email).localeCompare(b.naam ?? b.email, "nl"));
 
-  return <LedenClient leden={leden} eigenId={user?.id ?? ""} startId={nieuw !== undefined ? "nieuw" : id} />;
+  return <LedenClient leden={leden} eigenId={ik.user.id} startId={nieuw !== undefined ? "nieuw" : id} />;
 }

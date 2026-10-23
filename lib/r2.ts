@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import {
   S3Client,
   PutObjectCommand,
@@ -77,3 +78,7 @@ export async function bucketGebruik(bucket: Bucket): Promise<{ aantal: number; b
   } while (token);
   return { aantal, bytes };
 }
+
+// Voor het overzicht: de telling hoeft niet tot op de seconde te kloppen, en bij
+// veel foto's kost het optellen even. Vijf minuten bewaren; Sitestatus telt live.
+export const bucketGebruikGecachet = unstable_cache(bucketGebruik, ["r2-gebruik"], { revalidate: 300 });
