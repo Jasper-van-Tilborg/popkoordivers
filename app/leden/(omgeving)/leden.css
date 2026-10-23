@@ -27,8 +27,16 @@
   font-size: 14px; font-weight: 600; color: #555; text-decoration: none; white-space: nowrap; transition: color 0.2s;
 }
 .ln-links a:hover { color: #111; }
+.ln-links a[aria-current]:hover { color: var(--primary); }
 .ln-links a[aria-current] { color: var(--primary); }
 .ln-links a:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+/* Hover: een grijs vlak dat met de muis meeschuift; het oranje vlak ligt erboven */
+.ln-zweef {
+  position: absolute; top: 4px; bottom: 4px; left: 0; width: 0; opacity: 0; transform: scale(0.94);
+  border-radius: 100px; background: rgba(17,17,17,0.07); pointer-events: none;
+  transition: left 0.32s var(--ease-out), width 0.32s var(--ease-out), opacity 0.2s, transform 0.25s var(--ease-out);
+}
+.ln-zweef[data-zichtbaar] { opacity: 1; transform: none; }
 .ln-vlak {
   position: absolute; top: 4px; bottom: 4px; left: 0; width: 0; opacity: 0;
   border-radius: 100px; background: rgba(243,106,42,0.11); pointer-events: none;
@@ -53,7 +61,9 @@ a.ln-rol:hover { background: rgba(243,106,42,0.22); }
 .ln-knop--donker:hover { background: var(--primary); border-color: var(--primary); }
 .ln-knop:focus-visible, .ln-rol:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
+@media (prefers-reduced-motion: reduce) { .ln-zweef { transition: opacity 0.2s; } }
 @media (max-width: 1080px) {
+  .ln-links .ln-zweef { top: 4px; bottom: 8px; }
   .ln-balk {
     height: auto; padding: 10px 16px 0; row-gap: 6px;
     grid-template-columns: 1fr auto; grid-template-areas: "logo rechts" "links links";

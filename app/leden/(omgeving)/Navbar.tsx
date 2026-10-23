@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type PointerEvent } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -57,11 +57,30 @@ function Vlak({ doel }: { doel: string | null }) {
   return <span ref={vlak} className="ln-vlak" aria-hidden="true" />;
 }
 
+// Een zacht vlak dat met de muis meeschuift naar de link waar je overheen gaat.
+// Komt het net in beeld, dan verschijnt het op zijn plek in plaats van eraan te schuiven.
+function useZweef() {
+  const zweef = useRef<HTMLSpanElement>(null);
+  const naar = (e: PointerEvent<HTMLElement>) => {
+    const el = zweef.current;
+    const link = (e.target as HTMLElement).closest<HTMLElement>("a");
+    if (!el || !link || e.pointerType !== "mouse") return;
+    const nieuw = el.dataset.zichtbaar === undefined;
+    if (nieuw) el.style.transition = "none";
+    Object.assign(el.style, px({ left: link.offsetLeft, width: link.offsetWidth }));
+    if (nieuw) { void el.offsetWidth; el.style.transition = ""; }
+    el.dataset.zichtbaar = "";
+  };
+  const weg = () => { if (zweef.current) delete zweef.current.dataset.zichtbaar; };
+  return { zweef, naar, weg };
+}
+
 export default function Navbar({ rol }: { rol: "lid" | "redacteur" | "admin" }) {
   const pad = usePathname();
   const router = useRouter();
   const actief = knopVoor(pad);
   const badge = ROL[rol] ?? ROL.lid;
+  const { zweef, naar, weg } = useZweef();
 
   const logout = async () => {
     await createClient().auth.signOut();
@@ -77,7 +96,8 @@ export default function Navbar({ rol }: { rol: "lid" | "redacteur" | "admin" }) 
           <span className="ln-logo-sub">Ledenomgeving</span>
         </PaginaLink>
 
-        <nav className="ln-links" aria-label="Ledenomgeving">
+        <nav className="ln-links" aria-label="Ledenomgeving" onPointerOver={naar} onPointerLeave={weg}>
+          <span ref={zweef} className="ln-zweef" aria-hidden="true" />
           <Vlak doel={actief} />
           {PAGINAS.map((p) => (
             <PaginaLink key={p.href} href={p.href} aria-current={actief === p.href ? "page" : undefined}>{p.label}</PaginaLink>
