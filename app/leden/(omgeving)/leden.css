@@ -102,10 +102,11 @@ html[data-vt="leden-links"]::view-transition-new(leden-pagina) { animation-name:
 .leden-achtergrond {
   position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
-    radial-gradient(1400px 620px at 50% -140px, rgba(243,106,42,0.20), transparent 70%),
-    radial-gradient(900px 700px at 105% 55%, rgba(243,106,42,0.09), transparent 70%),
-    radial-gradient(800px 600px at -10% 100%, rgba(124,58,237,0.06), transparent 70%),
-    #FFFCFA;
+    radial-gradient(1500px 720px at 50% -160px, rgba(243,106,42,0.34), transparent 72%),
+    radial-gradient(900px 760px at 108% 48%, rgba(243,106,42,0.20), transparent 70%),
+    radial-gradient(760px 640px at -8% 62%, rgba(248,149,106,0.18), transparent 70%),
+    radial-gradient(900px 640px at 20% 112%, rgba(124,58,237,0.10), transparent 70%),
+    #FFF8F3;
 }
 .leden-main { min-height: 100vh; overflow-x: clip; }
 /* Zonder footer: wat ruimte onder de laatste sectie */
