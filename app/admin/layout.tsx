@@ -18,11 +18,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq("id", user.id)
     .single();
 
-  if (profile?.rol !== "admin") redirect("/leden");
+  if (profile?.rol !== "admin" && profile?.rol !== "redacteur") redirect("/leden");
 
   return (
     <div className="admin-shell">
-      <Sidebar naam={profile.naam ?? null} email={user.email ?? ""} />
+      <Sidebar naam={profile.naam ?? null} email={user.email ?? ""} rol={profile.rol} />
       <main className="adm-main">
         <PaginaInhoud>{children}</PaginaInhoud>
       </main>

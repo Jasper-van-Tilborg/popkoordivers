@@ -45,7 +45,7 @@ export async function proxy(request: NextRequest) {
       .single();
 
     const url = request.nextUrl.clone();
-    url.pathname = profile?.rol === "admin" ? "/admin" : "/leden";
+    url.pathname = profile?.rol === "admin" || profile?.rol === "redacteur" ? "/admin" : "/leden";
     return NextResponse.redirect(url);
   }
 

@@ -1,34 +1,37 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type MouseEvent } from "react";
+import { useLayoutEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { IconCalendar, IconNewspaper, IconFolder, IconUsers, IconEye, IconCamera } from "@/components/icons";
+import { IconCalendar, IconNewspaper, IconUsers, IconEye, IconCamera } from "@/components/icons";
 import { CURVE, DUUR, knopVoor, naStart, schuifNaar } from "./paginaWissel";
+import { IconHome, IconMuziek, IconPost, IconStukken, IconMicro, IconDans, IconLogboek, IconHartslag } from "./iconen";
 
-const IconHome = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" /></svg>
-);
-const IconSliders = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12" /><circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" /></svg>
-);
 const IconGlobe = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></svg>
 );
 
-const groepen = [
+type Item = { label: string; href: string; icon: ReactNode };
+const groepen: { kop: string | null; alleenAdmin?: boolean; items: Item[] }[] = [
   { kop: null, items: [{ label: "Overzicht", href: "/admin", icon: <IconHome /> }] },
   { kop: "Website", items: [
     { label: "Agenda", href: "/admin/agenda", icon: <IconCalendar size={19} /> },
     { label: "Nieuws", href: "/admin/nieuws", icon: <IconNewspaper size={19} /> },
     { label: "Media",  href: "/admin/albums", icon: <IconCamera size={19} /> },
   ] },
-  { kop: "Leden", items: [
-    { label: "Bestanden", href: "/admin/bestanden", icon: <IconFolder size={19} /> },
-    { label: "Leden",     href: "/admin/leden",     icon: <IconUsers size={19} /> },
+  { kop: "Ledenomgeving", items: [
+    { label: "Bladmuziek",    href: "/admin/bestanden/liedjes",       icon: <IconMuziek /> },
+    { label: "Nieuwsbrieven", href: "/admin/bestanden/nieuwsbrieven", icon: <IconPost /> },
+    { label: "ALV-stukken",   href: "/admin/bestanden/alv",           icon: <IconStukken /> },
+    { label: "Opnames",       href: "/admin/bestanden/opnames",       icon: <IconMicro /> },
+    { label: "Choreografie",  href: "/admin/bestanden/choreo",        icon: <IconDans /> },
   ] },
-  { kop: "Beheer", items: [{ label: "Instellingen", href: "/admin/instellingen", icon: <IconSliders /> }] },
+  { kop: "Beheer", alleenAdmin: true, items: [
+    { label: "Gebruikers", href: "/admin/gebruikers", icon: <IconUsers size={19} /> },
+    { label: "Activiteit", href: "/admin/activiteit", icon: <IconLogboek /> },
+    { label: "Sitestatus", href: "/admin/sitestatus", icon: <IconHartslag /> },
+  ] },
 ];
 
 // Het oranje vlak achter de actieve knop. Bij een klik schuift het naar de
@@ -90,7 +93,7 @@ function Brand() {
 const initialen = (s: string) =>
   (s.split(/[\s@.]+/).filter(Boolean).map((w) => w[0]).join("").slice(0, 2) || "?").toUpperCase();
 
-export default function Sidebar({ naam, email }: { naam: string | null; email: string }) {
+export default function Sidebar({ naam, email, rol }: { naam: string | null; email: string; rol: "admin" | "redacteur" }) {
   const pathname = usePathname();
   const router   = useRouter();
   const [open, setOpen] = useState(false);
@@ -135,7 +138,7 @@ export default function Sidebar({ naam, email }: { naam: string | null; email: s
         <Brand />
         <nav className="adm-nav" aria-label="Beheer">
           <NavVlak doel={doel} />
-          {groepen.map((g) => (
+          {groepen.filter((g) => rol === "admin" || !g.alleenAdmin).map((g) => (
             <div key={g.kop ?? "start"} style={{ display: "contents" }}>
               {g.kop && <p className="adm-nav-kop">{g.kop}</p>}
               {g.items.map((item) => (
@@ -160,7 +163,7 @@ export default function Sidebar({ naam, email }: { naam: string | null; email: s
           <div className="adm-account">
             <span className="adm-avatar" aria-hidden="true">{initialen(naam ?? email)}</span>
             <div>
-              <p className="adm-account-naam">{naam ?? "Beheerder"}</p>
+              <p className="adm-account-naam">{naam ?? (rol === "admin" ? "Beheerder" : "Redacteur")}</p>
               <p className="adm-account-mail">{email}</p>
             </div>
             <button onClick={logout} aria-label="Uitloggen" title="Uitloggen">

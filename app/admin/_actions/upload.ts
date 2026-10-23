@@ -1,6 +1,6 @@
 "use server";
 
-import { requireAdmin } from "@/lib/auth";
+import { requireBeheer } from "@/lib/auth";
 import { safeName, uploadUrl, type Bucket } from "@/lib/r2";
 
 export type UploadSoort =
@@ -10,7 +10,7 @@ export type UploadSoort =
 
 // De server bepaalt bucket en key; de browser krijgt alleen een tijdelijke uploadlink.
 export async function vraagUploadAan(doel: UploadSoort, bestandsnaam: string, contentType: string) {
-  await requireAdmin();
+  await requireBeheer();
 
   const naam = `${Date.now()}-${safeName(bestandsnaam)}`;
   let bucket: Bucket;

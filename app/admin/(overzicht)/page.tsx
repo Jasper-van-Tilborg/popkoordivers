@@ -1,64 +1,16 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { IconCalendar, IconNewspaper, IconCamera, IconFolder, IconMapPin, IconClock } from "@/components/icons";
-import { DateStub } from "../_components/ui";
+import { NL } from "../_components/activiteit";
+import Redactie from "./Redactie";
+import Beheer from "./Beheer";
 
-const NL = "Europe/Amsterdam";
-
+// Een redacteur ziet hier alles om iets te maken; een beheerder hoe de site ervoor staat.
 export default async function OverzichtPage() {
   const supabase = await createClient();
   const nu = new Date();
-  const vandaag = nu.toLocaleDateString("en-CA", { timeZone: NL }); // "2026-10-23"
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: ik } = await supabase.from("profiles").select("naam, rol").eq("id", user?.id ?? "").single();
 
-  const [{ data: { user } }, komend, berichten, albums, fotos, profielen, bestanden] = await Promise.all([
-    supabase.auth.getUser(),
-    supabase.from("agenda").select("id, titel, datum_sorteer, locatie, tijd, gepubliceerd").gte("datum_sorteer", vandaag).order("datum_sorteer"),
-    supabase.from("berichten").select("id, slug, titel, datum, afbeelding, gepubliceerd, created_at").order("created_at", { ascending: false }),
-    supabase.from("albums").select("id, titel"),
-    supabase.from("fotos").select("album_id, impressies"),
-    supabase.from("profiles").select("id, naam, email, stemgroep"),
-    supabase.from("bestanden").select("categorie"),
-  ]);
-
-  const optredens = komend.data ?? [];
-  const nieuws = berichten.data ?? [];
-  const leden = profielen.data ?? [];
-  const ik = leden.find((p) => p.id === user?.id);
   const voornaam = ik?.naam?.split(" ")[0];
-
-  // Wat er aandacht nodig heeft. Elke regel linkt rechtstreeks naar het item
-  // zelf; zijn het er meer dan drie, dan de eerste twee en een link naar de rest.
-  type Punt = { tekst: string; href: string; link: string };
-  const aandacht: Punt[] = [];
-  function perItem<T>(items: T[], punt: (x: T) => Punt, rest: (n: number) => Punt) {
-    if (items.length > 3) { aandacht.push(...items.slice(0, 2).map(punt), rest(items.length - 2)); }
-    else aandacht.push(...items.map(punt));
-  }
-
-  perItem(
-    optredens.filter((o) => !o.gepubliceerd),
-    (o) => ({ tekst: `"${o.titel}" staat nog verborgen voor bezoekers.`, href: `/admin/agenda?id=${o.id}`, link: "Naar het optreden" }),
-    (n) => ({ tekst: `En nog ${n} verborgen optredens.`, href: "/admin/agenda", link: "Naar de agenda" }),
-  );
-  perItem(
-    optredens.filter((o) => o.gepubliceerd && !o.locatie && !o.tijd),
-    (o) => ({ tekst: `Bij "${o.titel}" staan nog geen locatie en tijd.`, href: `/admin/agenda?id=${o.id}`, link: "Aanvullen" }),
-    (n) => ({ tekst: `En nog ${n} optredens zonder locatie en tijd.`, href: "/admin/agenda", link: "Naar de agenda" }),
-  );
-  perItem(
-    (albums.data ?? []).filter((a) => !(fotos.data ?? []).some((f) => f.album_id === a.id && f.impressies)),
-    (a) => ({ tekst: `Album "${a.titel}" staat nog niet op de website: geef een paar foto's een ster.`, href: `/admin/albums/${a.id}`, link: "Naar het album" }),
-    (n) => ({ tekst: `En nog ${n} albums zonder foto's op de website.`, href: "/admin/albums", link: "Naar media" }),
-  );
-  perItem(
-    leden.filter((p) => !p.stemgroep),
-    (p) => ({ tekst: `${p.naam ?? p.email ?? "Een lid"} heeft nog geen stemgroep.`, href: `/admin/leden?id=${p.id}`, link: "Aanvullen" }),
-    (n) => ({ tekst: `En nog ${n} leden zonder stemgroep.`, href: "/admin/leden", link: "Naar leden" }),
-  );
-  if (!(bestanden.data ?? []).length) aandacht.push({ tekst: "Er staan nog geen bladmuziek of nieuwsbrieven in de ledenomgeving.", href: "/admin/bestanden?nieuw", link: "Bestand toevoegen" });
-  const laatste = nieuws.find((b) => b.gepubliceerd);
-  if (laatste && nu.getTime() - new Date(laatste.created_at).getTime() > 60 * 864e5) aandacht.push({ tekst: `Het laatste nieuwsbericht is van ${laatste.datum}.`, href: "/admin/nieuws?nieuw", link: "Nieuw bericht" });
-
   const datumTekst = nu.toLocaleDateString("nl-NL", { timeZone: NL, weekday: "long", day: "numeric", month: "long" });
   const uur = Number(nu.toLocaleString("nl-NL", { timeZone: NL, hour: "numeric", hour12: false }));
   const groet = uur < 12 ? "Goedemorgen" : uur < 18 ? "Goedemiddag" : "Goedenavond";
@@ -70,91 +22,11 @@ export default async function OverzichtPage() {
           <h1>{groet}{voornaam ? `, ${voornaam}` : ""}</h1>
           <p className="adm-sub">{datumTekst.charAt(0).toUpperCase() + datumTekst.slice(1)}</p>
         </div>
+        <a className="adm-btn adm-btn--ghost" href="/" target="_blank" rel="noopener">Website bekijken</a>
       </header>
 
       <div className="adm-content">
-        <nav className="adm-acties" aria-label="Snel aan de slag">
-          <Link className="adm-actie" href="/admin/agenda?nieuw"><span className="adm-actie-icoon"><IconCalendar size={18} /></span>Optreden toevoegen</Link>
-          <Link className="adm-actie" href="/admin/nieuws?nieuw"><span className="adm-actie-icoon"><IconNewspaper size={18} /></span>Nieuwsbericht plaatsen</Link>
-          <Link className="adm-actie" href="/admin/albums?nieuw"><span className="adm-actie-icoon"><IconCamera size={18} /></span>Fotoalbum maken</Link>
-          <Link className="adm-actie" href="/admin/bestanden?nieuw"><span className="adm-actie-icoon"><IconFolder size={18} /></span>Bestand toevoegen</Link>
-        </nav>
-
-        <div className="adm-grid-overzicht">
-          <div>
-            <section className="adm-blok">
-              <div className="adm-blok-kop"><h2>Komende optredens</h2><Link href="/admin/agenda">Hele agenda</Link></div>
-              {optredens.length === 0 ? (
-                <p className="adm-blok-leeg">Er staat niets gepland. <Link href="/admin/agenda?nieuw">Voeg het volgende optreden toe.</Link></p>
-              ) : (
-                <ul className="adm-list">
-                  {optredens.slice(0, 4).map((o) => (
-                    <li key={o.id} className="adm-row" data-hidden={!o.gepubliceerd || undefined}>
-                      <DateStub iso={o.datum_sorteer} />
-                      <div className="adm-main-col">
-                        <Link className="adm-title" href={`/admin/agenda?id=${o.id}`}>{o.titel}</Link>
-                        <div className="adm-meta">
-                          {o.locatie && <span><IconMapPin size={13} />{o.locatie}</span>}
-                          {o.tijd && <span><IconClock size={13} />{o.tijd}</span>}
-                          {!o.locatie && !o.tijd && <span className="adm-missing">Locatie en tijd nog onbekend</span>}
-                        </div>
-                      </div>
-                      <span className={o.gepubliceerd ? "adm-pill" : "adm-pill adm-pill--brand"}>{o.gepubliceerd ? "Online" : "Verborgen"}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-
-            <section className="adm-blok">
-              <div className="adm-blok-kop"><h2>Laatste nieuws</h2><Link href="/admin/nieuws">Alle berichten</Link></div>
-              {nieuws.length === 0 ? (
-                <p className="adm-blok-leeg">Nog geen berichten. <Link href="/admin/nieuws?nieuw">Plaats het eerste.</Link></p>
-              ) : (
-                <ul className="adm-list">
-                  {nieuws.slice(0, 3).map((b) => (
-                    <li key={b.id} className="adm-row adm-row--thumb" data-hidden={!b.gepubliceerd || undefined}>
-                      <span className="adm-thumb">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        {/^(https?:\/\/|\/)/.test(b.afbeelding) && <img src={b.afbeelding} alt="" loading="lazy" />}
-                      </span>
-                      <div className="adm-main-col">
-                        <Link className="adm-title" href={`/admin/nieuws?id=${b.id}`}>{b.titel}</Link>
-                        <div className="adm-meta"><span>{b.datum}</span></div>
-                      </div>
-                      <span className="adm-pill">{b.gepubliceerd ? "Online" : "Verborgen"}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          </div>
-
-          <div>
-            <section className="adm-blok">
-              <div className="adm-blok-kop"><h2>Aandacht nodig</h2></div>
-              {aandacht.length === 0 ? (
-                <p className="adm-blok-leeg">Alles is bijgewerkt.</p>
-              ) : (
-                <ul className="adm-aandacht">
-                  {aandacht.map((a) => (
-                    <li key={a.tekst}><span>{a.tekst} <Link href={a.href}>{a.link}</Link></span></li>
-                  ))}
-                </ul>
-              )}
-            </section>
-
-            <section className="adm-blok">
-              <div className="adm-blok-kop"><h2>Op de website</h2></div>
-              <ul className="adm-aandacht adm-aandacht--feiten">
-                <li><span>{optredens.filter((o) => o.gepubliceerd).length} optredens gepland</span></li>
-                <li><span>{nieuws.filter((b) => b.gepubliceerd).length} nieuwsberichten online</span></li>
-                <li><span>{(albums.data ?? []).filter((a) => (fotos.data ?? []).some((f) => f.album_id === a.id && f.impressies)).length} van {(albums.data ?? []).length} albums met foto&apos;s op de website</span></li>
-                <li><span>{leden.length} accounts, {(bestanden.data ?? []).length} bestanden voor leden</span></li>
-              </ul>
-            </section>
-          </div>
-        </div>
+        {ik?.rol === "admin" ? <Beheer nu={nu} /> : <Redactie nu={nu} />}
       </div>
     </div>
   );

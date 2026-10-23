@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth";
+import { requireBeheer } from "@/lib/auth";
+import { logActiviteit } from "@/lib/activiteit";
 import { copyToPublic, deleteFile } from "@/lib/r2";
 
 export interface AlbumInput {
@@ -22,7 +23,8 @@ function vernieuw(albumId?: string) {
 }
 
 export async function maakAlbum(input: AlbumInput) {
-  const { supabase } = await requireAdmin();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
   if (!input.titel.trim() || !input.datum) return { error: "Titel en datum zijn verplicht." };
 
   const basis = slugify(`${input.titel}-${input.datumIso}`);
@@ -34,23 +36,27 @@ export async function maakAlbum(input: AlbumInput) {
   const { data, error } = await supabase
     .from("albums").insert({ titel: input.titel.trim(), datum: input.datum, slug }).select("id").single();
   if (error) return { error: error.message };
+  await logActiviteit(sessie, "aangemaakt", "album", { id: data.id, naam: input.titel.trim() });
   vernieuw();
   return { id: data.id };
 }
 
 export async function wijzigAlbum(id: string, input: AlbumInput) {
-  const { supabase } = await requireAdmin();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
   if (!input.titel.trim() || !input.datum) return { error: "Titel en datum zijn verplicht." };
   // Het webadres blijft gelijk, zodat links vanuit de agenda blijven werken.
   const { error } = await supabase.from("albums").update({ titel: input.titel.trim(), datum: input.datum }).eq("id", id);
   if (error) return { error: error.message };
+  await logActiviteit(sessie, "gewijzigd", "album", { id, naam: input.titel.trim() });
   vernieuw(id);
   return {};
 }
 
 export async function verwijderAlbum(id: string) {
-  const { supabase } = await requireAdmin();
-  const { data: album } = await supabase.from("albums").select("slug").eq("id", id).single();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
+  const { data: album } = await supabase.from("albums").select("slug, titel").eq("id", id).single();
   const { data: fotos } = await supabase.from("fotos").select("r2_key, impressies").eq("album_id", id);
 
   const { error } = await supabase.from("albums").delete().eq("id", id); // foto's gaan mee (cascade)
@@ -61,6 +67,7 @@ export async function verwijderAlbum(id: string) {
     ...(f.impressies ? [deleteFile("openbaar", f.r2_key)] : []),
   ]));
   if (album) await supabase.from("agenda").update({ fotos_url: null }).eq("fotos_url", `/media/${album.slug}`);
+  await logActiviteit(sessie, `verwijderd met ${(fotos ?? []).length} foto's`, "album", { id, naam: album?.titel });
 
   vernieuw();
   revalidatePath("/admin/agenda");
@@ -69,7 +76,8 @@ export async function verwijderAlbum(id: string) {
 
 // Na een upload vanuit de browser: de foto vastleggen in het album.
 export async function fotoToevoegen(albumId: string, key: string) {
-  const { supabase } = await requireAdmin();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
   if (!key.startsWith(`albums/${albumId}/`)) return { error: "Ongeldige foto." };
 
   const { data: laatste } = await supabase
@@ -86,7 +94,8 @@ export async function fotoToevoegen(albumId: string, key: string) {
 
 // Impressie = ook zichtbaar op de openbare website: er komt een kopie in de openbare bucket.
 export async function zetImpressie(fotoId: string, aan: boolean) {
-  const { supabase } = await requireAdmin();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
   const { data: foto } = await supabase.from("fotos").select("album_id, r2_key").eq("id", fotoId).single();
   if (!foto) return { error: "Foto niet gevonden." };
 
@@ -97,6 +106,8 @@ export async function zetImpressie(fotoId: string, aan: boolean) {
   }
   const { error } = await supabase.from("fotos").update({ impressies: aan }).eq("id", fotoId);
   if (error) return { error: error.message };
+  const { data: album } = await supabase.from("albums").select("titel").eq("id", foto.album_id).single();
+  await logActiviteit(sessie, aan ? "op de website gezet" : "van de website gehaald", "foto", { id: foto.album_id, naam: album?.titel });
   if (!aan) await deleteFile("openbaar", foto.r2_key).catch(() => {});
 
   vernieuw(foto.album_id);
@@ -104,7 +115,8 @@ export async function zetImpressie(fotoId: string, aan: boolean) {
 }
 
 export async function verwijderFoto(fotoId: string) {
-  const { supabase } = await requireAdmin();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
   const { data: foto } = await supabase.from("fotos").select("album_id, r2_key, impressies").eq("id", fotoId).single();
   if (!foto) return { error: "Foto niet gevonden." };
 
@@ -121,12 +133,21 @@ export async function verwijderFoto(fotoId: string) {
 
 // Nieuwe volgorde na slepen of de pijltjes: ids in de gewenste volgorde.
 export async function zetFotoVolgorde(albumId: string, ids: string[]) {
-  const { supabase } = await requireAdmin();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
   const resultaten = await Promise.all(
     ids.map((id, volgorde) => supabase.from("fotos").update({ volgorde }).eq("id", id).eq("album_id", albumId))
   );
   const fout = resultaten.find((r) => r.error);
   if (fout?.error) return { error: fout.error.message };
   vernieuw(albumId);
+  return {};
+}
+
+// Na een reeks uploads: één regel in de activiteit in plaats van één per foto.
+export async function fotosToegevoegd(albumId: string, aantal: number) {
+  const sessie = await requireBeheer();
+  const { data: album } = await sessie.supabase.from("albums").select("titel").eq("id", albumId).single();
+  await logActiviteit(sessie, `${aantal} foto${aantal === 1 ? "" : "'s"} toegevoegd`, "album", { id: albumId, naam: album?.titel });
   return {};
 }

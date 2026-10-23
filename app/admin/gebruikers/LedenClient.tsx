@@ -85,7 +85,7 @@ function LidDrawer({ lid, eigen, onClose, onDone }: {
   return (
     <Drawer
       inline
-      title={lid ? (lid.naam ?? lid.email) : "Lid toevoegen"}
+      title={lid ? (lid.naam ?? lid.email) : "Gebruiker toevoegen"}
       onClose={onClose}
       footer={
         <>
@@ -95,7 +95,7 @@ function LidDrawer({ lid, eigen, onClose, onDone }: {
             <span className="adm-spacer" />
             <button type="button" className="adm-btn adm-btn--ghost" onClick={onClose}>Annuleren</button>
             <button type="button" className="adm-btn adm-btn--primary" onClick={save} disabled={!!busy}>
-              {busy === "save" ? "Opslaan…" : lid ? "Wijzigingen opslaan" : "Lid toevoegen"}
+              {busy === "save" ? "Opslaan…" : lid ? "Wijzigingen opslaan" : "Gebruiker toevoegen"}
             </button>
           </div>
         </>
@@ -146,7 +146,8 @@ function LidDrawer({ lid, eigen, onClose, onDone }: {
               disabled={eigen}
               opties={[
                 { value: "lid", label: "Lid", hint: "Ziet de ledenomgeving" },
-                { value: "admin", label: "Beheerder", hint: "Kan ook de website aanpassen" },
+                { value: "redacteur", label: "Redacteur", hint: "Plaatst agenda, nieuws, foto's en bestanden" },
+                { value: "admin", label: "Beheerder", hint: "Alles, ook gebruikers, activiteit en sitestatus" },
               ]}
             />
             {eigen && <p className="adm-hint">Je eigen rol kun je niet wijzigen.</p>}
@@ -192,14 +193,15 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
 
   const bestuur = leden.filter((l) => l.bestuursfunctie).length;
   const admins  = leden.filter((l) => l.rol === "admin").length;
+  const redacteuren = leden.filter((l) => l.rol === "redacteur").length;
 
   const lijst = (
     <>
       <button className="adm-wb-nieuw" data-id="nieuw" data-gekozen={gekozen === "nieuw" || undefined} onClick={() => kies("nieuw")}>
-        <IconPlus /> Lid toevoegen
+        <IconPlus /> Gebruiker toevoegen
       </button>
       {groepen.length === 0 ? (
-        <div className="adm-empty"><p className="adm-empty-title">{zoek ? <>Niemand gevonden voor &ldquo;{zoek}&rdquo;</> : "Nog geen leden"}</p></div>
+        <div className="adm-empty"><p className="adm-empty-title">{zoek ? <>Niemand gevonden voor &ldquo;{zoek}&rdquo;</> : "Nog geen gebruikers"}</p></div>
       ) : groepen.map((g) => (
         <section key={g.titel} className="adm-group">
           <h2 className="adm-group-title">{g.titel} <span className="adm-count">{g.items.length}</span></h2>
@@ -210,10 +212,10 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
                 <div className="adm-main-col">
                   <button className="adm-title" onClick={(e) => { e.stopPropagation(); kies(l.id); }}>{l.naam ?? l.email}</button>
                   <div className="adm-meta">
-                    <span>{l.bestuursfunctie ?? (l.rol === "admin" ? "Beheerder" : l.email)}</span>
+                    <span>{l.bestuursfunctie ?? l.email}</span>
                   </div>
                 </div>
-                {l.rol === "admin" && l.bestuursfunctie && <span className="adm-pill">Beheerder</span>}
+                {l.rol !== "lid" && <span className={l.rol === "admin" ? "adm-pill adm-pill--brand" : "adm-pill"}>{l.rol === "admin" ? "Beheerder" : "Redacteur"}</span>}
               </li>
             ))}
           </ul>
@@ -236,10 +238,10 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
     <div className="adm-page">
       <header className="adm-head">
         <div>
-          <h1>Leden</h1>
-          <p className="adm-sub">{leden.length} accounts, {bestuur} in het bestuur, {admins} beheerder{admins === 1 ? "" : "s"}.</p>
+          <h1>Gebruikers</h1>
+          <p className="adm-sub">{leden.length} accounts, {bestuur} in het bestuur, {admins} beheerder{admins === 1 ? "" : "s"} en {redacteuren} redacteur{redacteuren === 1 ? "" : "en"}.</p>
         </div>
-        <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Lid toevoegen</button>
+        <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Gebruiker toevoegen</button>
       </header>
 
       <div className="adm-toolbar">
@@ -259,7 +261,7 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
             <>
               <p className="adm-empty-title">Kies een lid</p>
               <p>Klik links op een lid om naam, stemgroep, bestuursfunctie of wachtwoord aan te passen.</p>
-              <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Lid toevoegen</button>
+              <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Gebruiker toevoegen</button>
             </>
           }
         />

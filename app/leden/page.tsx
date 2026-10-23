@@ -45,7 +45,7 @@ export default async function LedenPage() {
   if (!user) redirect("/leden/login");
 
   const { data: profile } = await supabase.from("profiles").select("rol").eq("id", user.id).single();
-  const rol = (profile?.rol ?? "lid") as "lid" | "admin";
+  const rol = profile?.rol ?? "lid";
   const today = new Date().toISOString().split("T")[0];
   const inst = await getInstellingen();
 

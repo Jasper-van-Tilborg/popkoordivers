@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth";
+import { requireBeheer } from "@/lib/auth";
+import { logActiviteit } from "@/lib/activiteit";
 import { deleteFile } from "@/lib/r2";
 import type { Database } from "@/lib/database.types";
 
@@ -22,12 +23,13 @@ function controleer(input: BestandInput) {
 }
 
 function vernieuw() {
-  revalidatePath("/admin/bestanden");
+  revalidatePath("/admin/bestanden", "layout");
   revalidatePath("/leden");
 }
 
 export async function bestandToevoegen(key: string, input: BestandInput) {
-  const { supabase } = await requireAdmin();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
   const fout = controleer(input) ?? (key.startsWith("bestanden/") ? null : "Ongeldig bestand.");
   if (fout) return { error: fout };
 
@@ -41,12 +43,14 @@ export async function bestandToevoegen(key: string, input: BestandInput) {
     await deleteFile("prive", key).catch(() => {});
     return { error: error.message };
   }
+  await logActiviteit(sessie, "toegevoegd", "bestand", { id: data.id, naam: input.naam.trim() });
   vernieuw();
   return { id: data.id };
 }
 
 export async function wijzigBestand(id: number, input: BestandInput) {
-  const { supabase } = await requireAdmin();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
   const fout = controleer(input);
   if (fout) return { error: fout };
 
@@ -56,16 +60,19 @@ export async function wijzigBestand(id: number, input: BestandInput) {
     stemgroep: input.categorie === "liedjes" ? input.stemgroep : null,
   }).eq("id", id);
   if (error) return { error: error.message };
+  await logActiviteit(sessie, "gewijzigd", "bestand", { id, naam: input.naam.trim() });
   vernieuw();
   return {};
 }
 
 export async function verwijderBestand(id: number) {
-  const { supabase } = await requireAdmin();
-  const { data } = await supabase.from("bestanden").select("r2_key").eq("id", id).single();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
+  const { data } = await supabase.from("bestanden").select("r2_key, naam").eq("id", id).single();
   const { error } = await supabase.from("bestanden").delete().eq("id", id);
   if (error) return { error: error.message };
   if (data?.r2_key) await deleteFile("prive", data.r2_key).catch(() => {});
+  await logActiviteit(sessie, "verwijderd", "bestand", { id, naam: data?.naam });
   vernieuw();
   return {};
 }

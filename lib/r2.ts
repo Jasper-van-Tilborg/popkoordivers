@@ -4,6 +4,7 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   CopyObjectCommand,
+  ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -64,4 +65,15 @@ export async function copyToPublic(key: string): Promise<void> {
 // Veilige bestandsnaam voor in een key: "Mijn foto (1).JPG" → "mijn-foto-1.jpg"
 export function safeName(name: string): string {
   return name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9._-]/g, "").replace(/-+/g, "-") || "bestand";
+}
+
+// Hoeveel er in een bucket staat (voor de sitestatus op het overzicht)
+export async function bucketGebruik(bucket: Bucket): Promise<{ aantal: number; bytes: number }> {
+  let aantal = 0, bytes = 0, token: string | undefined;
+  do {
+    const r = await client.send(new ListObjectsV2Command({ Bucket: BUCKETS[bucket], ContinuationToken: token }));
+    for (const o of r.Contents ?? []) { aantal++; bytes += o.Size ?? 0; }
+    token = r.IsTruncated ? r.NextContinuationToken : undefined;
+  } while (token);
+  return { aantal, bytes };
 }

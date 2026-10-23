@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      activiteit: {
+        Row: {
+          actie: string
+          id: number
+          item_id: string | null
+          item_naam: string | null
+          soort: string
+          wanneer: string
+          wie: string | null
+          wie_naam: string | null
+        }
+        Insert: {
+          actie: string
+          id?: never
+          item_id?: string | null
+          item_naam?: string | null
+          soort: string
+          wanneer?: string
+          wie?: string | null
+          wie_naam?: string | null
+        }
+        Update: {
+          actie?: string
+          id?: never
+          item_id?: string | null
+          item_naam?: string | null
+          soort?: string
+          wanneer?: string
+          wie?: string | null
+          wie_naam?: string | null
+        }
+        Relationships: []
+      }
       agenda: {
         Row: {
           beschrijving: string | null
@@ -268,10 +301,12 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["user_rol"]
       }
+      mag_beheren: { Args: never; Returns: boolean }
+      sitestatus: { Args: never; Returns: Json }
     }
     Enums: {
       stemgroep_type: "Alt" | "Mezzo" | "Sopraan" | "Tenor" | "Bas"
-      user_rol: "lid" | "admin"
+      user_rol: "lid" | "redacteur" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -400,7 +435,7 @@ export const Constants = {
   public: {
     Enums: {
       stemgroep_type: ["Alt", "Mezzo", "Sopraan", "Tenor", "Bas"],
-      user_rol: ["lid", "admin"],
+      user_rol: ["lid", "redacteur", "admin"],
     },
   },
 } as const

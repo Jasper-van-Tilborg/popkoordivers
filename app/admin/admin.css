@@ -213,11 +213,92 @@
 .adm-actie:hover { border-color: var(--primary); transform: translateY(-1px); }
 .adm-actie:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .adm-actie-icoon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; background: #FFF1EA; color: var(--primary); flex-shrink: 0; }
-.adm-aandacht { list-style: none; margin: 0; padding: 0 20px 18px; display: flex; flex-direction: column; gap: 10px; }
-.adm-aandacht li { display: flex; gap: 10px; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
-.adm-aandacht li::before { content: ""; width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
-.adm-aandacht a { color: var(--ink); font-weight: 700; }
 @media (max-width: 1180px) { .adm-grid-overzicht { grid-template-columns: 1fr; } .adm-acties { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* In één oogopslag: één regel met de belangrijkste aantallen, elk een link */
+.adm-oogopslag {
+  display: flex; flex-wrap: wrap; gap: 6px 22px; padding: 14px 20px; margin-bottom: 20px;
+  background: #fff; border: 1px solid var(--line); border-radius: 14px; animation: adm-in 0.35s var(--ease-out) 0.06s both;
+}
+.adm-oogopslag a { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: none; }
+.adm-oogopslag a svg { color: var(--primary); }
+.adm-oogopslag a:hover { color: #C2410C; }
+
+/* Activiteit */
+.adm-activiteit { list-style: none; margin: 0; padding: 0 20px 16px; display: flex; flex-direction: column; }
+.adm-activiteit li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 10px 0; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.adm-activiteit li + li { border-top: 1px solid var(--line-soft); }
+.adm-activiteit strong { color: var(--ink); }
+.adm-activiteit a { color: var(--ink); font-weight: 700; text-decoration: none; }
+.adm-activiteit a:hover { color: var(--primary); }
+.adm-activiteit time { flex-shrink: 0; font-size: 12.5px; color: var(--ink-3); white-space: nowrap; }
+
+/* Sitestatus: een stip per regel, groen als het in orde is */
+.adm-status-lijst { list-style: none; margin: 0; padding: 0 20px 18px; display: flex; flex-direction: column; gap: 12px; }
+.adm-status-lijst li { display: flex; justify-content: space-between; gap: 16px; font-size: 14px; color: var(--ink); }
+.adm-status-lijst li > span:first-child { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; }
+.adm-status-lijst li > span:first-child::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #DC2626; flex-shrink: 0; }
+.adm-status-lijst li[data-ok] > span:first-child::before { background: var(--ok); }
+.adm-status-lijst li > span:last-child { color: var(--ink-2); text-align: right; }
+
+/* Nieuw maken (redacteur): de website en de ledenomgeving elk op een eigen rij */
+.adm-maken { margin-bottom: 20px; }
+.adm-maken-groepen { display: flex; flex-direction: column; gap: 16px; padding: 0 20px 20px; }
+.adm-maken-titel { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.adm-maken-rij { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.adm-maken-rij--leden { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.adm-maken .adm-actie { padding: 12px 14px; border-radius: 12px; box-shadow: none; }
+.adm-maken .adm-actie-icoon { width: 34px; height: 34px; border-radius: 10px; }
+@media (max-width: 1180px) { .adm-maken-rij, .adm-maken-rij--leden { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .adm-maken-rij, .adm-maken-rij--leden { grid-template-columns: 1fr 1fr; } }
+.adm-row--tekst { grid-template-columns: minmax(0, 1fr); }
+.adm-row--icoon { grid-template-columns: 38px minmax(0, 1fr); }
+.adm-pill--actie { background: #FFF1EA; color: #C2410C; }
+.adm-thumb:has(> svg) { display: grid; place-items: center; color: var(--primary); }
+.adm-blok-subkop { margin: 0; padding: 14px 20px 2px; border-top: 1px solid var(--line-soft); font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.adm-blok-tekst { margin: 0; padding: 0 20px 14px; font-size: 14px; line-height: 1.5; color: var(--ink-2); max-width: 62ch; }
+
+/* Cijfers in een blok: label links, aantal rechts */
+.adm-cijfers { margin: 0; padding: 4px 20px 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.adm-cijfers--vier { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 760px) { .adm-cijfers--vier { grid-template-columns: 1fr 1fr; } }
+.adm-cijfers > div { padding: 12px 14px; border-radius: 12px; background: var(--canvas); }
+.adm-cijfers dt { font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.adm-cijfers dd { margin: 2px 0 0; font-size: 18px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+/* Hoe vol iets is (database, opslag) */
+.adm-meter-rij { padding: 0 20px 14px; }
+.adm-meter { display: block; height: 8px; border-radius: 100px; background: var(--line-soft); overflow: hidden; }
+.adm-meter > span { display: block; height: 100%; border-radius: inherit; background: var(--ok); }
+.adm-meter > span[data-vol] { background: var(--danger); }
+
+/* Links naar de dashboards van Supabase, Cloudflare, Vercel en GitHub */
+.adm-dashboards { list-style: none; margin: 0; padding: 0 20px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.adm-dashboards a { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; text-decoration: none; color: var(--ink); transition: border-color 0.15s; }
+.adm-dashboards a:hover { border-color: var(--primary); }
+.adm-dashboards a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.adm-dashboards strong { font-size: 14px; }
+.adm-dashboards span { font-size: 12.5px; color: var(--ink-2); }
+
+/* Filters bovenaan Activiteit: één knop per keuze, de gekozen is gevuld */
+.adm-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.adm-filters a {
+  padding: 7px 13px; border-radius: 100px; border: 1px solid var(--line); background: #fff;
+  font-size: 13px; font-weight: 700; color: var(--ink-2); text-decoration: none; transition: border-color 0.15s, color 0.15s;
+}
+.adm-filters a:hover { border-color: var(--primary); color: var(--ink); }
+.adm-filters a[aria-current] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.adm-filters a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Logboek: tijd links, de zin ernaast */
+.adm-logboek li { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 12px 20px; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.adm-logboek--datum li { grid-template-columns: 120px minmax(0, 1fr); }
+.adm-logboek li + li { border-top: 1px solid var(--line-soft); }
+.adm-logboek time { font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.adm-logboek strong { color: var(--ink); }
+.adm-logboek a { color: var(--ink); font-weight: 700; text-decoration: none; }
+.adm-logboek a:hover { color: var(--primary); }
+@media (max-width: 760px) { .adm-logboek li { grid-template-columns: 1fr; gap: 2px; } }
+
 /* Een hele rij in het overzicht is een link naar het item */
 .adm-blok .adm-row { position: relative; }
 .adm-blok .adm-title::after { content: ""; position: absolute; inset: 0; }
@@ -626,7 +707,6 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 /* Koppen, rijen en lijstjes in een blok beginnen allemaal op 20px van de rand */
 .adm-blok .adm-row { padding-left: 20px; padding-right: 20px; }
 .adm-blok .adm-row:hover { background: #FCFBFA; }
-.adm-aandacht--feiten li::before { background: #D6D3D1; }
 
 /* Laden tussen pagina's */
 .adm-skel { border-radius: 10px; background: linear-gradient(90deg, #EDECE9 0%, #F5F4F2 50%, #EDECE9 100%); background-size: 200% 100%; animation: adm-shimmer 1.4s linear infinite; }

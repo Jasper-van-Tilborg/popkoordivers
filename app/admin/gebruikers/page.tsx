@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import LedenClient from "./LedenClient";
@@ -5,6 +6,10 @@ import LedenClient from "./LedenClient";
 export default async function LedenAdminPage({ searchParams }: { searchParams: Promise<{ id?: string; nieuw?: string }> }) {
   const { id, nieuw } = await searchParams;
   const supabase = await createClient();
+  // Alleen voor admins; een redacteur gaat terug naar het overzicht
+  const { data: { user: ik } } = await supabase.auth.getUser();
+  const { data: mijnProfiel } = await supabase.from("profiles").select("rol").eq("id", ik?.id ?? "").single();
+  if (mijnProfiel?.rol !== "admin") redirect("/admin");
   const [{ data: { user } }, { data: auth }, { data: profiles }] = await Promise.all([
     supabase.auth.getUser(),
     createAdminClient().auth.admin.listUsers({ perPage: 1000 }),

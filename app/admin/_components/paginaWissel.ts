@@ -8,7 +8,12 @@
 // ("Pagina wisselen" in admin.css). Op een telefoon, met "minder beweging"
 // en zonder View Transitions gewoon direct.
 
-export const VOLGORDE = ["/admin", "/admin/agenda", "/admin/nieuws", "/admin/albums", "/admin/bestanden", "/admin/leden", "/admin/instellingen"];
+export const VOLGORDE = [
+  "/admin",
+  "/admin/agenda", "/admin/nieuws", "/admin/albums",
+  "/admin/bestanden/liedjes", "/admin/bestanden/nieuwsbrieven", "/admin/bestanden/alv", "/admin/bestanden/opnames", "/admin/bestanden/choreo",
+  "/admin/gebruikers", "/admin/activiteit", "/admin/sitestatus",
+];
 
 // Even lang en met dezelfde curve als het vlak in de zijbalk (Sidebar.tsx).
 export const DUUR = 550;

@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth";
+import { requireBeheer } from "@/lib/auth";
+import { logActiviteit } from "@/lib/activiteit";
 import { deleteFile, getPublicUrl, keyFromPublicUrl } from "@/lib/r2";
 
 export interface BerichtInput {
@@ -32,7 +33,8 @@ function vernieuw() {
 }
 
 export async function bewaarBericht(id: number | null, input: BerichtInput) {
-  const { supabase } = await requireAdmin();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
   if (!input.titel.trim() || !input.intro.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(input.datumIso)) {
     return { error: "Titel, datum en introductie zijn verplicht." };
   }
@@ -77,16 +79,19 @@ export async function bewaarBericht(id: number | null, input: BerichtInput) {
   }
 
   if (huidig && huidig.afbeelding !== afbeelding) await verwijderAfbeelding(huidig.afbeelding);
+  await logActiviteit(sessie, id ? "gewijzigd" : input.gepubliceerd ? "geplaatst" : "als concept bewaard", "bericht", { id: bewaardId, naam: input.titel.trim() });
   vernieuw();
   return { id: bewaardId };
 }
 
 export async function verwijderBericht(id: number) {
-  const { supabase } = await requireAdmin();
-  const { data } = await supabase.from("berichten").select("afbeelding").eq("id", id).single();
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
+  const { data } = await supabase.from("berichten").select("afbeelding, titel").eq("id", id).single();
   const { error } = await supabase.from("berichten").delete().eq("id", id);
   if (error) return { error: error.message };
   await verwijderAfbeelding(data?.afbeelding ?? null);
+  await logActiviteit(sessie, "verwijderd", "bericht", { id, naam: data?.titel });
   vernieuw();
   return {};
 }

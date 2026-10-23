@@ -15,12 +15,13 @@ const sections = [
 ];
 
 const rolBadge: Record<string, { label: string; bg: string; color: string }> = {
-  admin: { label: "Admin", bg: "rgba(243,106,42,0.12)", color: "var(--primary)" },
+  admin: { label: "Beheerder", bg: "rgba(243,106,42,0.12)", color: "var(--primary)" },
+  redacteur: { label: "Redacteur", bg: "rgba(124,58,237,0.10)", color: "#7C3AED" },
   lid:   { label: "Lid",   bg: "rgba(0,0,0,0.06)",     color: "#666" },
 };
 
 interface Props {
-  rol: "lid" | "admin";
+  rol: "lid" | "redacteur" | "admin";
 }
 
 export default function LedenNavbar({ rol }: Props) {
@@ -94,7 +95,7 @@ export default function LedenNavbar({ rol }: Props) {
         {/* Right — rol badge + website link + logout */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
           {/* Rol badge */}
-          {rol === "admin" ? (
+          {rol === "admin" || rol === "redacteur" ? (
             <Link
               href="/admin"
               style={{

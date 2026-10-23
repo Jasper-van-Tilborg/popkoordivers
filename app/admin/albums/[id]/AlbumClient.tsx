@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { IconBack, IconStarSmall, IconTrash, IconUpload, useNaijlen, useToast } from "../../_components/ui";
 import { uploadNaarR2 } from "../../_components/upload";
 import AlbumDrawer from "../AlbumDrawer";
-import { fotoToevoegen, verwijderAlbum, verwijderFoto, wijzigAlbum, zetFotoVolgorde, zetImpressie, type AlbumInput } from "../actions";
+import { fotoToevoegen, fotosToegevoegd, verwijderAlbum, verwijderFoto, wijzigAlbum, zetFotoVolgorde, zetImpressie, type AlbumInput } from "../actions";
 
 interface Foto { id: string; impressies: boolean; url: string }
 interface Upload { naam: string; voortgang: number; fout?: string }
@@ -64,6 +64,7 @@ export default function AlbumClient({ album, fotos }: {
     }
     await Promise.all([werker(), werker(), werker()]);
 
+    if (gelukt) fotosToegevoegd(album.id, gelukt);
     router.refresh();
     const mislukt = beelden.length - gelukt;
     melding(mislukt ? `${gelukt} foto's toegevoegd, ${mislukt} mislukt` : `${gelukt} foto${gelukt === 1 ? "" : "'s"} toegevoegd`);

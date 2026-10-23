@@ -30,7 +30,7 @@ export default function LoginPage() {
         .eq("id", data.user.id)
         .single();
 
-      router.replace(profile?.rol === "admin" ? "/admin" : "/leden");
+      router.replace(profile?.rol === "admin" || profile?.rol === "redacteur" ? "/admin" : "/leden");
       router.refresh();
     }
   };
