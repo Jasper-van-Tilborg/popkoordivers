@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { Drawer, DeleteButton, IconPlus, IconSearch, useToast } from "../_components/ui";
-import { Keuze, Suggestie, Vinkje } from "../_components/velden";
+import { Keuze, Vinkje } from "../_components/velden";
 import { Werkblad, kiesMetSchuif } from "../_components/Werkblad";
 import { maakLid, verwijderLid, wijzigLid, zetWachtwoord, type LidInput } from "./actions";
 
@@ -14,13 +14,11 @@ interface Lid {
   naam: string | null;
   rol: LidInput["rol"];
   stemgroep: Stemgroep | null;
-  bestuursfunctie: string | null;
   in_smoelenboek: boolean;
   laatst_ingelogd: string | null;
 }
 
 const STEMGROEPEN: Stemgroep[] = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas"];
-const FUNCTIES = ["Voorzitter", "Secretaris", "Penningmeester", "Algemeen bestuurslid"];
 
 const initialen = (naam: string) =>
   naam.split(/\s+/).filter((w) => w && w[0] === w[0].toUpperCase()).map((w) => w[0]).join("").slice(0, 2) || naam.slice(0, 2).toUpperCase();
@@ -42,7 +40,6 @@ function LidDrawer({ lid, eigen, onClose, onDone }: {
     email: lid?.email ?? "",
     stemgroep: lid?.stemgroep ?? null,
     rol: lid?.rol ?? "lid",
-    bestuursfunctie: lid?.bestuursfunctie ?? "",
     in_smoelenboek: lid?.in_smoelenboek ?? true,
   });
   const [wachtwoord, setWachtwoord] = useState(() => (lid ? "" : maakWachtwoord()));
@@ -123,14 +120,9 @@ function LidDrawer({ lid, eigen, onClose, onDone }: {
               opties={[...STEMGROEPEN.map((s) => ({ value: s, label: s })), { value: "", label: "Geen", hint: "Bijvoorbeeld de dirigent" }]}
             />
           </div>
-          <div className="adm-field">
-            <label htmlFor="ld-functie">Bestuursfunctie <span className="adm-optional">optioneel</span></label>
-            <Suggestie id="ld-functie" value={form.bestuursfunctie} onChange={(v) => set("bestuursfunctie", v)} suggesties={FUNCTIES} placeholder="Geen" />
+          <div className="adm-field adm-field--vinkje">
+            <Vinkje checked={form.in_smoelenboek} onChange={(v) => set("in_smoelenboek", v)}>Tonen in het smoelenboek</Vinkje>
           </div>
-        </div>
-        <p className="adm-hint">Met een bestuursfunctie staat het lid in het blok &ldquo;Bestuur&rdquo; in de ledenomgeving.</p>
-        <div style={{ marginTop: 16 }}>
-          <Vinkje checked={form.in_smoelenboek} onChange={(v) => set("in_smoelenboek", v)}>Tonen in het smoelenboek</Vinkje>
         </div>
       </section>
 
@@ -191,7 +183,6 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
       .filter((g) => g.items.length > 0);
   }, [leden, zoek]);
 
-  const bestuur = leden.filter((l) => l.bestuursfunctie).length;
   const admins  = leden.filter((l) => l.rol === "admin").length;
   const redacteuren = leden.filter((l) => l.rol === "redacteur").length;
 
@@ -212,7 +203,7 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
                 <div className="adm-main-col">
                   <button className="adm-title" onClick={(e) => { e.stopPropagation(); kies(l.id); }}>{l.naam ?? l.email}</button>
                   <div className="adm-meta">
-                    <span>{l.bestuursfunctie ?? l.email}</span>
+                    <span>{l.email}</span>
                   </div>
                 </div>
                 {l.rol !== "lid" && <span className={l.rol === "admin" ? "adm-pill adm-pill--brand" : "adm-pill"}>{l.rol === "admin" ? "Beheerder" : "Redacteur"}</span>}
@@ -239,7 +230,7 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
       <header className="adm-head">
         <div>
           <h1>Gebruikers</h1>
-          <p className="adm-sub">{leden.length} accounts, {bestuur} in het bestuur, {admins} beheerder{admins === 1 ? "" : "s"} en {redacteuren} redacteur{redacteuren === 1 ? "" : "en"}.</p>
+          <p className="adm-sub">{leden.length} accounts, {admins} beheerder{admins === 1 ? "" : "s"} en {redacteuren} redacteur{redacteuren === 1 ? "" : "en"}.</p>
         </div>
         <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Gebruiker toevoegen</button>
       </header>
@@ -260,7 +251,7 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
           leeg={
             <>
               <p className="adm-empty-title">Kies een lid</p>
-              <p>Klik links op een lid om naam, stemgroep, bestuursfunctie of wachtwoord aan te passen.</p>
+              <p>Klik links op een lid om naam, stemgroep, rol of wachtwoord aan te passen.</p>
               <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Gebruiker toevoegen</button>
             </>
           }

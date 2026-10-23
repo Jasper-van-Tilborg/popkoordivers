@@ -31,7 +31,6 @@ const card = {
   boxShadow: "var(--shadow-sm)",
 } as const;
 
-const BESTUUR_VOLGORDE = ["voorzitter", "secretaris", "penningmeester"];
 const STEMGROEPEN = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas"];
 
 function initialen(naam: string) {
@@ -55,24 +54,27 @@ export default async function LedenPage() {
     { data: albumsRaw },
     { data: fotosRaw },
     { data: optredensRaw },
+    { data: groepenRaw },
   ] = await Promise.all([
     // Leden mogen elkaars profiel niet rechtstreeks lezen (e-mailadressen); de server
-    // haalt alleen naam, stemgroep en bestuursfunctie op, na de login-check hierboven.
-    createAdminClient().from("profiles").select("naam, stemgroep, bestuursfunctie, in_smoelenboek").not("naam", "is", null).order("naam"),
+    // haalt alleen naam en stemgroep op, na de login-check hierboven.
+    createAdminClient().from("profiles").select("naam, stemgroep, in_smoelenboek").not("naam", "is", null).order("naam"),
     supabase.from("bestanden").select("id, naam, categorie, stemgroep, r2_key").order("created_at", { ascending: false }),
     supabase.from("albums").select("id, slug, titel, datum").order("created_at", { ascending: false }),
     supabase.from("fotos").select("album_id, r2_key").order("volgorde").order("created_at"),
     supabase.from("agenda").select("id, titel, datum, locatie, fotos_url").eq("gepubliceerd", true).lt("datum_sorteer", today).order("datum_sorteer", { ascending: false }),
+    supabase.from("groepen").select("id, naam, soort, toelichting, contactpersoon_id, volgorde, leden:groepsleden!groepsleden_groep_id_fkey(id, naam, functie, volgorde)").order("volgorde"),
   ]);
 
   const leden = (ledenRaw ?? []).filter((l) => l.in_smoelenboek).map((l) => ({ ...l, naam: l.naam!, initialen: initialen(l.naam!) }));
-  const bestuur = (ledenRaw ?? [])
-    .filter((l) => l.bestuursfunctie)
-    .map((l) => ({ naam: l.naam!, rol: l.bestuursfunctie!, initialen: initialen(l.naam!) }))
-    .sort((a, b) => {
-      const ia = BESTUUR_VOLGORDE.indexOf(a.rol.toLowerCase()), ib = BESTUUR_VOLGORDE.indexOf(b.rol.toLowerCase());
-      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.naam.localeCompare(b.naam, "nl");
-    });
+  // Bestuur en commissies (Admin → Bestuur & commissies)
+  const groepen = (groepenRaw ?? []).map((g) => ({ ...g, leden: [...g.leden].sort((a, b) => a.volgorde - b.volgorde) }));
+  const bestuursleden = groepen.find((g) => g.soort === "bestuur")?.leden ?? [];
+  const bestuur = bestuursleden.map((l) => ({ naam: l.naam, rol: l.functie ?? "Bestuurslid", initialen: initialen(l.naam) }));
+  const commissies = groepen
+    .filter((g) => g.soort !== "bestuur" && g.leden.length > 0)
+    .sort((a, b) => Number(a.soort === "overig") - Number(b.soort === "overig") || a.volgorde - b.volgorde)
+    .map((g) => ({ ...g, contact: bestuursleden.find((l) => l.id === g.contactpersoon_id)?.naam ?? null }));
 
   // Alle bestanden en foto's staan in de privé bucket: tijdelijke links (1 uur geldig)
   const bestanden = await Promise.all((bestandenRaw ?? []).filter((b) => b.r2_key).map(async (b) => ({
@@ -169,29 +171,68 @@ export default async function LedenPage() {
           </div>
         </section>
 
-        {/* ── 4. Bestuur ── */}
+        {/* ── 4. Bestuur en commissies ── */}
         <section id="bestuur" className="leden-section" style={{ background: "#FFF8F4" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Reveal><SectionHeader title="Samenstelling bestuur" /></Reveal>
+            <Reveal><SectionHeader title="Bestuur en commissies" /></Reveal>
             <Reveal delay={80}>
               {bestuur.length === 0 ? (
                 <p style={{ fontSize: "14px", color: "#aaa" }}>Binnenkort beschikbaar.</p>
               ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }} className="bestuur-grid">
-                {bestuur.map((lid, i) => (
-                  <div key={i} style={{ ...card, padding: "22px 24px", display: "flex", alignItems: "center", gap: "16px" }}>
-                    <div className="leden-avatar" style={{ width: "52px", height: "52px", fontSize: "16px" }}>
-                      {lid.initialen}
+                <div className="bestuur-grid">
+                  {bestuur.map((lid, i) => (
+                    <div key={i} className="bestuur-kaart" style={card}>
+                      <div className="leden-avatar" style={{ width: "48px", height: "48px", fontSize: "15px" }}>{lid.initialen}</div>
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#111", lineHeight: 1.3 }}>{lid.naam}</p>
+                        <p style={{ margin: "3px 0 0", fontSize: "12px", color: "var(--primary)", fontWeight: 600 }}>{lid.rol}</p>
+                      </div>
                     </div>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#111", lineHeight: 1.3 }}>{lid.naam}</p>
-                      <p style={{ margin: "4px 0 0", fontSize: "12px", color: "var(--primary)", fontWeight: 600 }}>{lid.rol}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
               )}
             </Reveal>
+
+            {commissies.length > 0 && (
+              <>
+                <Reveal><h3 style={{ fontSize: "18px", fontWeight: 800, color: "#111", letterSpacing: "-0.3px", margin: "44px 0 16px" }}>Commissies</h3></Reveal>
+                {/* Twee losse kolommen: een commissie openklappen duwt alleen die kolom omlaag */}
+                <Reveal delay={60}>
+                  <div className="commissie-kolommen">
+                    {[0, 1].map((k) => (
+                      <div key={k} className="commissie-kolom">
+                        {commissies.map((c, i) => ({ c, i })).filter(({ i }) => i % 2 === k).map(({ c, i }) => (
+                          <details key={c.id} className="commissie" style={{ ...card, order: i }}>
+                            <summary>
+                              <div style={{ minWidth: 0 }}>
+                                <p className="commissie-naam">{c.naam}</p>
+                                <p className="commissie-meta">
+                                  {c.soort === "overig" ? `${c.leden.length} ${c.leden.length === 1 ? "taak" : "taken"}` : `${c.leden.length} ${c.leden.length === 1 ? "lid" : "leden"}`}
+                                  {c.toelichting && <span className="commissie-toelichting">{c.toelichting}</span>}
+                                  {c.contact && <span>Contact: {c.contact}</span>}
+                                </p>
+                              </div>
+                              <span className="leden-album__chevron" aria-hidden="true">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" /></svg>
+                              </span>
+                            </summary>
+                            <ul className="commissie-leden">
+                              {c.leden.map((l) => (
+                                <li key={l.id}>
+                                  <span className="leden-avatar" style={{ width: "30px", height: "30px", fontSize: "11px" }}>{initialen(l.naam)}</span>
+                                  <span>{l.naam}</span>
+                                  {l.functie && <span className="commissie-functie">{l.functie}</span>}
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </Reveal>
+              </>
+            )}
           </div>
         </section>
 
@@ -377,8 +418,35 @@ export default async function LedenPage() {
         .leden-foto { transition: transform 0.4s var(--ease-out); }
         .leden-foto:hover { transform: scale(1.04); }
 
+        .bestuur-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+        .bestuur-kaart { padding: 22px 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+
+        .commissie-kolommen { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+        .commissie-kolom { display: flex; flex-direction: column; gap: 12px; }
+        .commissie { overflow: hidden; }
+        .commissie summary {
+          list-style: none; cursor: pointer;
+          display: flex; align-items: center; justify-content: space-between; gap: 12px;
+          padding: 16px 18px 16px 22px;
+        }
+        .commissie summary::-webkit-details-marker { display: none; }
+        .commissie summary:hover { background: #FFFCFA; }
+        .commissie summary:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; border-radius: 20px; }
+        .commissie[open] .leden-album__chevron { transform: rotate(180deg); }
+        .commissie-naam { margin: 0; font-size: 15px; font-weight: 800; color: #111; letter-spacing: -0.2px; }
+        .commissie-meta { margin: 3px 0 0; font-size: 12.5px; color: #888; display: flex; flex-wrap: wrap; column-gap: 12px; row-gap: 2px; }
+        .commissie-toelichting { color: var(--primary); font-weight: 600; }
+        .commissie-leden {
+          list-style: none; margin: 0; padding: 4px 22px 18px;
+          display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;
+        }
+        .commissie-leden li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #333; min-width: 0; }
+        .commissie-functie { font-size: 11px; font-weight: 700; color: #888; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 100px; white-space: nowrap; }
+
         @media (max-width: 900px) {
-          .bestuur-grid { grid-template-columns: 1fr 1fr !important; }
+          .bestuur-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+          .commissie-kolommen { grid-template-columns: 1fr; }
+          .commissie-kolom { display: contents; }
           .smoelenboek-grid { grid-template-columns: repeat(3, 1fr) !important; }
           .optredens-grid { grid-template-columns: 1fr 1fr !important; }
           .opnames-grid { grid-template-columns: 1fr !important; }
@@ -386,7 +454,9 @@ export default async function LedenPage() {
         @media (max-width: 640px) {
           .leden-section { padding: 56px 16px; }
           .leden-card-pad { padding: 20px !important; }
-          .bestuur-grid { grid-template-columns: 1fr !important; }
+          .bestuur-grid { grid-template-columns: 1fr; gap: 8px; }
+          .bestuur-kaart { flex-direction: row; align-items: center; padding: 12px 16px; border-radius: 16px !important; }
+          .commissie-leden { grid-template-columns: 1fr; }
           .smoelenboek-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .optredens-grid { grid-template-columns: 1fr !important; }
         }

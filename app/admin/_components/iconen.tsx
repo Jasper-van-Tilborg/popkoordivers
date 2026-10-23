@@ -12,3 +12,4 @@ export const IconMicro    = () => svg(<><rect x="9" y="3" width="6" height="11" 
 export const IconDans     = () => svg(<><circle cx="13" cy="4" r="2" /><path d="m7 21 3-6 3 2 2 4M10 15l1-6 4 2 3-2M11 9 7 10l-2 3" /></>);
 export const IconLogboek  = () => svg(<><path d="M12 8v4l3 2" /><path d="M3.05 11a9 9 0 1 1 .5 4" /><path d="M3 4v5h5" /></>);
 export const IconHartslag = () => svg(<path d="M3 12h4l2-5 4 10 2-5h6" />);
+export const IconGroep    = () => svg(<><circle cx="12" cy="7" r="3" /><circle cx="5" cy="10" r="2" /><circle cx="19" cy="10" r="2" /><path d="M7 20v-2a5 5 0 0 1 10 0v2M2 20v-1a3 3 0 0 1 4-2.8M22 20v-1a3 3 0 0 0-4-2.8" /></>);

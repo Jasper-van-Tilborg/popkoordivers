@@ -1,12 +1,12 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { IconCalendar, IconNewspaper, IconUsers, IconEye, IconCamera } from "@/components/icons";
 import { CURVE, DUUR, knopVoor, naStart, schuifNaar } from "./paginaWissel";
-import { IconHome, IconMuziek, IconPost, IconStukken, IconMicro, IconDans, IconLogboek, IconHartslag } from "./iconen";
+import { IconHome, IconMuziek, IconPost, IconStukken, IconMicro, IconDans, IconLogboek, IconHartslag, IconGroep } from "./iconen";
 
 const IconGlobe = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></svg>
@@ -26,6 +26,7 @@ const groepen: { kop: string | null; alleenAdmin?: boolean; items: Item[] }[] = 
     { label: "ALV-stukken",   href: "/admin/bestanden/alv",           icon: <IconStukken /> },
     { label: "Opnames",       href: "/admin/bestanden/opnames",       icon: <IconMicro /> },
     { label: "Choreografie",  href: "/admin/bestanden/choreo",        icon: <IconDans /> },
+    { label: "Bestuur & commissies", href: "/admin/organisatie",       icon: <IconGroep /> },
   ] },
   { kop: "Beheer", alleenAdmin: true, items: [
     { label: "Gebruikers", href: "/admin/gebruikers", icon: <IconUsers size={19} /> },
@@ -81,12 +82,32 @@ function NavVlak({ doel }: { doel: string | null }) {
   return <span ref={vlak} className="adm-navvlak" aria-hidden="true" />;
 }
 
+// Het logo zingt: de letters springen als een golf en er zweven noten omhoog.
+// Elke klik telt op; de teller als key laat de animatie opnieuw beginnen.
+const NOTEN = [
+  { teken: "♪", x: 34, dx: -14, r: -18, d: 0 },
+  { teken: "♫", x: 92, dx: 6, r: 12, d: 120 },
+  { teken: "♪", x: 150, dx: 16, r: 20, d: 240 },
+];
+
 function Brand() {
+  const [keer, setKeer] = useState(0);
+  const letters = (tekst: string, start: number) =>
+    [...tekst].map((c, i) => <span key={i} className="adm-brand-letter" style={{ "--i": start + i } as CSSProperties}>{c}</span>);
   return (
-    <a href="/" target="_blank" rel="noopener" className="adm-brand">
-      <p className="adm-brand-name">Popkoor <span>Divers</span></p>
-      <p className="adm-brand-sub">Beheer van de website</p>
-    </a>
+    <button type="button" className="adm-brand" onClick={() => setKeer((k) => k + 1)} aria-label="Popkoor Divers">
+      <span key={keer} className="adm-brand-name" data-speelt={keer > 0 || undefined} aria-hidden="true">
+        {letters("Popkoor", 0)}{" "}<span className="adm-brand-divers">{letters("Divers", 8)}</span>
+      </span>
+      {keer > 0 && NOTEN.map((n, i) => (
+        <span
+          key={`${keer}-${i}`}
+          className="adm-brand-noot"
+          aria-hidden="true"
+          style={{ "--x": `${n.x}px`, "--dx": `${n.dx}px`, "--r": `${n.r}deg`, "--d": `${n.d}ms` } as CSSProperties}
+        >{n.teken}</span>
+      ))}
+    </button>
   );
 }
 

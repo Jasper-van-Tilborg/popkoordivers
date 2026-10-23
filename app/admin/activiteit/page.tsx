@@ -10,7 +10,7 @@ const FILTERS = [
   { id: "agenda",    label: "Agenda",         soorten: ["optreden"] },
   { id: "nieuws",    label: "Nieuws",         soorten: ["bericht"] },
   { id: "media",     label: "Media",          soorten: ["album", "foto"] },
-  { id: "bestanden", label: "Ledenomgeving",  soorten: ["bestand"] },
+  { id: "bestanden", label: "Ledenomgeving",  soorten: ["bestand", "groep"] },
   { id: "gebruikers", label: "Gebruikers",    soorten: ["lid"] },
 ];
 

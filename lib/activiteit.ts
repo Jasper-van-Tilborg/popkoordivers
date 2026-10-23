@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type Soort = "optreden" | "bericht" | "album" | "foto" | "bestand" | "lid" | "instellingen";
+export type Soort = "optreden" | "bericht" | "album" | "foto" | "bestand" | "lid" | "groep" | "instellingen";
 
 // Legt vast wie wat deed in de admin (te zien op het overzicht van admins).
 // Mislukt dit, dan gaat de wijziging zelf gewoon door.

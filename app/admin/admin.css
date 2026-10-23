@@ -13,10 +13,37 @@
 
 /* Zijbalk */
 .adm-sidebar { width: 272px; min-width: 272px; background: #161412; display: flex; flex-direction: column; height: 100vh; }
-.adm-brand { padding: 28px 24px 22px; text-decoration: none; display: block; }
-.adm-brand-name { margin: 0; font-family: var(--font-display), var(--font-manrope), sans-serif; font-size: 23px; font-weight: 800; letter-spacing: -0.025em; color: #fff; }
-.adm-brand-name span { color: var(--primary); }
-.adm-brand-sub { margin: 5px 0 0; font-size: 13px; color: rgba(255,255,255,0.42); }
+.adm-brand {
+  position: relative; display: block; width: 100%; padding: 30px 24px 24px; margin: 0; border: 0; background: none;
+  text-align: left; cursor: pointer; font: inherit; -webkit-tap-highlight-color: transparent;
+}
+.adm-brand:focus-visible { outline: 2px solid var(--primary); outline-offset: -6px; border-radius: 12px; }
+.adm-brand-name { display: block; margin: 0; font-family: var(--font-display), var(--font-manrope), sans-serif; font-size: 23px; font-weight: 800; letter-spacing: -0.025em; color: #fff; white-space: nowrap; }
+.adm-brand-divers { color: var(--primary); }
+.adm-brand-letter { display: inline-block; transform-origin: 50% 100%; }
+/* Klik: een golf door de letters, alsof ze zingen */
+.adm-brand-name[data-speelt] .adm-brand-letter { animation: adm-zing 0.62s cubic-bezier(0.3, 1.5, 0.5, 1) calc(var(--i) * 32ms) both; }
+@keyframes adm-zing {
+  0%   { transform: none; }
+  35%  { transform: translateY(-9px) scale(1.12, 0.92) rotate(-5deg); }
+  65%  { transform: translateY(1px) scale(0.96, 1.05); }
+  100% { transform: none; }
+}
+/* ...en er zweven drie noten omhoog */
+.adm-brand-noot {
+  position: absolute; left: var(--x); top: 34px; font-size: 17px; line-height: 1; color: var(--primary); pointer-events: none;
+  animation: adm-noot 1.3s cubic-bezier(0.2, 0.7, 0.3, 1) var(--d) both;
+}
+@keyframes adm-noot {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.5); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), -34px) rotate(var(--r)) scale(1.15); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adm-brand-name[data-speelt] .adm-brand-letter { animation: none; }
+  .adm-brand-noot { animation-name: adm-noot-zacht; }
+}
+@keyframes adm-noot-zacht { 0%, 100% { opacity: 0; } 40% { opacity: 1; } }
 .adm-nav { flex: 1; padding: 4px 14px 16px; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
 .adm-nav-kop { margin: 18px 12px 6px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.34); }
 .adm-nav-kop:first-child { margin-top: 4px; }
@@ -299,6 +326,19 @@
 .adm-logboek a:hover { color: var(--primary); }
 @media (max-width: 760px) { .adm-logboek li { grid-template-columns: 1fr; gap: 2px; } }
 
+/* Bestuur & commissies: één regel per persoon, naam en functie naast elkaar */
+.adm-personen { list-style: none; margin: 12px 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.adm-personen li { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.adm-personen-knoppen { display: flex; gap: 2px; }
+@media (max-width: 760px) {
+  .adm-personen { gap: 12px; }
+  .adm-personen li { grid-template-columns: 1fr auto; row-gap: 6px; }
+  .adm-personen li + li { padding-top: 12px; border-top: 1px solid var(--line-soft); }
+  .adm-personen li > :nth-child(2) { grid-column: 1; grid-row: 2; }
+  .adm-personen-knoppen { grid-row: 1 / span 2; grid-column: 2; flex-direction: column; }
+}
+.adm-field--vinkje { display: flex; align-items: flex-end; padding-bottom: 10px; }
+
 /* Een hele rij in het overzicht is een link naar het item */
 .adm-blok .adm-row { position: relative; }
 .adm-blok .adm-title::after { content: ""; position: absolute; inset: 0; }
@@ -564,9 +604,10 @@ textarea.adm-input { resize: vertical; line-height: 1.55; }
     display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px 10px 16px;
     background: #161412; position: sticky; top: 0; z-index: 30;
   }
-  .adm-topbar .adm-brand { padding: 0; }
+  .adm-topbar .adm-brand { padding: 0; width: auto; }
+  .adm-topbar .adm-brand-noot { top: 2px; font-size: 14px; }
   .adm-topbar .adm-brand-name { font-size: 17px; }
-  .adm-topbar button { all: unset; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; color: #fff; cursor: pointer; }
+  .adm-topbar button:not(.adm-brand) { all: unset; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; color: #fff; cursor: pointer; }
   .adm-topbar button:focus-visible { outline: 2px solid var(--primary); }
   .adm-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 40; transform: translateX(-100%); transition: transform 0.25s var(--ease-out); width: min(300px, 86vw); min-width: 0; }
   .adm-sidebar[data-open] { transform: none; box-shadow: 24px 0 60px -20px rgba(0,0,0,0.5); }

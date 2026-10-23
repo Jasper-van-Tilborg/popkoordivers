@@ -13,7 +13,7 @@ export default async function LedenAdminPage({ searchParams }: { searchParams: P
   const [{ data: { user } }, { data: auth }, { data: profiles }] = await Promise.all([
     supabase.auth.getUser(),
     createAdminClient().auth.admin.listUsers({ perPage: 1000 }),
-    supabase.from("profiles").select("id, naam, rol, stemgroep, bestuursfunctie, in_smoelenboek"),
+    supabase.from("profiles").select("id, naam, rol, stemgroep, in_smoelenboek"),
   ]);
 
   const perId = new Map((profiles ?? []).map((p) => [p.id, p]));
@@ -25,7 +25,6 @@ export default async function LedenAdminPage({ searchParams }: { searchParams: P
       naam: p?.naam ?? null,
       rol: p?.rol ?? "lid",
       stemgroep: p?.stemgroep ?? null,
-      bestuursfunctie: p?.bestuursfunctie ?? null,
       in_smoelenboek: p?.in_smoelenboek ?? true,
       laatst_ingelogd: u.last_sign_in_at ?? null,
     };

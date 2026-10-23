@@ -14,7 +14,6 @@ export interface LidInput {
   email: string;
   stemgroep: Stemgroep | null;
   rol: Rol;
-  bestuursfunctie: string;
   in_smoelenboek: boolean;
 }
 
@@ -30,7 +29,6 @@ const profiel = (input: LidInput) => ({
   email: input.email.trim().toLowerCase(),
   stemgroep: input.stemgroep,
   rol: input.rol,
-  bestuursfunctie: input.bestuursfunctie.trim() || null,
   in_smoelenboek: input.in_smoelenboek,
 });
 

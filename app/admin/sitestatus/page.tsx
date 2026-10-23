@@ -15,6 +15,7 @@ const TABELLEN = [
   { naam: "albums", label: "Albums" },
   { naam: "fotos", label: "Foto's" },
   { naam: "bestanden", label: "Bestanden" },
+  { naam: "groepsleden", label: "In bestuur en commissies" },
   { naam: "profiles", label: "Accounts" },
   { naam: "activiteit", label: "Regels in de activiteit" },
 ] as const;

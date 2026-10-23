@@ -217,9 +217,78 @@ export type Database = {
           },
         ]
       }
+      groepen: {
+        Row: {
+          contactpersoon_id: number | null
+          created_at: string
+          id: number
+          naam: string
+          soort: Database["public"]["Enums"]["groep_soort"]
+          toelichting: string | null
+          volgorde: number
+        }
+        Insert: {
+          contactpersoon_id?: number | null
+          created_at?: string
+          id?: never
+          naam: string
+          soort?: Database["public"]["Enums"]["groep_soort"]
+          toelichting?: string | null
+          volgorde?: number
+        }
+        Update: {
+          contactpersoon_id?: number | null
+          created_at?: string
+          id?: never
+          naam?: string
+          soort?: Database["public"]["Enums"]["groep_soort"]
+          toelichting?: string | null
+          volgorde?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groepen_contactpersoon_fk"
+            columns: ["contactpersoon_id"]
+            isOneToOne: false
+            referencedRelation: "groepsleden"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groepsleden: {
+        Row: {
+          functie: string | null
+          groep_id: number
+          id: number
+          naam: string
+          volgorde: number
+        }
+        Insert: {
+          functie?: string | null
+          groep_id: number
+          id?: never
+          naam: string
+          volgorde?: number
+        }
+        Update: {
+          functie?: string | null
+          groep_id?: number
+          id?: never
+          naam?: string
+          volgorde?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groepsleden_groep_id_fkey"
+            columns: ["groep_id"]
+            isOneToOne: false
+            referencedRelation: "groepen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
-          bestuursfunctie: string | null
           created_at: string
           email: string | null
           id: string
@@ -229,7 +298,6 @@ export type Database = {
           stemgroep: Database["public"]["Enums"]["stemgroep_type"] | null
         }
         Insert: {
-          bestuursfunctie?: string | null
           created_at?: string
           email?: string | null
           id: string
@@ -239,7 +307,6 @@ export type Database = {
           stemgroep?: Database["public"]["Enums"]["stemgroep_type"] | null
         }
         Update: {
-          bestuursfunctie?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -305,6 +372,7 @@ export type Database = {
       sitestatus: { Args: never; Returns: Json }
     }
     Enums: {
+      groep_soort: "bestuur" | "commissie" | "overig"
       stemgroep_type: "Alt" | "Mezzo" | "Sopraan" | "Tenor" | "Bas"
       user_rol: "lid" | "redacteur" | "admin"
     }
@@ -434,6 +502,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      groep_soort: ["bestuur", "commissie", "overig"],
       stemgroep_type: ["Alt", "Mezzo", "Sopraan", "Tenor", "Bas"],
       user_rol: ["lid", "redacteur", "admin"],
     },

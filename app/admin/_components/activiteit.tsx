@@ -33,6 +33,7 @@ export function linkVoor(soort: string, id: string | null) {
     foto: `/admin/albums/${id}`,
     bestand: `/admin/bestanden?id=${id}`,
     lid: `/admin/gebruikers?id=${id}`,
+    groep: `/admin/organisatie?id=${id}`,
   } as Record<string, string>)[soort] ?? null;
 }
 
@@ -45,6 +46,7 @@ export function Zin({ a }: { a: ActiviteitRegel }) {
   const naam = a.item_naam ? (href ? <Link href={href}>{`"${a.item_naam}"`}</Link> : `"${a.item_naam}"`) : null;
   const wie = <strong>{a.wie_naam ?? "Iemand"}</strong>;
   if (a.soort === "instellingen") return <>{wie} heeft de website-instellingen {a.actie}.</>;
+  if (a.soort === "groep") return <>{wie} heeft {naam} {a.actie}.</>;
   if (a.soort === "foto") return <>{wie} heeft een foto uit {naam} {a.actie}.</>;
   if (a.soort === "album" && a.actie.endsWith("toegevoegd")) return <>{wie} heeft {a.actie.replace(/ toegevoegd$/, "")} toegevoegd aan {naam}.</>;
   if (a.actie === "nieuw wachtwoord") return <>{wie} heeft een nieuw wachtwoord ingesteld voor {naam}.</>;
