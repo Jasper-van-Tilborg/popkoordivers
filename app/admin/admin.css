@@ -7,7 +7,8 @@
   display: flex; height: 100vh; overflow: hidden; color: var(--ink);
   font-family: var(--font-manrope), system-ui, sans-serif;
 }
-.adm-main { flex: 1; overflow: auto; background: var(--canvas); }
+.adm-main { flex: 1; overflow: auto; background: var(--canvas); scroll-padding: 90px 0 110px; }
+/* (scroll-padding: een veld met focus valt nooit achter de toolbar of de knoppenbalk onderin) */
 .adm-display { font-family: var(--font-display), var(--font-manrope), sans-serif; }
 
 /* Zijbalk */
@@ -466,13 +467,14 @@ textarea.adm-input { resize: vertical; line-height: 1.55; }
 .adm-photo-btn:disabled { opacity: 0.35; cursor: default; }
 @media (hover: none) { .adm-photo-move { opacity: 1; } }
 
-/* Melding */
+/* Melding: bovenin, zodat hij nooit de knoppen onderin het bewerkscherm afdekt;
+   klikken gaan er altijd doorheen */
 .adm-toast {
-  position: fixed; left: 50%; bottom: 28px; z-index: 60; transform: translateX(-50%);
+  position: fixed; left: calc(50% + 136px); top: 20px; z-index: 60; transform: translateX(-50%); pointer-events: none;
   padding: 11px 18px; border-radius: 12px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 600;
   box-shadow: 0 12px 32px -8px rgba(28,25,23,0.45); animation: adm-toast 0.25s var(--ease-out); max-width: calc(100vw - 32px);
 }
-@keyframes adm-toast { from { opacity: 0; transform: translate(-50%, 8px); } }
+@keyframes adm-toast { from { opacity: 0; transform: translate(-50%, -8px); } }
 
 /* Mobiel */
 @media (max-width: 760px) {
@@ -514,6 +516,7 @@ textarea.adm-input { resize: vertical; line-height: 1.55; }
   .adm-foot-actions { flex-wrap: wrap; }
 
   /* Werkblad op een telefoon: de lijst, en het bewerkscherm over het hele scherm */
+  .adm-toast { left: 50%; top: 72px; }
   .adm-wb { grid-template-columns: 1fr; }
   .adm-wb-lijst { position: static; max-height: none; overflow: visible; }
   .adm-wb:not([data-open]) .adm-wb-blad { display: none; }
@@ -522,6 +525,9 @@ textarea.adm-input { resize: vertical; line-height: 1.55; }
     animation: adm-in 0.3s var(--ease-out) both;
   }
   .adm-blad .adm-drawer-foot { border-radius: 0; }
+  .adm-blad .adm-foot-actions .adm-spacer { display: none; }
+  .adm-blad .adm-foot-actions .adm-btn--primary { order: -1; flex-basis: 100%; }
+  .adm-blad .adm-foot-actions .adm-btn--ghost { flex: 1; }
   .adm-venster { width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
 }
 
@@ -536,7 +542,7 @@ textarea.adm-input { resize: vertical; line-height: 1.55; }
 @keyframes adm-in       { from { opacity: 0; transform: translateY(8px); } }
 @keyframes adm-fade-out { to { opacity: 0; } }
 @keyframes adm-slide-out { to { opacity: 0; transform: translateX(40px); } }
-@keyframes adm-toast-out { to { opacity: 0; transform: translate(-50%, 8px); } }
+@keyframes adm-toast-out { to { opacity: 0; transform: translate(-50%, -8px); } }
 @keyframes adm-pop-in   { from { opacity: 0; transform: scale(0.92); } }
 @keyframes adm-ster     { 40% { transform: scale(1.45) rotate(-12deg); } }
 @keyframes adm-shimmer  { to { background-position: -200% 0; } }
@@ -569,6 +575,10 @@ textarea.adm-input { resize: vertical; line-height: 1.55; }
 .adm-photo { transition: opacity 0.2s, transform 0.25s var(--ease-out); }
 .adm-photo[data-sleep] { transform: scale(0.96); }
 
+/* Tijdens een schuifbeweging blijft alles klikbaar: klikken gaan door naar de
+   pagina eronder in plaats van een halve seconde te verdwijnen. */
+html::view-transition { pointer-events: none; }
+
 /* ── Pagina wisselen (paginaWissel.ts) ──
    Via de zijbalk naar een andere pagina: de pagina's liggen onder elkaar in de
    volgorde van de zijbalk. Omlaag in de lijst schuift de oude pagina als geheel
@@ -592,37 +602,20 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 @keyframes adm-pagina-naar-onder { to { transform: translateY(100%); } }
 @keyframes adm-pagina-van-boven  { from { transform: translateY(-100%); } }
 
-/* ── Bewerkscherm wisselen (Werkblad.tsx) ──
-   Een andere regel in de lijst: het bewerkscherm schuift als geheel, net als een
-   pagina hierboven, maar binnen zijn eigen kader. Het kader groeit of krimpt in
-   hetzelfde tempo naar de hoogte van het nieuwe scherm; wat erbuiten valt, is weg.
-   De lijst ernaast (root) is live, zodat het vlak achter de regel zichtbaar meeschuift. */
-html[data-vt^="blad-"] .adm-wb-blad { view-transition-name: adm-blad; }
-html[data-vt^="blad-"]::view-transition-group(root) { animation: none; }
-html[data-vt^="blad-"]::view-transition-old(root) { animation: none; opacity: 0; }
-html[data-vt^="blad-"]::view-transition-new(root) { animation: none; }
-html[data-vt^="blad-"]::view-transition-group(adm-blad) {
-  overflow: clip; border-radius: 16px;
-  animation-duration: 0.55s; animation-timing-function: cubic-bezier(0.55, 0, 0.1, 1);
-}
-html[data-vt^="blad-"]::view-transition-old(adm-blad),
-html[data-vt^="blad-"]::view-transition-new(adm-blad) {
-  /* Bovenaan het kader vast, op hun eigen hoogte (niet uitgerekt naar het kader) */
-  height: auto; mix-blend-mode: normal;
-  animation-duration: 0.55s; animation-timing-function: cubic-bezier(0.55, 0, 0.1, 1); animation-fill-mode: both;
-}
-/* Beide even ver (--blad-schuif), zodat ze op elkaar aansluiten */
-html[data-vt="blad-omlaag"]::view-transition-old(adm-blad) { animation-name: adm-blad-naar-boven; }
-html[data-vt="blad-omlaag"]::view-transition-new(adm-blad) { animation-name: adm-blad-van-onder; }
-html[data-vt="blad-omhoog"]::view-transition-old(adm-blad) { animation-name: adm-blad-naar-onder; }
-html[data-vt="blad-omhoog"]::view-transition-new(adm-blad) { animation-name: adm-blad-van-boven; }
-@keyframes adm-blad-naar-boven { to   { transform: translateY(calc(-1 * var(--blad-schuif, 100%))); } }
-@keyframes adm-blad-van-onder  { from { transform: translateY(var(--blad-schuif, 100%)); } }
-@keyframes adm-blad-naar-onder { to   { transform: translateY(var(--blad-schuif, 100%)); } }
-@keyframes adm-blad-van-boven  { from { transform: translateY(calc(-1 * var(--blad-schuif, 100%))); } }
+/* ── Bewerkscherm wisselen (Werkblad.tsx, kiesMetSchuif) ──
+   Het oude scherm (een kopie) en het nieuwe schuiven samen binnen het kader;
+   wat erbuiten valt, is weg. */
+.adm-wb-blad { position: relative; }
+.adm-wb-blad.is-schuivend { overflow: clip; border-radius: 16px; }
+.adm-wb-kopie { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
+
+/* Laden: een rustige melding onder de echte kop (Skelet.tsx) */
+.adm-laden { margin: 8px 0 0; font-size: 14px; color: var(--ink-2); animation: adm-fade 0.3s ease-out 0.25s both; }
 
 /* Na het laadskelet komt de echte inhoud zacht in beeld */
-.adm-pagina > .adm-page:not(.adm-skelet) { animation: adm-fade 0.2s ease-out both; }
+/* backwards, niet both: na afloop laat de animatie los, anders zit het bewerkscherm
+   op een telefoon (position: fixed) gevangen onder de toolbar */
+.adm-pagina > .adm-page:not(.adm-skelet) > :is(.adm-toolbar, .adm-content) { animation: adm-fade 0.2s ease-out backwards; }
 
 /* Een pagina die zo binnenkwam staat er als geheel: niet ook nog rij voor rij */
 .adm-pagina[data-geschoven] :is(.adm-head, .adm-toolbar, .adm-content > *, .adm-list > li, .adm-group-title, .adm-card, .adm-card-nieuw, .adm-photo, .adm-blok, .adm-actie) {

@@ -142,6 +142,7 @@ export default function Sidebar({ naam, email }: { naam: string | null; email: s
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={true}
                   onClick={kies(item.href)}
                   aria-current={actief === item.href ? "page" : undefined}
                   data-doel={doel === item.href || undefined}

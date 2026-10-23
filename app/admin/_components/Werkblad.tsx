@@ -25,7 +25,7 @@ export function Werkblad({ lijst, blad, leeg, gekozen }: {
         <LijstVlak houder={lijstRef} gekozen={gekozen} />
         {lijst}
       </div>
-      <div className="adm-wb-blad">{blad ?? <div className="adm-wb-leeg">{leeg}</div>}</div>
+      <div className="adm-wb-blad"><div className="adm-wb-blad-inhoud">{blad ?? <div className="adm-wb-leeg">{leeg}</div>}</div></div>
     </div>
   );
 }
@@ -68,27 +68,53 @@ function LijstVlak({ houder, gekozen }: { houder: React.RefObject<HTMLDivElement
   return <span ref={vlak} className="adm-wb-vlak" aria-hidden="true" />;
 }
 
-// Een andere regel kiezen: met de schuifbeweging van het bewerkscherm als dat kan.
+// Een andere regel kiezen: het bewerkscherm schuift als geheel binnen zijn
+// eigen kader, net als een pagina bij het wisselen via de zijbalk. Met gewone
+// animaties (geen View Transition), zodat je tijdens het schuiven gewoon kunt
+// blijven klikken. Het oude scherm gaat als kopie weg; het kader groeit of
+// krimpt in hetzelfde tempo naar de hoogte van het nieuwe scherm.
 // `van` en `naar` zijn de data-id's van de regels (null = niets gekozen).
+let lopend: (() => void) | null = null;
+
 export function kiesMetSchuif(van: string | null, naar: string | null, kies: () => void) {
-  const blad = document.querySelector<HTMLElement>(".adm-wb-blad");
+  lopend?.(); // een vorige beweging meteen afronden
+  const kader = document.querySelector<HTMLElement>(".adm-wb-blad");
+  const inhoud = kader?.querySelector<HTMLElement>(".adm-wb-blad-inhoud");
   if (
-    van === naar || !blad || !document.startViewTransition ||
+    van === naar || !kader || !inhoud ||
     window.matchMedia("(max-width: 760px), (prefers-reduced-motion: reduce)").matches
-  ) return kies();
+  ) return flushSync(kies);
 
   // Lager in de lijst (of vanuit "niets gekozen"): het oude scherm gaat naar boven weg.
   const pos = (id: string | null) => (id ? document.querySelector(`.adm-wb-lijst [data-id="${CSS.escape(id)}"]`)?.getBoundingClientRect().top : undefined);
   const a = pos(van), b = pos(naar);
   const omlaag = a === undefined || b === undefined || b > a;
 
-  const root = document.documentElement;
-  root.dataset.vt = omlaag ? "blad-omlaag" : "blad-omhoog";
-  root.style.setProperty("--blad-schuif", `${blad.offsetHeight}px`);
-  const overgang = document.startViewTransition(() => flushSync(kies));
-  overgang.finished.finally(() => {
-    if (!root.dataset.vt?.startsWith("blad-")) return;
-    delete root.dataset.vt;
-    root.style.removeProperty("--blad-schuif");
-  });
+  const oudeHoogte = kader.offsetHeight;
+  const kopie = inhoud.cloneNode(true) as HTMLElement;
+  kopie.classList.add("adm-wb-kopie");
+  kopie.setAttribute("aria-hidden", "true");
+  kopie.inert = true;
+  kopie.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+
+  flushSync(kies);
+  kader.appendChild(kopie);
+  const nieuweHoogte = inhoud.offsetHeight;
+  const afstand = omlaag ? oudeHoogte : nieuweHoogte;
+  const tempo = { duration: DUUR, easing: CURVE };
+
+  kader.classList.add("is-schuivend");
+  const animaties = [
+    kader.animate([{ height: `${oudeHoogte}px` }, { height: `${nieuweHoogte}px` }], tempo),
+    kopie.animate([{ transform: "translateY(0)" }, { transform: `translateY(${omlaag ? -afstand : afstand}px)` }], tempo),
+    inhoud.animate([{ transform: `translateY(${omlaag ? afstand : -afstand}px)` }, { transform: "translateY(0)" }], tempo),
+  ];
+  const klaar = () => {
+    animaties.forEach((x) => x.cancel());
+    kopie.remove();
+    kader.classList.remove("is-schuivend");
+    if (lopend === klaar) lopend = null;
+  };
+  lopend = klaar;
+  animaties[0].finished.then(klaar, () => {});
 }

@@ -1,5 +1,5 @@
 import Skelet from "../_components/Skelet";
 
 export default function Laden() {
-  return <Skelet soort="werkblad" />;
+  return <Skelet titel="Agenda" knop="Nieuw optreden" wat="Optredens" />;
 }

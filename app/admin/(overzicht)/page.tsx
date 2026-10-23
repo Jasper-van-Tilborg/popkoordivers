@@ -14,9 +14,9 @@ export default async function OverzichtPage() {
     supabase.auth.getUser(),
     supabase.from("agenda").select("id, titel, datum_sorteer, locatie, tijd, gepubliceerd").gte("datum_sorteer", vandaag).order("datum_sorteer"),
     supabase.from("berichten").select("id, slug, titel, datum, afbeelding, gepubliceerd, created_at").order("created_at", { ascending: false }),
-    supabase.from("albums").select("id"),
+    supabase.from("albums").select("id, titel"),
     supabase.from("fotos").select("album_id, impressies"),
-    supabase.from("profiles").select("id, naam, stemgroep"),
+    supabase.from("profiles").select("id, naam, email, stemgroep"),
     supabase.from("bestanden").select("categorie"),
   ]);
 
@@ -26,16 +26,35 @@ export default async function OverzichtPage() {
   const ik = leden.find((p) => p.id === user?.id);
   const voornaam = ik?.naam?.split(" ")[0];
 
-  // Wat er aandacht nodig heeft, met een link naar waar je het oplost
-  const aandacht: { tekst: string; href: string; link: string }[] = [];
-  const verborgen = optredens.filter((o) => !o.gepubliceerd).length;
-  if (verborgen) aandacht.push({ tekst: `${verborgen} komend${verborgen === 1 ? " optreden is" : "e optredens zijn"} nog verborgen.`, href: "/admin/agenda", link: "Naar de agenda" });
-  const onvolledig = optredens.filter((o) => o.gepubliceerd && !o.locatie && !o.tijd).length;
-  if (onvolledig) aandacht.push({ tekst: `Bij ${onvolledig} optreden${onvolledig === 1 ? "" : "s"} staan nog geen locatie en tijd.`, href: "/admin/agenda", link: "Aanvullen" });
-  const zonderSter = (albums.data ?? []).filter((a) => !(fotos.data ?? []).some((f) => f.album_id === a.id && f.impressies)).length;
-  if (zonderSter) aandacht.push({ tekst: `${zonderSter} album${zonderSter === 1 ? " staat" : "s staan"} nog niet op de website: geef een paar foto's een ster.`, href: "/admin/albums", link: "Naar media" });
-  const zonderStem = leden.filter((p) => !p.stemgroep).length;
-  if (zonderStem) aandacht.push({ tekst: `${zonderStem} ${zonderStem === 1 ? "lid heeft" : "leden hebben"} nog geen stemgroep.`, href: "/admin/leden", link: "Naar leden" });
+  // Wat er aandacht nodig heeft. Elke regel linkt rechtstreeks naar het item
+  // zelf; zijn het er meer dan drie, dan de eerste twee en een link naar de rest.
+  type Punt = { tekst: string; href: string; link: string };
+  const aandacht: Punt[] = [];
+  function perItem<T>(items: T[], punt: (x: T) => Punt, rest: (n: number) => Punt) {
+    if (items.length > 3) { aandacht.push(...items.slice(0, 2).map(punt), rest(items.length - 2)); }
+    else aandacht.push(...items.map(punt));
+  }
+
+  perItem(
+    optredens.filter((o) => !o.gepubliceerd),
+    (o) => ({ tekst: `"${o.titel}" staat nog verborgen voor bezoekers.`, href: `/admin/agenda?id=${o.id}`, link: "Naar het optreden" }),
+    (n) => ({ tekst: `En nog ${n} verborgen optredens.`, href: "/admin/agenda", link: "Naar de agenda" }),
+  );
+  perItem(
+    optredens.filter((o) => o.gepubliceerd && !o.locatie && !o.tijd),
+    (o) => ({ tekst: `Bij "${o.titel}" staan nog geen locatie en tijd.`, href: `/admin/agenda?id=${o.id}`, link: "Aanvullen" }),
+    (n) => ({ tekst: `En nog ${n} optredens zonder locatie en tijd.`, href: "/admin/agenda", link: "Naar de agenda" }),
+  );
+  perItem(
+    (albums.data ?? []).filter((a) => !(fotos.data ?? []).some((f) => f.album_id === a.id && f.impressies)),
+    (a) => ({ tekst: `Album "${a.titel}" staat nog niet op de website: geef een paar foto's een ster.`, href: `/admin/albums/${a.id}`, link: "Naar het album" }),
+    (n) => ({ tekst: `En nog ${n} albums zonder foto's op de website.`, href: "/admin/albums", link: "Naar media" }),
+  );
+  perItem(
+    leden.filter((p) => !p.stemgroep),
+    (p) => ({ tekst: `${p.naam ?? p.email ?? "Een lid"} heeft nog geen stemgroep.`, href: `/admin/leden?id=${p.id}`, link: "Aanvullen" }),
+    (n) => ({ tekst: `En nog ${n} leden zonder stemgroep.`, href: "/admin/leden", link: "Naar leden" }),
+  );
   if (!(bestanden.data ?? []).length) aandacht.push({ tekst: "Er staan nog geen bladmuziek of nieuwsbrieven in de ledenomgeving.", href: "/admin/bestanden?nieuw", link: "Bestand toevoegen" });
   const laatste = nieuws.find((b) => b.gepubliceerd);
   if (laatste && nu.getTime() - new Date(laatste.created_at).getTime() > 60 * 864e5) aandacht.push({ tekst: `Het laatste nieuwsbericht is van ${laatste.datum}.`, href: "/admin/nieuws?nieuw", link: "Nieuw bericht" });
@@ -130,7 +149,7 @@ export default async function OverzichtPage() {
               <ul className="adm-aandacht adm-aandacht--feiten">
                 <li><span>{optredens.filter((o) => o.gepubliceerd).length} optredens gepland</span></li>
                 <li><span>{nieuws.filter((b) => b.gepubliceerd).length} nieuwsberichten online</span></li>
-                <li><span>{(albums.data ?? []).length - zonderSter} van {(albums.data ?? []).length} albums met foto&apos;s op de website</span></li>
+                <li><span>{(albums.data ?? []).filter((a) => (fotos.data ?? []).some((f) => f.album_id === a.id && f.impressies)).length} van {(albums.data ?? []).length} albums met foto&apos;s op de website</span></li>
                 <li><span>{leden.length} accounts, {(bestanden.data ?? []).length} bestanden voor leden</span></li>
               </ul>
             </section>

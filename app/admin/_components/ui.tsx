@@ -35,7 +35,8 @@ export function Drawer({ title, onClose, children, footer, sluitend, inline, act
   // Alleen bij openen: focus op het eerste veld (zonder de pagina te laten verspringen) en Esc om te sluiten
   useEffect(() => {
     ref.current?.querySelector<HTMLElement>("input:not([type=hidden]):not([type=file]), textarea, select")?.focus({ preventScroll: true });
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeRef.current(); };
+    // Een Escape die een kalender of keuzelijst al heeft afgehandeld, sluit niet ook het scherm
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !e.defaultPrevented) closeRef.current(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
