@@ -2,39 +2,73 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-/* ── Paneel dat van rechts inschuift ─────────────────────────────────────────── */
+/* ── Bewerkscherm ────────────────────────────────────────────────────────────────
+   inline: als blok rechts in het Werkblad (Agenda, Nieuws, Bestanden, Leden).
+   Anders: een venster in het midden, voor korte formulieren (een album). */
 
-export function Drawer({ title, onClose, children, footer }: {
+// Houdt een waarde nog even vast nadat hij null wordt, zodat iets kan wegschuiven
+// voordat het uit beeld verdwijnt. Geeft [waarde om te tonen, bezig met sluiten].
+export function useNaijlen<T>(waarde: T | null, ms = 200): [T | null, boolean] {
+  const [laatste, setLaatste] = useState(waarde);
+  if (waarde !== null && waarde !== laatste) setLaatste(waarde);
+  useEffect(() => {
+    if (waarde !== null || laatste === null) return;
+    const t = setTimeout(() => setLaatste(null), ms);
+    return () => clearTimeout(t);
+  }, [waarde, laatste, ms]);
+  return [waarde ?? laatste, waarde === null && laatste !== null];
+}
+
+export function Drawer({ title, onClose, children, footer, sluitend, inline, acties }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   footer: ReactNode;
+  sluitend?: boolean;
+  inline?: boolean;
+  acties?: ReactNode;
 }) {
   const ref = useRef<HTMLElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => { closeRef.current = onClose; });
 
-  // Alleen bij openen: focus op het eerste veld en Esc om te sluiten
+  // Alleen bij openen: focus op het eerste veld (zonder de pagina te laten verspringen) en Esc om te sluiten
   useEffect(() => {
-    ref.current?.querySelector<HTMLElement>("input:not([type=hidden]):not([type=file]), textarea, select")?.focus();
+    ref.current?.querySelector<HTMLElement>("input:not([type=hidden]):not([type=file]), textarea, select")?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeRef.current(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  return (
+  const inhoud = (
     <>
-      <div className="adm-overlay" onClick={onClose} />
-      <aside ref={ref} className="adm-drawer" role="dialog" aria-modal="true" aria-labelledby="adm-drawer-titel">
-        <header className="adm-drawer-head">
-          <h2 id="adm-drawer-titel">{title}</h2>
+      <header className="adm-drawer-head">
+        <h2 id="adm-drawer-titel">{title}</h2>
+        <div className="adm-drawer-acties">
+          {acties}
           <button className="adm-icon-btn" onClick={onClose} aria-label="Sluiten">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
           </button>
-        </header>
-        <div className="adm-drawer-body">{children}</div>
-        <footer className="adm-drawer-foot">{footer}</footer>
-      </aside>
+        </div>
+      </header>
+      <div className="adm-drawer-body">{children}</div>
+      <footer className="adm-drawer-foot">{footer}</footer>
+    </>
+  );
+
+  if (inline) {
+    return (
+      <section ref={ref} className="adm-blad" data-sluitend={sluitend || undefined} aria-labelledby="adm-drawer-titel">
+        {inhoud}
+      </section>
+    );
+  }
+  return (
+    <>
+      <div className="adm-overlay" data-sluitend={sluitend || undefined} onClick={onClose} />
+      <div ref={ref as React.RefObject<HTMLDivElement>} className="adm-venster" data-sluitend={sluitend || undefined} role="dialog" aria-modal="true" aria-labelledby="adm-drawer-titel">
+        {inhoud}
+      </div>
     </>
   );
 }
@@ -42,16 +76,49 @@ export function Drawer({ title, onClose, children, footer }: {
 /* ── Korte melding onderin ───────────────────────────────────────────────────── */
 
 export function useToast() {
-  const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
+  const [toast, setToast] = useState<{ msg: string; key: number; weg?: boolean } | null>(null);
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3200);
+    const t = setTimeout(() => (toast.weg ? setToast(null) : setToast({ ...toast, weg: true })), toast.weg ? 200 : 3000);
     return () => clearTimeout(t);
   }, [toast]);
 
-  const element = toast ? <div key={toast.key} className="adm-toast" role="status">{toast.msg}</div> : null;
+  const element = toast ? <div key={toast.key} className="adm-toast" data-sluitend={toast.weg || undefined} role="status">{toast.msg}</div> : null;
   return [element, (msg: string) => setToast({ msg, key: Date.now() })] as const;
+}
+
+/* ── Tabbladen met een meeschuivend actief blokje ────────────────────────────── */
+
+export function Tabs<T extends string>({ value, onChange, items, label }: {
+  value: T;
+  onChange: (v: T) => void;
+  items: { id: T; label: string; count?: number }[];
+  label: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [blok, setBlok] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+
+  useEffect(() => {
+    const meet = () => {
+      const el = ref.current?.querySelector<HTMLElement>('[aria-selected="true"]');
+      if (el) setBlok({ x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+    };
+    meet();
+    window.addEventListener("resize", meet);
+    return () => window.removeEventListener("resize", meet);
+  }, [value, items.length]);
+
+  return (
+    <div ref={ref} className="adm-tabs" role="tablist" aria-label={label}>
+      {blok && <span className="adm-tabs-blok" aria-hidden="true" style={{ transform: `translate(${blok.x}px, ${blok.y}px)`, width: blok.w, height: blok.h }} />}
+      {items.map((t) => (
+        <button key={t.id} role="tab" aria-selected={value === t.id} onClick={() => onChange(t.id)}>
+          {t.label}{t.count !== undefined && <span className="adm-count">{t.count}</span>}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 /* ── Aan/uit-schakelaar ──────────────────────────────────────────────────────── */

@@ -3,7 +3,7 @@
 import { useCallback, useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { IconBack, IconStarSmall, IconTrash, IconUpload, useToast } from "../../_components/ui";
+import { IconBack, IconStarSmall, IconTrash, IconUpload, useNaijlen, useToast } from "../../_components/ui";
 import { uploadNaarR2 } from "../../_components/upload";
 import AlbumDrawer from "../AlbumDrawer";
 import { fotoToevoegen, verwijderAlbum, verwijderFoto, wijzigAlbum, zetFotoVolgorde, zetImpressie, type AlbumInput } from "../actions";
@@ -19,12 +19,15 @@ export default function AlbumClient({ album, fotos }: {
   const router = useRouter();
   const [toast, melding]      = useToast();
   const [bewerken, setBewerken] = useState(false);
+  const [toonBewerken, sluitend] = useNaijlen(bewerken ? true : null);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [drag, setDrag]       = useState(false);
   const [bezig, setBezig]     = useState<Set<string>>(new Set());
   const [bevestig, setBevestig] = useState<string | null>(null);
   const [, startTransition]   = useTransition();
   const [sleep, setSleep]     = useState<number | null>(null);
+  // Foto's die er bij het openen al waren; alles daarna is nieuw en popt in
+  const [bekend] = useState(() => new Set(fotos.map((f) => f.id)));
   const [lijst, pasToe] = useOptimistic(fotos, (state, a: Actie) =>
     a.soort === "impressie"
       ? state.map((f) => (f.id === a.id ? { ...f, impressies: a.impressies } : f))
@@ -113,7 +116,7 @@ export default function AlbumClient({ album, fotos }: {
   }
 
   return (
-    <div>
+    <div className="adm-page">
       <header className="adm-head">
         <div>
           <Link href="/admin/albums" className="adm-head-back"><IconBack /> Alle albums</Link>
@@ -172,7 +175,7 @@ export default function AlbumClient({ album, fotos }: {
             {lijst.map((f, i) => (
               <li
                 key={f.id}
-                className="adm-photo"
+                className={bekend.has(f.id) ? "adm-photo" : "adm-photo adm-photo--nieuw"}
                 data-busy={bezig.has(f.id) || undefined}
                 data-sleep={sleep === i || undefined}
                 draggable
@@ -214,8 +217,9 @@ export default function AlbumClient({ album, fotos }: {
         )}
       </div>
 
-      {bewerken && (
+      {toonBewerken && (
         <AlbumDrawer
+          sluitend={sluitend}
           album={{ titel: album.titel, datum: album.datum, totaal: lijst.length }}
           onClose={sluit}
           onSave={bewaar}

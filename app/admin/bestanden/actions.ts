@@ -31,18 +31,18 @@ export async function bestandToevoegen(key: string, input: BestandInput) {
   const fout = controleer(input) ?? (key.startsWith("bestanden/") ? null : "Ongeldig bestand.");
   if (fout) return { error: fout };
 
-  const { error } = await supabase.from("bestanden").insert({
+  const { data, error } = await supabase.from("bestanden").insert({
     naam: input.naam.trim(),
     categorie: input.categorie,
     stemgroep: input.categorie === "liedjes" ? input.stemgroep : null,
     r2_key: key,
-  });
+  }).select("id").single();
   if (error) {
     await deleteFile("prive", key).catch(() => {});
     return { error: error.message };
   }
   vernieuw();
-  return {};
+  return { id: data.id };
 }
 
 export async function wijzigBestand(id: number, input: BestandInput) {

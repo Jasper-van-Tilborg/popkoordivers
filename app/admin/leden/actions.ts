@@ -48,7 +48,7 @@ export async function maakLid(input: LidInput, wachtwoord: string) {
   if (pErr) return { error: pErr.message };
 
   vernieuw();
-  return {};
+  return { id: data.user.id };
 }
 
 export async function wijzigLid(id: string, input: LidInput) {

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Drawer, DeleteButton, Switch, formatDatum } from "../_components/ui";
+import { Datum, Keuze } from "../_components/velden";
 import type { AgendaInput } from "./actions";
 
 export interface AgendaItem {
@@ -53,9 +54,10 @@ interface Props {
   onClose: () => void;
   onSave: (input: AgendaInput) => Promise<string | null>;
   onDelete?: () => Promise<string | null>;
+  acties?: ReactNode;
 }
 
-export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, onDelete }: Props) {
+export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, onDelete, acties }: Props) {
   const [form, setForm]           = useState(initial);
   const [errors, setErrors]       = useState<Partial<Record<"titel" | "datum" | "link", string>>>({});
   const [serverErr, setServerErr] = useState("");
@@ -103,6 +105,8 @@ export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, o
 
   return (
     <Drawer
+      inline
+      acties={acties}
       title={mode === "edit" ? "Optreden bewerken" : "Nieuw optreden"}
       onClose={onClose}
       footer={
@@ -133,7 +137,7 @@ export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, o
         <div className="adm-grid-2">
           <div className="adm-field">
             <label htmlFor="ag-datum">Datum</label>
-            <input id="ag-datum" type="date" className="adm-input" value={form.datum_sorteer} onChange={(e) => set("datum_sorteer", e.target.value)} aria-invalid={!!errors.datum} />
+            <Datum id="ag-datum" value={form.datum_sorteer} onChange={(v) => set("datum_sorteer", v)} invalid={!!errors.datum} />
             {errors.datum
               ? <p className="adm-err">{errors.datum}</p>
               : form.datum_sorteer && <p className="adm-hint">Op de site: {formatDatum(form.datum_sorteer)}</p>}
@@ -164,11 +168,16 @@ export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, o
         </div>
         <div className="adm-field">
           <label htmlFor="ag-fotos">Fotoalbum <span className="adm-optional">optioneel</span></label>
-          <select id="ag-fotos" className="adm-input" value={form.fotos_url} onChange={(e) => set("fotos_url", e.target.value)}>
-            <option value="">Geen album</option>
-            {albums.map((a) => <option key={a.slug} value={`/media/${a.slug}`}>{a.titel}</option>)}
-            {eigenFotoLink && <option value={form.fotos_url}>Eigen link: {form.fotos_url}</option>}
-          </select>
+          <Keuze
+            id="ag-fotos"
+            value={form.fotos_url}
+            onChange={(v) => set("fotos_url", v)}
+            opties={[
+              { value: "", label: "Geen album" },
+              ...albums.map((a) => ({ value: `/media/${a.slug}`, label: a.titel })),
+              ...(eigenFotoLink ? [{ value: form.fotos_url, label: "Eigen link", hint: form.fotos_url }] : []),
+            ]}
+          />
           <p className="adm-hint">Zonder album zien bezoekers bij een afgelopen optreden een link naar de ledenomgeving.</p>
         </div>
       </section>

@@ -1,133 +1,135 @@
 "use client";
 
-import { useCallback, useMemo, useOptimistic, useState, useTransition } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { IconEye } from "@/components/icons";
-import { IconPlus, IconSearch, Switch, useToast } from "../_components/ui";
+import { IconPlus, IconSearch, useToast } from "../_components/ui";
+import { Werkblad, kiesMetSchuif } from "../_components/Werkblad";
 import NieuwsDrawer, { type Bericht } from "./NieuwsDrawer";
-import { bewaarBericht, verwijderBericht, zetBerichtZichtbaar, type BerichtInput } from "./actions";
+import { bewaarBericht, verwijderBericht, type BerichtInput } from "./actions";
 
-type DrawerState = { bericht: Bericht | null };
+export default function NieuwsClient({ items, loadError, startNieuw, startId }: {
+  items: Bericht[];
+  loadError?: string;
+  startNieuw?: boolean;
+  startId?: string;
+}) {
+  const [zoek, setZoek] = useState("");
+  const [gekozen, setGekozen] = useState<string | null>(startNieuw ? "nieuw" : startId ?? null);
+  const [toast, melding] = useToast();
 
-export default function NieuwsClient({ items, loadError }: { items: Bericht[]; loadError?: string }) {
-  const [zoek, setZoek]     = useState("");
-  const [drawer, setDrawer] = useState<DrawerState | null>(null);
-  const [toast, melding]    = useToast();
-  const [, startTransition] = useTransition();
-  const [lijst, zetOptimistisch] = useOptimistic(items, (state, u: { id: number; gepubliceerd: boolean }) =>
-    state.map((i) => (i.id === u.id ? { ...i, gepubliceerd: u.gepubliceerd } : i))
-  );
-
+  const bericht = gekozen && gekozen !== "nieuw" ? items.find((b) => String(b.id) === gekozen) ?? null : null;
   const zichtbaar = useMemo(() => {
     const q = zoek.trim().toLowerCase();
-    return lijst.filter((b) => !q || b.titel.toLowerCase().includes(q) || b.intro.toLowerCase().includes(q));
-  }, [lijst, zoek]);
+    return items.filter((b) => !q || b.titel.toLowerCase().includes(q) || b.intro.toLowerCase().includes(q));
+  }, [items, zoek]);
 
-  const sluit = useCallback(() => setDrawer(null), []);
+  const kies = useCallback((id: string | null) => kiesMetSchuif(gekozen, id, () => setGekozen(id)), [gekozen]);
+  const sluit = useCallback(() => kies(null), [kies]);
 
   async function save(input: BerichtInput) {
-    const id = drawer?.bericht?.id ?? null;
-    const res = await bewaarBericht(id, input);
+    const res = await bewaarBericht(bericht?.id ?? null, input);
     if (res.error) return res.error;
-    setDrawer(null);
-    melding(id ? "Wijzigingen opgeslagen" : "Bericht geplaatst");
+    setGekozen(String(res.id));
+    melding(bericht ? "Wijzigingen opgeslagen" : "Bericht geplaatst");
     return null;
   }
 
   async function remove() {
-    if (!drawer?.bericht) return null;
-    const res = await verwijderBericht(drawer.bericht.id);
+    if (!bericht) return null;
+    const res = await verwijderBericht(bericht.id);
     if (res.error) return res.error;
-    setDrawer(null);
+    setGekozen(null);
     melding("Bericht verwijderd");
     return null;
   }
 
-  function togglePublish(b: Bericht) {
-    const nieuw = !b.gepubliceerd;
-    startTransition(async () => {
-      zetOptimistisch({ id: b.id, gepubliceerd: nieuw });
-      const res = await zetBerichtZichtbaar(b.id, nieuw);
-      melding(res.error ? "Zichtbaarheid wijzigen lukte niet. Probeer het opnieuw." : nieuw ? `"${b.titel}" staat online` : `"${b.titel}" is verborgen`);
-    });
-  }
+  const verborgen = items.filter((b) => !b.gepubliceerd).length;
 
-  const verborgen = lijst.filter((b) => !b.gepubliceerd).length;
+  const lijst = loadError ? (
+    <div className="adm-empty"><p className="adm-empty-title">Het nieuws kon niet worden geladen</p><p>{loadError}</p></div>
+  ) : (
+    <>
+      <button className="adm-wb-nieuw" data-id="nieuw" data-gekozen={gekozen === "nieuw" || undefined} onClick={() => kies("nieuw")}>
+        <IconPlus /> Nieuw bericht
+      </button>
+      {zichtbaar.length === 0 ? (
+        <div className="adm-empty">
+          <p className="adm-empty-title">{zoek ? <>Niets gevonden voor &ldquo;{zoek}&rdquo;</> : "Nog geen nieuwsberichten"}</p>
+        </div>
+      ) : (
+        <ul className="adm-list">
+          {zichtbaar.map((b) => (
+            <li
+              key={b.id}
+              data-id={String(b.id)}
+              data-gekozen={gekozen === String(b.id) || undefined}
+              className="adm-row adm-row--thumb"
+              data-hidden={!b.gepubliceerd || undefined}
+              onClick={() => kies(String(b.id))}
+            >
+              <span className="adm-thumb">
+                {/^(https?:\/\/|\/)/.test(b.afbeelding) && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={b.afbeelding} alt="" loading="lazy" />
+                )}
+              </span>
+              <div className="adm-main-col">
+                <button className="adm-title" onClick={(e) => { e.stopPropagation(); kies(String(b.id)); }}>{b.titel}</button>
+                <div className="adm-meta"><span>{b.datum}</span><span>{b.categorie}</span></div>
+              </div>
+              {!b.gepubliceerd && <span className="adm-pill">Verborgen</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+
+  const blad = gekozen && (gekozen === "nieuw" || bericht) ? (
+    <NieuwsDrawer
+      key={gekozen}
+      bericht={bericht}
+      onClose={sluit}
+      onSave={save}
+      onDelete={bericht ? remove : undefined}
+      acties={bericht?.gepubliceerd && (
+        <a className="adm-icon-btn" href={`/nieuws/${bericht.slug}`} target="_blank" rel="noopener" title="Bekijk op de website" aria-label="Bekijk op de website"><IconEye size={16} /></a>
+      )}
+    />
+  ) : null;
 
   return (
-    <div>
+    <div className="adm-page">
       <header className="adm-head">
         <div>
           <h1>Nieuws</h1>
-          <p className="adm-sub">{`${lijst.length} bericht${lijst.length === 1 ? "" : "en"}${verborgen ? `, ${verborgen} verborgen` : ""}`}</p>
+          <p className="adm-sub">{`${items.length} bericht${items.length === 1 ? "" : "en"}${verborgen ? `, ${verborgen} verborgen` : ""}`}</p>
         </div>
-        <button className="adm-btn adm-btn--primary" onClick={() => setDrawer({ bericht: null })}><IconPlus /> Nieuw bericht</button>
+        <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Nieuw bericht</button>
       </header>
 
-      {lijst.length > 5 && (
-        <div className="adm-toolbar">
-          <span />
-          <div className="adm-search">
-            <IconSearch />
-            <input type="search" value={zoek} onChange={(e) => setZoek(e.target.value)} placeholder="Zoek in berichten" aria-label="Zoek in berichten" />
-          </div>
+      <div className="adm-toolbar">
+        <span />
+        <div className="adm-search">
+          <IconSearch />
+          <input type="search" value={zoek} onChange={(e) => setZoek(e.target.value)} placeholder="Zoek in berichten" aria-label="Zoek in berichten" />
         </div>
-      )}
-
-      <div className="adm-content">
-        {loadError ? (
-          <div className="adm-empty"><p className="adm-empty-title">Het nieuws kon niet worden geladen</p><p>{loadError}</p></div>
-        ) : zichtbaar.length === 0 ? (
-          <div className="adm-empty">
-            {zoek ? (
-              <p className="adm-empty-title">Niets gevonden voor &ldquo;{zoek}&rdquo;</p>
-            ) : (
-              <>
-                <p className="adm-empty-title">Nog geen nieuwsberichten</p>
-                <p>Vertel bezoekers over optredens, nieuwe leden of andere hoogtepunten.</p>
-                <button className="adm-btn adm-btn--primary" onClick={() => setDrawer({ bericht: null })}>Nieuw bericht</button>
-              </>
-            )}
-          </div>
-        ) : (
-          <ul className="adm-list">
-            {zichtbaar.map((b) => (
-              <li key={b.id} className="adm-row adm-row--thumb" data-hidden={!b.gepubliceerd || undefined} onClick={() => setDrawer({ bericht: b })}>
-                <span className="adm-thumb">
-                  {/^(https?:\/\/|\/)/.test(b.afbeelding) && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={b.afbeelding} alt="" loading="lazy" />
-                  )}
-                </span>
-                <div className="adm-main-col">
-                  <button className="adm-title" onClick={(e) => { e.stopPropagation(); setDrawer({ bericht: b }); }}>{b.titel}</button>
-                  <div className="adm-meta"><span>{b.datum}</span><span>{b.categorie}</span></div>
-                </div>
-                <div className="adm-actions" onClick={(e) => e.stopPropagation()}>
-                  <Switch checked={b.gepubliceerd} onChange={() => togglePublish(b)} label={`${b.titel} zichtbaar op de website`} />
-                  <span className="adm-status">{b.gepubliceerd ? "Online" : "Verborgen"}</span>
-                  {b.gepubliceerd ? (
-                    <a className="adm-icon-btn" href={`/nieuws/${b.slug}`} target="_blank" rel="noopener" title="Bekijk op de website" aria-label={`Bekijk ${b.titel} op de website`}>
-                      <IconEye size={16} />
-                    </a>
-                  ) : (
-                    <span className="adm-icon-btn adm-icon-btn--off" aria-hidden="true"><IconEye size={16} /></span>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
-      {drawer && (
-        <NieuwsDrawer
-          key={drawer.bericht?.id ?? "new"}
-          bericht={drawer.bericht}
-          onClose={sluit}
-          onSave={save}
-          onDelete={drawer.bericht ? remove : undefined}
+      <div className="adm-content">
+        <Werkblad
+          gekozen={gekozen}
+          lijst={lijst}
+          blad={blad}
+          leeg={
+            <>
+              <p className="adm-empty-title">Kies een bericht</p>
+              <p>Klik links op een bericht om het te bewerken, of vertel bezoekers iets nieuws.</p>
+              <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Nieuw bericht</button>
+            </>
+          }
         />
-      )}
+      </div>
       {toast}
     </div>
   );

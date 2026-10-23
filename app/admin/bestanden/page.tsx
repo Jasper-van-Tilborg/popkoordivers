@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { downloadUrl } from "@/lib/r2";
 import BestandenClient from "./BestandenClient";
 
-export default async function BestandenAdminPage() {
+export default async function BestandenAdminPage({ searchParams }: { searchParams: Promise<{ nieuw?: string; id?: string }> }) {
+  const { nieuw, id } = await searchParams;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("bestanden")
@@ -14,5 +15,5 @@ export default async function BestandenAdminPage() {
     url: r2_key ? await downloadUrl(r2_key) : null,
   })));
 
-  return <BestandenClient items={items} loadError={error?.message} />;
+  return <BestandenClient items={items} loadError={error?.message} startNieuw={nieuw !== undefined} startId={id} />;
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Drawer, DeleteButton, Switch, IconUpload, formatDatum, vandaag } from "../_components/ui";
 import { uploadNaarR2 } from "../_components/upload";
+import { Datum, Suggestie } from "../_components/velden";
 import type { BerichtInput } from "./actions";
 
 export interface Bericht {
@@ -23,11 +24,12 @@ interface Props {
   onClose: () => void;
   onSave: (input: BerichtInput) => Promise<string | null>;
   onDelete?: () => Promise<string | null>;
+  acties?: ReactNode;
 }
 
 const heeftFoto = (url: string) => /^(https?:\/\/|\/)/.test(url);
 
-export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete }: Props) {
+export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete, acties }: Props) {
   const [titel, setTitel]   = useState(bericht?.titel ?? "");
   const [datum, setDatum]   = useState(bericht?.created_at.slice(0, 10) ?? vandaag());
   const [categorie, setCategorie] = useState(bericht?.categorie ?? "Nieuws");
@@ -92,6 +94,8 @@ export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete }: Pro
 
   return (
     <Drawer
+      inline
+      acties={acties}
       title={bericht ? "Bericht bewerken" : "Nieuw bericht"}
       onClose={onClose}
       footer={
@@ -121,13 +125,12 @@ export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete }: Pro
         <div className="adm-grid-2">
         <div className="adm-field">
           <label htmlFor="nw-datum">Datum</label>
-          <input id="nw-datum" type="date" className="adm-input" value={datum} onChange={(e) => setDatum(e.target.value)} aria-invalid={!!errors.datum} />
+          <Datum id="nw-datum" value={datum} onChange={setDatum} invalid={!!errors.datum} />
           {errors.datum ? <p className="adm-err">{errors.datum}</p> : <p className="adm-hint">Nieuwste berichten staan bovenaan.</p>}
         </div>
         <div className="adm-field">
           <label htmlFor="nw-categorie">Categorie</label>
-          <input id="nw-categorie" className="adm-input" list="nw-categorieen" value={categorie} onChange={(e) => setCategorie(e.target.value)} />
-          <datalist id="nw-categorieen">{["Nieuws", "Optreden", "Vereniging", "Ledenwerving"].map((c) => <option key={c} value={c} />)}</datalist>
+          <Suggestie id="nw-categorie" value={categorie} onChange={setCategorie} suggesties={["Nieuws", "Optreden", "Vereniging", "Ledenwerving"]} />
           <p className="adm-hint">Staat boven het bericht op de website.</p>
         </div>
         </div>

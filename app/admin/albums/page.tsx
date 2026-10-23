@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { downloadUrl, getPublicUrl } from "@/lib/r2";
 import AlbumsClient from "./AlbumsClient";
 
-export default async function AlbumsAdminPage() {
+export default async function AlbumsAdminPage({ searchParams }: { searchParams: Promise<{ nieuw?: string }> }) {
+  const { nieuw } = await searchParams;
   const supabase = await createClient();
   const [albums, fotos] = await Promise.all([
     supabase.from("albums").select("id, slug, titel, datum").order("created_at", { ascending: false }),
@@ -18,5 +19,5 @@ export default async function AlbumsAdminPage() {
     return { ...a, totaal: eigen.length, impressies: impressies.length, cover };
   }));
 
-  return <AlbumsClient albums={lijst} loadError={albums.error?.message} />;
+  return <AlbumsClient albums={lijst} loadError={albums.error?.message} startNieuw={nieuw !== undefined} />;
 }

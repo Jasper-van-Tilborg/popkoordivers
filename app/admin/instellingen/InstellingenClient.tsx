@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useToast } from "../_components/ui";
+import { Keuze } from "../_components/velden";
 import type { Instellingen } from "@/lib/instellingen-standaard";
 import { bewaarInstellingen } from "./actions";
 
@@ -39,7 +40,7 @@ export default function InstellingenClient({ initial, bijgewerkt }: { initial: I
   );
 
   return (
-    <div>
+    <div className="adm-page">
       <header className="adm-head">
         <div>
           <h1>Instellingen</h1>
@@ -51,15 +52,15 @@ export default function InstellingenClient({ initial, bijgewerkt }: { initial: I
       </header>
 
       <div className="adm-content">
-        <div className="adm-list" style={{ padding: "4px 24px 8px" }}>
-          <section className="adm-fieldset">
-            <h3>Repetities</h3>
-            <p className="adm-hint" style={{ margin: "0 0 14px" }}>Staat in de footer, op Over ons, op Contact en in de ledenomgeving.</p>
+        <section className="adm-instelling">
+          <div>
+            <h2>Repetities</h2>
+            <p>Staat in de footer, op Over ons, op Contact en in de ledenomgeving.</p>
+          </div>
+          <div className="adm-instelling-velden">
             <div className="adm-grid-2">
               <Veld id="in-repetitie_dag" label="Dag">
-                <select id="in-repetitie_dag" className="adm-input" value={form.repetitie_dag} onChange={(e) => set("repetitie_dag", e.target.value)}>
-                  {DAGEN.map((d) => <option key={d}>{d}</option>)}
-                </select>
+                <Keuze id="in-repetitie_dag" value={form.repetitie_dag} onChange={(v) => set("repetitie_dag", v)} opties={DAGEN.map((d) => ({ value: d, label: d }))} />
               </Veld>
               <Veld id="in-repetitie_tijd" label="Tijd">{input("repetitie_tijd", { placeholder: "19:30 – 21:30" })}</Veld>
             </div>
@@ -67,35 +68,45 @@ export default function InstellingenClient({ initial, bijgewerkt }: { initial: I
               <Veld id="in-repetitie_locatie" label="Locatie">{input("repetitie_locatie", { placeholder: "CCGR De Schakel" })}</Veld>
               <Veld id="in-repetitie_adres" label="Adres">{input("repetitie_adres", { placeholder: "Straat en nummer, postcode en plaats" })}</Veld>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section className="adm-fieldset">
-            <h3>Contact</h3>
-            <Veld id="in-email" label="E-mailadres" hint="Hier komen aanmeldingen en boekingsaanvragen van het contactformulier binnen.">
-              {input("email", { type: "email" })}
-            </Veld>
-          </section>
+        <section className="adm-instelling">
+          <div>
+            <h2>Contact</h2>
+            <p>Hier komen aanmeldingen en boekingsaanvragen van het contactformulier binnen. Staat ook in de footer en op Contact.</p>
+          </div>
+          <div className="adm-instelling-velden">
+            <Veld id="in-email" label="E-mailadres">{input("email", { type: "email" })}</Veld>
+          </div>
+        </section>
 
-          <section className="adm-fieldset">
-            <h3>Sociale media</h3>
-            <p className="adm-hint" style={{ margin: "0 0 14px" }}>Laat een veld leeg om dat icoon te verbergen.</p>
+        <section className="adm-instelling">
+          <div>
+            <h2>Sociale media</h2>
+            <p>De iconen in het menu, op de homepage, in de footer en op Contact. Laat een veld leeg om dat icoon te verbergen.</p>
+          </div>
+          <div className="adm-instelling-velden">
             <Veld id="in-facebook" label="Facebook" optioneel>{input("facebook", { type: "url", placeholder: "https://" })}</Veld>
             <Veld id="in-instagram" label="Instagram" optioneel>{input("instagram", { type: "url", placeholder: "https://" })}</Veld>
             <Veld id="in-youtube" label="YouTube" optioneel>{input("youtube", { type: "url", placeholder: "https://" })}</Veld>
-          </section>
+          </div>
+        </section>
 
-          <section className="adm-fieldset">
-            <h3>SponsorKliks</h3>
-            <Veld id="in-sponsorkliks" label="Link naar de SponsorKliks-pagina" optioneel hint="Staat onderaan elke pagina.">
-              {input("sponsorkliks", { type: "url", placeholder: "https://" })}
-            </Veld>
-          </section>
-        </div>
+        <section className="adm-instelling">
+          <div>
+            <h2>SponsorKliks</h2>
+            <p>De link onderaan elke pagina. Leeg laten om hem te verbergen.</p>
+          </div>
+          <div className="adm-instelling-velden">
+            <Veld id="in-sponsorkliks" label="Link naar de SponsorKliks-pagina" optioneel>{input("sponsorkliks", { type: "url", placeholder: "https://" })}</Veld>
+          </div>
+        </section>
 
-        {fout && <p className="adm-server-err" role="alert" style={{ marginTop: 16 }}>{fout}</p>}
-        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+        <div className="adm-opslaanbalk">
           <button className="adm-btn adm-btn--primary" onClick={opslaan} disabled={bezig || !gewijzigd}>{bezig ? "Opslaan…" : "Wijzigingen opslaan"}</button>
           {gewijzigd && <button className="adm-btn adm-btn--ghost" onClick={() => { setForm(initial); setFout(""); }}>Ongedaan maken</button>}
+          {fout ? <span role="alert" style={{ color: "var(--danger)", fontWeight: 600 }}>{fout}</span> : <span>{gewijzigd ? "Je hebt wijzigingen die nog niet zijn opgeslagen." : "Alles is opgeslagen."}</span>}
         </div>
       </div>
       {toast}

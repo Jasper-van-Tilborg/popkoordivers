@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Sidebar from "./_components/Sidebar";
+import PaginaInhoud from "./_components/PaginaInhoud";
 import "./admin.css";
 
 export const metadata = { title: "Admin — Popkoor Divers" };
@@ -13,7 +14,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("rol")
+    .select("rol, naam")
     .eq("id", user.id)
     .single();
 
@@ -21,9 +22,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="admin-shell">
-      <Sidebar />
+      <Sidebar naam={profile.naam ?? null} email={user.email ?? ""} />
       <main className="adm-main">
-        {children}
+        <PaginaInhoud>{children}</PaginaInhoud>
       </main>
     </div>
   );

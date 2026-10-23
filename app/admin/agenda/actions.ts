@@ -21,26 +21,21 @@ export async function bewaarOptreden(id: number | null, input: AgendaInput) {
     return { error: "Titel en datum zijn verplicht." };
   }
 
-  const { error } = id
-    ? await supabase.from("agenda").update(input).eq("id", id)
-    : await supabase.from("agenda").insert(input);
+  if (id) {
+    const { error } = await supabase.from("agenda").update(input).eq("id", id);
+    if (error) return { error: error.message };
+    vernieuw();
+    return { id };
+  }
+  const { data, error } = await supabase.from("agenda").insert(input).select("id").single();
   if (error) return { error: error.message };
-
   vernieuw();
-  return {};
+  return { id: data.id };
 }
 
 export async function verwijderOptreden(id: number) {
   const { supabase } = await requireAdmin();
   const { error } = await supabase.from("agenda").delete().eq("id", id);
-  if (error) return { error: error.message };
-  vernieuw();
-  return {};
-}
-
-export async function zetOptredenZichtbaar(id: number, gepubliceerd: boolean) {
-  const { supabase } = await requireAdmin();
-  const { error } = await supabase.from("agenda").update({ gepubliceerd }).eq("id", id);
   if (error) return { error: error.message };
   vernieuw();
   return {};

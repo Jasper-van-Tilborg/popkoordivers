@@ -59,6 +59,7 @@ export async function bewaarBericht(id: number | null, input: BerichtInput) {
     created_at: `${input.datumIso}T12:00:00Z`,
   };
 
+  let bewaardId = id;
   if (id) {
     const { error } = await supabase.from("berichten").update(velden).eq("id", id);
     if (error) return { error: error.message };
@@ -70,13 +71,14 @@ export async function bewaarBericht(id: number | null, input: BerichtInput) {
     let slug = basis;
     for (let n = 2; bezet.has(slug); n++) slug = `${basis}-${n}`;
 
-    const { error } = await supabase.from("berichten").insert({ ...velden, slug });
+    const { data, error } = await supabase.from("berichten").insert({ ...velden, slug }).select("id").single();
     if (error) return { error: error.message };
+    bewaardId = data.id;
   }
 
   if (huidig && huidig.afbeelding !== afbeelding) await verwijderAfbeelding(huidig.afbeelding);
   vernieuw();
-  return {};
+  return { id: bewaardId };
 }
 
 export async function verwijderBericht(id: number) {
@@ -85,14 +87,6 @@ export async function verwijderBericht(id: number) {
   const { error } = await supabase.from("berichten").delete().eq("id", id);
   if (error) return { error: error.message };
   await verwijderAfbeelding(data?.afbeelding ?? null);
-  vernieuw();
-  return {};
-}
-
-export async function zetBerichtZichtbaar(id: number, gepubliceerd: boolean) {
-  const { supabase } = await requireAdmin();
-  const { error } = await supabase.from("berichten").update({ gepubliceerd }).eq("id", id);
-  if (error) return { error: error.message };
   vernieuw();
   return {};
 }

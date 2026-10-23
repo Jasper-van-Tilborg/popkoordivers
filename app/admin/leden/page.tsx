@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import LedenClient from "./LedenClient";
 
-export default async function LedenAdminPage() {
+export default async function LedenAdminPage({ searchParams }: { searchParams: Promise<{ id?: string; nieuw?: string }> }) {
+  const { id, nieuw } = await searchParams;
   const supabase = await createClient();
   const [{ data: { user } }, { data: auth }, { data: profiles }] = await Promise.all([
     supabase.auth.getUser(),
@@ -25,5 +26,5 @@ export default async function LedenAdminPage() {
     };
   }).sort((a, b) => (a.naam ?? a.email).localeCompare(b.naam ?? b.email, "nl"));
 
-  return <LedenClient leden={leden} eigenId={user?.id ?? ""} />;
+  return <LedenClient leden={leden} eigenId={user?.id ?? ""} startId={nieuw !== undefined ? "nieuw" : id} />;
 }

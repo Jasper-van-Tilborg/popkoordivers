@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Drawer, DeleteButton, formatDatum, parseNlDatum } from "../_components/ui";
+import { Datum } from "../_components/velden";
 import type { AlbumInput } from "./actions";
 
 interface Props {
@@ -9,9 +10,10 @@ interface Props {
   onClose: () => void;
   onSave: (input: AlbumInput) => Promise<string | null>;
   onDelete?: () => Promise<string | null>;
+  sluitend?: boolean;
 }
 
-export default function AlbumDrawer({ album, onClose, onSave, onDelete }: Props) {
+export default function AlbumDrawer({ album, onClose, onSave, onDelete, sluitend }: Props) {
   const [titel, setTitel] = useState(album?.titel ?? "");
   const [datum, setDatum] = useState(album ? parseNlDatum(album.datum) : "");
   const [errors, setErrors] = useState<Partial<Record<"titel" | "datum", string>>>({});
@@ -42,6 +44,7 @@ export default function AlbumDrawer({ album, onClose, onSave, onDelete }: Props)
 
   return (
     <Drawer
+      sluitend={sluitend}
       title={album ? "Album bewerken" : "Nieuw album"}
       onClose={onClose}
       footer={
@@ -66,7 +69,7 @@ export default function AlbumDrawer({ album, onClose, onSave, onDelete }: Props)
         </div>
         <div className="adm-field">
           <label htmlFor="al-datum">Datum</label>
-          <input id="al-datum" type="date" className="adm-input" value={datum} onChange={(e) => setDatum(e.target.value)} aria-invalid={!!errors.datum} />
+          <Datum id="al-datum" value={datum} onChange={setDatum} invalid={!!errors.datum} />
           {errors.datum
             ? <p className="adm-err">{errors.datum}</p>
             : <p className="adm-hint">{datum ? `Op de site: ${formatDatum(datum)}` : album ? `Nu: ${album.datum}` : "De dag van het optreden of de activiteit."}</p>}
