@@ -284,6 +284,20 @@
 .adm-blok-subkop { margin: 0; padding: 14px 20px 2px; border-top: 1px solid var(--line-soft); font-size: 13px; font-weight: 700; color: var(--ink-2); }
 .adm-blok-tekst { margin: 0; padding: 0 20px 14px; font-size: 14px; line-height: 1.5; color: var(--ink-2); max-width: 62ch; }
 
+/* Overzicht van beheerders: sitestatus en opslag als twee widgets naast elkaar */
+.adm-grid-overzicht--rij { margin-bottom: 20px; align-items: stretch; }
+.adm-grid-overzicht--rij > .adm-blok { display: flex; flex-direction: column; }
+.adm-grid-overzicht--rij > .adm-blok + .adm-blok { margin-top: 0; }
+.adm-blok-kop h2 { display: inline-flex; align-items: center; gap: 10px; }
+.adm-status-pill { font-family: var(--font-manrope), sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0; padding: 3px 10px; border-radius: 100px; background: #FDECEC; color: var(--danger); }
+.adm-status-pill[data-ok] { background: #E9F6EE; color: var(--ok); }
+.adm-blok-voet { margin: auto 0 0; padding: 12px 20px; border-top: 1px solid var(--line-soft); font-size: 12.5px; color: var(--ink-3); }
+.adm-opslag { display: flex; flex-direction: column; gap: 20px; padding: 2px 20px 20px; }
+.adm-opslag-kop { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 8px; font-size: 14px; }
+.adm-opslag-kop span:first-child { font-weight: 600; color: var(--ink); }
+.adm-opslag-kop span:last-child { color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.adm-opslag-detail { margin: 8px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-3); }
+
 /* Cijfers in een blok: label links, aantal rechts */
 .adm-cijfers { margin: 0; padding: 4px 20px 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
 .adm-cijfers--vier { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -297,14 +311,6 @@
 .adm-meter { display: block; height: 8px; border-radius: 100px; background: var(--line-soft); overflow: hidden; }
 .adm-meter > span { display: block; height: 100%; border-radius: inherit; background: var(--ok); }
 .adm-meter > span[data-vol] { background: var(--danger); }
-
-/* Links naar de dashboards van Supabase, Cloudflare, Vercel en GitHub */
-.adm-dashboards { list-style: none; margin: 0; padding: 0 20px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.adm-dashboards a { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; text-decoration: none; color: var(--ink); transition: border-color 0.15s; }
-.adm-dashboards a:hover { border-color: var(--primary); }
-.adm-dashboards a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.adm-dashboards strong { font-size: 14px; }
-.adm-dashboards span { font-size: 12.5px; color: var(--ink-2); }
 
 /* Filters bovenaan Activiteit: één knop per keuze, de gekozen is gevuld */
 .adm-filters { display: flex; flex-wrap: wrap; gap: 6px; }

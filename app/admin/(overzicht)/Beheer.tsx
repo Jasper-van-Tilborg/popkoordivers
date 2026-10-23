@@ -3,11 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { bucketGebruik } from "@/lib/r2";
 import { IconCalendar, IconNewspaper, IconCamera, IconFolder } from "@/components/icons";
+import { version as nextVersie } from "next/package.json";
 import { NL, Zin, geleden } from "../_components/activiteit";
+import { DB_MAX, Meter, OMGEVING, R2_MAX, keepaliveOk as isKeepaliveOk, mb, type Status } from "../_components/status";
 
 // Het overzicht voor een beheerder: hoe de site ervoor staat, wie er bij kan en wat er gebeurde.
 
-const mb = (b: number) => (b < 1e6 ? `${Math.max(0.1, b / 1e6).toFixed(1)} MB` : b < 1e9 ? `${(b / 1e6).toFixed(0)} MB` : `${(b / 1e9).toFixed(2)} GB`);
 const tel = (n: number, een: string, meer: string) => `${n} ${n === 1 ? een : meer}`;
 const ROLNAAM = { admin: "Beheerder", redacteur: "Redacteur", lid: "Lid" } as const;
 
@@ -29,9 +30,13 @@ export default async function Beheer({ nu }: { nu: Date }) {
     supabase.from("profiles").select("id, naam, rol"),
   ]);
 
-  const s = (status.data ?? null) as { db_bytes?: number; keepalive?: { start: string; status: string } | null; keepalive_http?: number | null } | null;
-  const keepaliveOk = s?.keepalive?.status === "succeeded" && (s.keepalive_http ?? 200) < 400 && nu.getTime() - new Date(s.keepalive.start).getTime() < 2 * 864e5;
+  const s = (status.data ?? null) as Status;
+  const keepaliveOk = isKeepaliveOk(s, nu);
   const opslag = (openbaar?.bytes ?? 0) + (prive?.bytes ?? 0);
+  const r2Ok = !!openbaar && !!prive;
+  const ontbreekt = OMGEVING.filter((k) => !process.env[k]);
+  // Alles in orde: de site draait, kan bij database en bestanden, en heeft ruimte genoeg
+  const allesOk = keepaliveOk && !status.error && r2Ok && ontbreekt.length === 0 && (s?.db_bytes ?? 0) < 0.8 * DB_MAX && opslag < 0.8 * R2_MAX;
 
   const perId = new Map((profielen.data ?? []).map((p) => [p.id, p]));
   const gebruikers = (auth.data?.users ?? []).map((u) => ({
@@ -54,26 +59,55 @@ export default async function Beheer({ nu }: { nu: Date }) {
         {oogopslag.map((o) => <Link key={o.href} href={o.href}>{o.icon}{o.tekst}</Link>)}
       </section>
 
+      <div className="adm-grid-overzicht adm-grid-overzicht--rij">
+        <section className="adm-blok">
+          <div className="adm-blok-kop">
+            <h2>Sitestatus <span className="adm-status-pill" data-ok={allesOk || undefined}>{allesOk ? "Alles in orde" : "Let op"}</span></h2>
+            <Link href="/admin/sitestatus">Alle details</Link>
+          </div>
+          <ul className="adm-status-lijst">
+            <li data-ok={keepaliveOk || undefined}>
+              <span>Supabase actief houden</span>
+              <span>{s?.keepalive ? `${keepaliveOk ? "In orde" : "Mislukt"}, ${geleden(s.keepalive.start, nu)}` : "Onbekend"}</span>
+            </li>
+            <li data-ok={!status.error || undefined}>
+              <span>Database</span>
+              <span>{status.error ? "Niet bereikbaar" : "Bereikbaar"}</span>
+            </li>
+            <li data-ok={r2Ok || undefined}>
+              <span>Bestanden (Cloudflare R2)</span>
+              <span>{r2Ok ? "Bereikbaar" : "Niet bereikbaar"}</span>
+            </li>
+            <li data-ok={ontbreekt.length === 0 || undefined}>
+              <span>Serverinstellingen</span>
+              <span>{ontbreekt.length === 0 ? "Alles ingesteld" : `${ontbreekt.length} ontbreken`}</span>
+            </li>
+          </ul>
+          <p className="adm-blok-voet">{process.env.VERCEL_ENV === "production" || (!process.env.VERCEL_ENV && process.env.NODE_ENV === "production") ? "Productie" : "Test"}, Next.js {nextVersie}</p>
+        </section>
+
+        <section className="adm-blok">
+          <div className="adm-blok-kop"><h2>Opslag</h2><Link href="/admin/sitestatus">Per tabel en map</Link></div>
+          <div className="adm-opslag">
+            <div>
+              <p className="adm-opslag-kop"><span>Database (Supabase)</span><span>{s?.db_bytes ? `${mb(s.db_bytes)} van ${mb(DB_MAX)}` : "Onbekend"}</span></p>
+              <Meter waarde={s?.db_bytes ?? 0} max={DB_MAX} />
+            </div>
+            <div>
+              <p className="adm-opslag-kop"><span>Foto&apos;s en bestanden (Cloudflare R2)</span><span>{r2Ok ? `${mb(opslag)} van ${mb(R2_MAX)}` : "Niet bereikbaar"}</span></p>
+              <Meter waarde={opslag} max={R2_MAX} />
+              {r2Ok && (
+                <p className="adm-opslag-detail">
+                  Website {tel(openbaar.aantal, "bestand", "bestanden")} ({mb(openbaar.bytes)}), ledenomgeving {tel(prive.aantal, "bestand", "bestanden")} ({mb(prive.bytes)})
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
+
       <div className="adm-grid-overzicht">
         <div>
-          <section className="adm-blok">
-            <div className="adm-blok-kop"><h2>Sitestatus</h2><Link href="/admin/sitestatus">Alle details</Link></div>
-            <ul className="adm-status-lijst">
-              <li data-ok={keepaliveOk || undefined}>
-                <span>Supabase actief houden</span>
-                <span>{s?.keepalive ? `${keepaliveOk ? "In orde" : "Mislukt"}, ${geleden(s.keepalive.start, nu)}` : "Onbekend"}</span>
-              </li>
-              <li data-ok={(s?.db_bytes ?? 0) < 400e6 || undefined}>
-                <span>Database</span>
-                <span>{s?.db_bytes ? `${mb(s.db_bytes)} van 500 MB` : "Onbekend"}</span>
-              </li>
-              <li data-ok={(openbaar && prive && opslag < 8e9) || undefined}>
-                <span>Opslag (Cloudflare R2)</span>
-                <span>{openbaar && prive ? `${mb(opslag)} van 10 GB` : "Niet bereikbaar"}</span>
-              </li>
-            </ul>
-          </section>
-
           <section className="adm-blok">
             <div className="adm-blok-kop"><h2>Gebruikers</h2><Link href="/admin/gebruikers">Alle gebruikers</Link></div>
             <dl className="adm-cijfers adm-cijfers--vier">
