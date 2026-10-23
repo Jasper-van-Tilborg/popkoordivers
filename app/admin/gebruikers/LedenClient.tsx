@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Drawer, DeleteButton, IconPlus, IconSearch, useToast } from "../_components/ui";
 import { Keuze, Vinkje } from "../_components/velden";
 import { Werkblad, kiesMetSchuif } from "../_components/Werkblad";
+import { gebruikersnaamVoor, isEmail, isGebruikersnaam } from "@/lib/gebruikersnaam";
 import { maakLid, verwijderLid, wijzigLid, zetWachtwoord, type LidInput } from "./actions";
 
 type Stemgroep = NonNullable<LidInput["stemgroep"]>;
@@ -50,7 +51,11 @@ function LidDrawer({ lid, eigen, onClose, onDone }: {
 
   async function save() {
     if (!form.naam.trim()) { setFout("Vul de naam in."); return; }
-    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) { setFout("Vul een geldig e-mailadres in."); return; }
+    const inlog = form.email.trim().toLowerCase();
+    if (inlog.includes("@") ? !isEmail(inlog) : !isGebruikersnaam(inlog)) {
+      setFout("Vul een e-mailadres in, of een gebruikersnaam met alleen kleine letters, cijfers, punt of streepje.");
+      return;
+    }
     setBusy("save");
     setFout("");
     const res = lid ? await wijzigLid(lid.id, form) : await maakLid(form, wachtwoord);
@@ -105,9 +110,22 @@ function LidDrawer({ lid, eigen, onClose, onDone }: {
             <input id="ld-naam" className="adm-input" value={form.naam} onChange={(e) => set("naam", e.target.value)} placeholder="Voor- en achternaam" />
           </div>
           <div className="adm-field">
-            <label htmlFor="ld-email">E-mailadres</label>
-            <input id="ld-email" type="email" className="adm-input" value={form.email} onChange={(e) => set("email", e.target.value)} />
-            <p className="adm-hint">Hiermee logt het lid in.</p>
+            <label htmlFor="ld-email">E-mailadres of gebruikersnaam</label>
+            <input
+              id="ld-email"
+              className="adm-input"
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
+              placeholder={gebruikersnaamVoor(form.naam) || "naam@voorbeeld.nl"}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+            />
+            {!lid && !form.email && gebruikersnaamVoor(form.naam) && (
+              <button type="button" className="adm-link-knop" onClick={() => set("email", gebruikersnaamVoor(form.naam))}>
+                Gebruik {gebruikersnaamVoor(form.naam)}
+              </button>
+            )}
           </div>
         </div>
         <div className="adm-grid-2">

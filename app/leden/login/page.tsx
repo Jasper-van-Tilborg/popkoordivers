@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { naarInlog } from "@/lib/gebruikersnaam";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,10 +19,10 @@ export default function LoginPage() {
     setError("");
 
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: naarInlog(email), password });
 
     if (error) {
-      setError("Onjuist e-mailadres of wachtwoord.");
+      setError("Onjuiste inloggegevens. Controleer je e-mailadres of gebruikersnaam en je wachtwoord.");
       setLoading(false);
     } else {
       const { data: profile } = await supabase
@@ -89,15 +90,18 @@ export default function LoginPage() {
               htmlFor="email"
               style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#444", marginBottom: "6px" }}
             >
-              E-mailadres
+              E-mailadres of gebruikersnaam
             </label>
             <input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              autoComplete="email"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               style={{
                 width: "100%",
                 padding: "11px 14px",

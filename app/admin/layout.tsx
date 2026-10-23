@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { inlognaam } from "@/lib/gebruikersnaam";
 import Sidebar from "./_components/Sidebar";
 import PaginaInhoud from "./_components/PaginaInhoud";
 import "./admin.css";
@@ -22,7 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="admin-shell">
-      <Sidebar naam={profile.naam ?? null} email={user.email ?? ""} rol={profile.rol} />
+      <Sidebar naam={profile.naam ?? null} email={inlognaam(user.email)} rol={profile.rol} />
       <main className="adm-main">
         <PaginaInhoud>{children}</PaginaInhoud>
       </main>

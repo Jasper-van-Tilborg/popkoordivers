@@ -343,6 +343,10 @@
   .adm-personen li > :nth-child(2) { grid-column: 1; grid-row: 2; }
   .adm-personen-knoppen { grid-row: 1 / span 2; grid-column: 2; flex-direction: column; }
 }
+/* Een voorstel onder een veld, als tekstknop */
+.adm-link-knop { margin-top: 6px; padding: 0; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 700; color: var(--primary); cursor: pointer; }
+.adm-link-knop:hover { text-decoration: underline; }
+.adm-link-knop:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 .adm-field--vinkje { display: flex; align-items: flex-end; padding-bottom: 10px; }
 
 /* Een hele rij in het overzicht is een link naar het item */

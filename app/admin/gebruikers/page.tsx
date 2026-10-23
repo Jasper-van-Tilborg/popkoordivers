@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { inlognaam } from "@/lib/gebruikersnaam";
 import LedenClient from "./LedenClient";
 
 export default async function LedenAdminPage({ searchParams }: { searchParams: Promise<{ id?: string; nieuw?: string }> }) {
@@ -21,7 +22,7 @@ export default async function LedenAdminPage({ searchParams }: { searchParams: P
     const p = perId.get(u.id);
     return {
       id: u.id,
-      email: u.email ?? "",
+      email: inlognaam(u.email),   // e-mailadres of gebruikersnaam
       naam: p?.naam ?? null,
       rol: p?.rol ?? "lid",
       stemgroep: p?.stemgroep ?? null,
