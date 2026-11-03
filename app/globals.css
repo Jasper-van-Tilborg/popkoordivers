@@ -205,3 +205,9 @@ a, button { -webkit-tap-highlight-color: transparent; }
   .detail-kaart { border-radius: 22px; }
   .detail-meer { padding: 64px 16px 80px; }
 }
+
+/* Op een touchscreen minstens 16px in velden, anders zoomt iOS in zodra je erin tikt.
+   !important omdat de formulieren hun grootte inline zetten. */
+@media (pointer: coarse) {
+  input, select, textarea { font-size: 16px !important; }
+}

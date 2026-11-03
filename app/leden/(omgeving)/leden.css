@@ -380,7 +380,8 @@ html[data-vt="leden-links"]::view-transition-new(leden-pagina) { animation-name:
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   margin-top: 8px; padding-top: 18px; border-top: 1px solid rgba(0,0,0,0.07);
 }
-.liedjes-pagina-tekst { font-size: 15px; font-weight: 600; color: #5c5c5c; font-variant-numeric: tabular-nums; }
+.liedjes-pagina-tekst { font-size: 15px; font-weight: 600; color: #5c5c5c; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lied-knop-icoon { display: none; }
 .liedjes-pagina-knop {
   min-height: 46px; padding: 0 20px; border-radius: 35px; border: 1.5px solid rgba(0,0,0,0.12); background: #fff; cursor: pointer;
   font: inherit; font-size: 15px; font-weight: 700; color: #222; transition: background 0.15s, border-color 0.15s;

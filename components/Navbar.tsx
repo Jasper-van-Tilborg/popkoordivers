@@ -102,7 +102,7 @@ export default function Navbar() {
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Sluit menu" : "Open menu"}
             aria-expanded={open}
-            style={{ background: "none", border: "none", cursor: "pointer", color: scrolled || open ? "#111" : "#fff", padding: "6px", display: "none", flexShrink: 0, transition: "color 0.2s" }}
+            style={{ background: "none", border: "none", cursor: "pointer", color: scrolled || open ? "#111" : "#fff", padding: "10px", display: "none", flexShrink: 0, transition: "color 0.2s" }}
           >
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" style={{ display: "block", transition: "transform 0.2s" }}>
               {open

@@ -25,6 +25,9 @@ const gewoon = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
 const AUDIO = ["mp3", "m4a", "wav", "ogg", "aac"];
 const soort = (ext?: string) => ext === "pdf" ? "pdf" : AUDIO.includes(ext ?? "") ? "audio" : ext === "mp4" ? "video" : "anders";
 const KNOP = { pdf: "PDF ↓", audio: "Luisteren", video: "Video", anders: "Openen" };
+// Op de telefoon staat alleen het icoon in de knop (de hele rij is klikbaar)
+const pad = (d: string) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="lied-knop-icoon">{d === "play" ? <path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12.2-7.4a1 1 0 0 0 0-1.72L8.5 3.74A1 1 0 0 0 7 4.6z" fill="currentColor" stroke="none" /> : d === "video" ? <><rect x="3" y="6" width="13" height="12" rx="2" /><path d="m16 10 5-3v10l-5-3" /></> : <path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14" />}</svg>;
+const ICOON = { pdf: pad("omlaag"), audio: pad("play"), video: pad("video"), anders: pad("omlaag") };
 
 interface Props {
   liedjes: Record<string, Lied[]>;
@@ -171,7 +174,9 @@ export default function StemTabs({ liedjes, begin }: Props) {
                   <p className="lied-titel">{kop}</p>
                   {details && <p className="lied-componist">{details}</p>}
                 </div>
-                <button type="button" className="lied-pdf" onClick={() => (s === "audio" || s === "video" ? speel(lied) : open(lied))}>{KNOP[s]}</button>
+                <button type="button" className="lied-pdf" aria-label={`${KNOP[s].replace(" ↓", "")}: ${lied.titel}`} onClick={() => (s === "audio" || s === "video" ? speel(lied) : open(lied))}>
+                  {ICOON[s]}<span className="lied-knop-tekst">{KNOP[s]}</span>
+                </button>
               </div>
             );
           })}
@@ -181,7 +186,7 @@ export default function StemTabs({ liedjes, begin }: Props) {
       {paginas > 1 && (
         <nav className="liedjes-paginas" aria-label="Pagina's">
           <button type="button" className="liedjes-pagina-knop" onClick={() => naarPagina(pagina - 1)} disabled={pagina === 0}>Vorige</button>
-          <span className="liedjes-pagina-tekst" aria-live="polite">Pagina {pagina + 1} van {paginas}</span>
+          <span className="liedjes-pagina-tekst" aria-live="polite"><span className="liedjes-pagina-woord">Pagina </span>{pagina + 1} van {paginas}</span>
           <button type="button" className="liedjes-pagina-knop" onClick={() => naarPagina(pagina + 1)} disabled={pagina === paginas - 1}>Volgende</button>
         </nav>
       )}

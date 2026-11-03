@@ -149,10 +149,18 @@
   .liedjes-zoek { margin: 12px 18px 4px; }
   .liedjes-paginas { margin: 0 18px; padding: 14px 0 18px; }
   .liedjes-pagina-tekst { font-size: 14px; }
+  .liedjes-pagina-woord { display: none; }
+  /* Rond icoon in plaats van tekst: dan past de omschrijving op een regel */
+  .lied-pdf { flex-shrink: 0; justify-content: center; width: 48px; height: 48px; min-height: 0; padding: 0; border-radius: 50%; }
+  .lied-knop-tekst { display: none; }
+  .lied-knop-icoon { display: block; }
+  /* Het tempo in de speler: drie knoppen, niet het raster van de stemmen */
+  .speler-tempo .stemtabs { grid-template-columns: repeat(3, minmax(0, 1fr)); width: auto; flex: 1; max-width: 240px; }
+  .speler-tempo .stemtab { min-height: 44px; }
   .lied { gap: 14px; min-height: 76px; padding: 14px 0; }
   .lied-titel { font-size: 17px; line-height: 1.35; }
   .lied-componist { font-size: 14.5px; color: #5c5c5c; }
-  .lied-pdf { min-height: 48px; padding: 0 18px; font-size: 15px; color: var(--oranje-tekst); background: rgba(243,106,42,0.10); border-color: rgba(243,106,42,0.3); }
+  .lied-pdf { font-size: 15px; color: var(--oranje-tekst); background: rgba(243,106,42,0.10); border-color: rgba(243,106,42,0.3); }
   .lied-pdf:active { background: rgba(243,106,42,0.2); }
   .lied-binnenkort { font-size: 14.5px; color: #777; }
 

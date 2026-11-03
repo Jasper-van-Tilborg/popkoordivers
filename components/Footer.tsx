@@ -97,7 +97,7 @@ export default function Footer() {
             gap: "12px",
           }}
         >
-          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", margin: 0 }}>
+          <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", margin: 0 }}>
             © {new Date().getFullYear()} Popkoor Divers
           </p>
           <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
@@ -111,9 +111,9 @@ export default function Footer() {
                   href={l.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", textDecoration: "none", transition: "color 0.15s" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.25)")}
+                  style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", textDecoration: "none", transition: "color 0.15s", display: "inline-block", padding: "12px 0" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.9)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
                 >
                   {l.label}
                 </a>
@@ -121,9 +121,9 @@ export default function Footer() {
                 <Link
                   key={l.label}
                   href={l.href}
-                  style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", textDecoration: "none", transition: "color 0.15s" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.25)")}
+                  style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", textDecoration: "none", transition: "color 0.15s", display: "inline-block", padding: "12px 0" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.9)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
                 >
                   {l.label}
                 </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -14,6 +14,8 @@ export default function Instellingen({ weergave, account, beheer }: {
   const router = useRouter();
   const [groot, setGroot] = useState(weergave === "groot");
   const [bezig, setBezig] = useState(false);
+  // Staat zowel in het paneel als op de pagina: eigen id per keer
+  const label = useId();
 
   function zetGroot(aan: boolean) {
     setGroot(aan);
@@ -35,12 +37,12 @@ export default function Instellingen({ weergave, account, beheer }: {
       <section className="leden-kaart">
         <h2 className="leden-kaart-titel">Weergave</h2>
         <div className="leden-instelling">
-          <span id="inst-groot" className="leden-instelling-naam">Grote letters en knoppen</span>
+          <span id={label} className="leden-instelling-naam">Grote letters en knoppen</span>
           <button
             type="button"
             role="switch"
             aria-checked={groot}
-            aria-labelledby="inst-groot"
+            aria-labelledby={label}
             className="leden-schakelaar"
             onClick={() => zetGroot(!groot)}
           >
