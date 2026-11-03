@@ -31,22 +31,22 @@ export default async function FotosPage() {
               <details key={album.id} open={idx === 0} className="leden-kaart leden-album" style={{ overflow: "hidden" }}>
                 <summary>
                   <div>
-                    <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#111", letterSpacing: "-0.3px" }}>{album.titel}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 12, color: "#999", fontWeight: 500 }}>{album.datum}, {album.fotos.length} foto{album.fotos.length !== 1 ? "'s" : ""}</p>
+                    <p className="leden-album-titel">{album.titel}</p>
+                    <p className="leden-album-meta">{album.datum}, {album.fotos.length} foto{album.fotos.length !== 1 ? "'s" : ""}</p>
                   </div>
                   <span className="leden-album__chevron" aria-hidden="true">
                     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" /></svg>
                   </span>
                 </summary>
-                <div style={{ padding: "0 20px 20px" }}>
+                <div className="leden-album-inhoud">
                   {album.fotos.length === 0 ? (
                     <p className="leden-leeg">Nog geen foto&apos;s in dit album.</p>
                   ) : (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 8 }}>
+                    <div className="leden-fotos">
                       {album.fotos.map((url, i) => (
-                        <a key={i} href={url} target="_blank" rel="noopener" style={{ display: "block", borderRadius: 12, overflow: "hidden" }}>
+                        <a key={i} href={url} target="_blank" rel="noopener">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={url} alt="" className="leden-foto" style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", display: "block" }} loading="lazy" />
+                          <img src={url} alt="" className="leden-foto" loading="lazy" />
                         </a>
                       ))}
                     </div>

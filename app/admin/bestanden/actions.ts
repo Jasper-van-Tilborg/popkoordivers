@@ -5,6 +5,7 @@ import { requireBeheer } from "@/lib/auth";
 import { logActiviteit } from "@/lib/activiteit";
 import { deleteFile } from "@/lib/r2";
 import type { Database } from "@/lib/database.types";
+import { MET_STEMGROEP } from "./categorieen";
 
 type Stemgroep = Database["public"]["Enums"]["stemgroep_type"];
 
@@ -14,7 +15,7 @@ export interface BestandInput {
   stemgroep: Stemgroep | null;
 }
 
-const CATEGORIEEN = ["liedjes", "nieuwsbrieven", "alv", "opnames", "choreo"];
+const CATEGORIEEN = ["opnames", "nieuwsbrieven", "alv", "choreo"];
 
 function controleer(input: BestandInput) {
   if (!input.naam.trim()) return "Geef het bestand een naam.";
@@ -36,7 +37,7 @@ export async function bestandToevoegen(key: string, input: BestandInput) {
   const { data, error } = await supabase.from("bestanden").insert({
     naam: input.naam.trim(),
     categorie: input.categorie,
-    stemgroep: input.categorie === "liedjes" ? input.stemgroep : null,
+    stemgroep: MET_STEMGROEP.includes(input.categorie) ? input.stemgroep : null,
     r2_key: key,
   }).select("id").single();
   if (error) {
@@ -57,7 +58,7 @@ export async function wijzigBestand(id: number, input: BestandInput) {
   const { error } = await supabase.from("bestanden").update({
     naam: input.naam.trim(),
     categorie: input.categorie,
-    stemgroep: input.categorie === "liedjes" ? input.stemgroep : null,
+    stemgroep: MET_STEMGROEP.includes(input.categorie) ? input.stemgroep : null,
   }).eq("id", id);
   if (error) return { error: error.message };
   await logActiviteit(sessie, "gewijzigd", "bestand", { id, naam: input.naam.trim() });

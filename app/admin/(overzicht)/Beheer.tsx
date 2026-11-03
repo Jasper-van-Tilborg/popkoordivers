@@ -50,7 +50,7 @@ export default async function Beheer({ nu }: { nu: Date }) {
     { href: "/admin/agenda", icon: <IconCalendar size={16} />, tekst: `${tel(komend.count ?? 0, "optreden", "optredens")} gepland` },
     { href: "/admin/nieuws", icon: <IconNewspaper size={16} />, tekst: `${tel(berichten.count ?? 0, "bericht", "berichten")} online` },
     { href: "/admin/albums", icon: <IconCamera size={16} />, tekst: `${tel(albums.count ?? 0, "album", "albums")}, ${tel(fotos.count ?? 0, "foto", "foto's")}` },
-    { href: "/admin/bestanden/liedjes", icon: <IconFolder size={16} />, tekst: `${tel(bestanden.count ?? 0, "bestand", "bestanden")} voor leden` },
+    { href: "/admin/bestanden/opnames", icon: <IconFolder size={16} />, tekst: `${tel(bestanden.count ?? 0, "bestand", "bestanden")} voor leden` },
   ];
 
   return (

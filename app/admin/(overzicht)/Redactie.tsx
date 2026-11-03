@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { downloadUrl, getPublicUrl } from "@/lib/r2";
 import { IconCalendar, IconNewspaper, IconCamera, IconMapPin, IconClock } from "@/components/icons";
-import { IconMuziek, IconPost, IconStukken, IconMicro, IconDans } from "../_components/iconen";
+import { IconPost, IconStukken, IconMicro, IconDans } from "../_components/iconen";
 import { DateStub } from "../_components/ui";
 import { NL } from "../_components/activiteit";
 import { CATEGORIEEN, type CategorieId } from "../bestanden/categorieen";
@@ -11,7 +11,7 @@ import { CATEGORIEEN, type CategorieId } from "../bestanden/categorieen";
 // Het overzicht voor een redacteur: alles om iets te maken of af te maken.
 
 const CAT_ICOON: Record<CategorieId, ReactNode> = {
-  liedjes: <IconMuziek />, nieuwsbrieven: <IconPost />, alv: <IconStukken />, opnames: <IconMicro />, choreo: <IconDans />,
+  nieuwsbrieven: <IconPost />, alv: <IconStukken />, opnames: <IconMicro />, choreo: <IconDans />,
 };
 
 const WEBSITE = [

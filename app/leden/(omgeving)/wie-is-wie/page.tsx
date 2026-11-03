@@ -39,10 +39,10 @@ export default async function WieIsWiePage() {
           <div className="bestuur-grid">
             {bestuursleden.map((l) => (
               <div key={l.id} className="leden-kaart bestuur-kaart">
-                <div className="leden-avatar" style={{ width: 48, height: 48, fontSize: 15 }}>{initialen(l.naam)}</div>
+                <div className="leden-avatar bestuur-avatar">{initialen(l.naam)}</div>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111", lineHeight: 1.3 }}>{l.naam}</p>
-                  <p style={{ margin: "3px 0 0", fontSize: 12, color: "var(--primary)", fontWeight: 600 }}>{l.functie ?? "Bestuurslid"}</p>
+                  <p className="bestuur-naam">{l.naam}</p>
+                  <p className="bestuur-functie">{l.functie ?? "Bestuurslid"}</p>
                 </div>
               </div>
             ))}
@@ -72,7 +72,7 @@ export default async function WieIsWiePage() {
                     <ul className="commissie-leden">
                       {c.leden.map((l) => (
                         <li key={l.id}>
-                          <span className="leden-avatar" style={{ width: 30, height: 30, fontSize: 11 }}>{initialen(l.naam)}</span>
+                          <span className="leden-avatar commissie-avatar">{initialen(l.naam)}</span>
                           <span>{l.naam}</span>
                           {l.functie && <span className="commissie-functie">{l.functie}</span>}
                         </li>
@@ -92,12 +92,10 @@ export default async function WieIsWiePage() {
         ) : (
           <div className="smoelenboek-grid">
             {leden.map((l, i) => (
-              <div key={i} className="leden-kaart" style={{ borderRadius: 16, padding: "20px 12px", textAlign: "center" }}>
-                <div className="leden-avatar" style={{ width: 56, height: 56, fontSize: 17, margin: "0 auto 12px" }}>{initialen(l.naam)}</div>
-                <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 700, color: "#111", lineHeight: 1.3 }}>{l.naam}</p>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "var(--primary)", background: "rgba(243,106,42,0.08)", padding: "3px 10px", borderRadius: 100, letterSpacing: "0.04em" }}>
-                  {l.stemgroep ?? "Divers"}
-                </span>
+              <div key={i} className="leden-kaart smoel">
+                <div className="leden-avatar smoel-avatar">{initialen(l.naam)}</div>
+                <p className="smoel-naam">{l.naam}</p>
+                <span className="smoel-stem">{l.stemgroep ?? "Divers"}</span>
               </div>
             ))}
           </div>

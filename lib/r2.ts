@@ -11,7 +11,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 // Twee buckets:
 // - openbaar: alles wat op de publieke website staat (nieuwsfoto's, impressies)
-// - prive:    alles uit de ledenomgeving (albumfoto's, bladmuziek, nieuwsbrieven)
+// - prive:    alles uit de ledenomgeving (albumfoto's, opnames, nieuwsbrieven)
 export type Bucket = "openbaar" | "prive";
 
 const client = new S3Client({

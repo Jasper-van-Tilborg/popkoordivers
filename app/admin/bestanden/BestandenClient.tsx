@@ -6,7 +6,7 @@ import { Keuze } from "../_components/velden";
 import { Werkblad, kiesMetSchuif } from "../_components/Werkblad";
 import { uploadNaarR2 } from "../_components/upload";
 import { bestandToevoegen, verwijderBestand, wijzigBestand, type BestandInput } from "./actions";
-import { CATEGORIEEN, categorie as vind, type CategorieId } from "./categorieen";
+import { CATEGORIEEN, MET_STEMGROEP, categorie as vind, type CategorieId } from "./categorieen";
 
 type Stemgroep = NonNullable<BestandInput["stemgroep"]>;
 
@@ -141,7 +141,7 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
             <Keuze id="bs-cat" value={categorie} onChange={setCategorie} opties={CATEGORIEEN.map((c) => ({ value: c.id, label: c.label }))} />
             <p className="adm-hint">Een andere categorie verplaatst het bestand naar die pagina.</p>
           </div>
-          {categorie === "liedjes" && (
+          {MET_STEMGROEP.includes(categorie) && (
             <div className="adm-field">
               <label htmlFor="bs-stem">Stemgroep</label>
               <Keuze<Stemgroep | "">
@@ -175,11 +175,11 @@ export default function BestandenClient({ categorie, items, loadError, startNieu
   const kies = (id: string | null) => kiesMetSchuif(gekozen, id, () => setGekozen(id));
   const sluit = () => kies(null);
 
-  // Bij bladmuziek per stemgroep gegroepeerd, anders één lijst
+  // Bij opnames per stemgroep gegroepeerd, anders één lijst
   const groepen = useMemo(() => {
     const q = zoek.trim().toLowerCase();
     const lijst = items.filter((b) => !q || b.naam.toLowerCase().includes(q));
-    if (categorie !== "liedjes") return lijst.length ? [{ titel: null as string | null, items: lijst }] : [];
+    if (!MET_STEMGROEP.includes(categorie)) return lijst.length ? [{ titel: null as string | null, items: lijst }] : [];
     return [...STEMGROEPEN, null]
       .map((s) => ({ titel: s ?? "Alle stemgroepen", items: lijst.filter((b) => b.stemgroep === s) }))
       .filter((g) => g.items.length > 0);
@@ -190,7 +190,7 @@ export default function BestandenClient({ categorie, items, loadError, startNieu
   ) : (
     <>
       <button className="adm-wb-nieuw" data-id="nieuw" data-gekozen={gekozen === "nieuw" || undefined} onClick={() => kies("nieuw")}>
-        <IconPlus /> {cat.label === "Bladmuziek" ? "Bladmuziek" : cat.enkel.charAt(0).toUpperCase() + cat.enkel.slice(1)} toevoegen
+        <IconPlus /> {cat.enkel.charAt(0).toUpperCase() + cat.enkel.slice(1)} toevoegen
       </button>
       {groepen.length === 0 ? (
         <div className="adm-empty">

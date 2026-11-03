@@ -7,7 +7,7 @@ export default async function BestandenPage({ searchParams }: { searchParams: Pr
   if (id) {
     const supabase = await createClient();
     const { data } = await supabase.from("bestanden").select("categorie").eq("id", Number(id)).single();
-    redirect(`/admin/bestanden/${data?.categorie ?? "liedjes"}?id=${id}`);
+    redirect(`/admin/bestanden/${data?.categorie ?? "opnames"}?id=${id}`);
   }
-  redirect(`/admin/bestanden/liedjes${nieuw !== undefined ? "?nieuw" : ""}`);
+  redirect(`/admin/bestanden/opnames${nieuw !== undefined ? "?nieuw" : ""}`);
 }

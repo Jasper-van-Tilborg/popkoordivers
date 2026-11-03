@@ -6,11 +6,13 @@ import { maakPaginaWissel } from "@/lib/paginaWissel";
 
 export const PAGINAS = [
   { href: "/leden", label: "Overzicht" },
-  { href: "/leden/bladmuziek", label: "Bladmuziek" },
   { href: "/leden/opnames", label: "Opnames" },
+  { href: "/leden/choreo", label: "Choreo" },
   { href: "/leden/nieuwsbrieven", label: "Nieuwsbrieven" },
   { href: "/leden/fotos", label: "Foto's" },
   { href: "/leden/wie-is-wie", label: "Wie is wie" },
+  // Rechts in de navbar (en onder "Meer" op de telefoon), niet tussen de pagina's
+  { href: "/leden/instellingen", label: "Instellingen", rechts: true },
 ];
 
 export const { knopVoor, naStart, wisseltNu, paginaStaat, schuifNaar } = maakPaginaWissel({

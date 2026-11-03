@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { IconCalendar, IconNewspaper, IconUsers, IconEye, IconCamera } from "@/components/icons";
 import { CURVE, DUUR, knopVoor, naStart, schuifNaar } from "./paginaWissel";
-import { IconHome, IconMuziek, IconPost, IconStukken, IconMicro, IconDans, IconLogboek, IconHartslag, IconGroep } from "./iconen";
+import { IconHome, IconPost, IconStukken, IconMicro, IconDans, IconLogboek, IconHartslag, IconGroep } from "./iconen";
 
 const IconGlobe = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></svg>
@@ -21,11 +21,10 @@ const groepen: { kop: string | null; alleenAdmin?: boolean; items: Item[] }[] = 
     { label: "Media",  href: "/admin/albums", icon: <IconCamera size={19} /> },
   ] },
   { kop: "Ledenomgeving", items: [
-    { label: "Bladmuziek",    href: "/admin/bestanden/liedjes",       icon: <IconMuziek /> },
-    { label: "Nieuwsbrieven", href: "/admin/bestanden/nieuwsbrieven", icon: <IconPost /> },
-    { label: "ALV-stukken",   href: "/admin/bestanden/alv",           icon: <IconStukken /> },
     { label: "Opnames",       href: "/admin/bestanden/opnames",       icon: <IconMicro /> },
     { label: "Choreografie",  href: "/admin/bestanden/choreo",        icon: <IconDans /> },
+    { label: "Nieuwsbrieven", href: "/admin/bestanden/nieuwsbrieven", icon: <IconPost /> },
+    { label: "ALV-stukken",   href: "/admin/bestanden/alv",           icon: <IconStukken /> },
     { label: "Bestuur & commissies", href: "/admin/organisatie",       icon: <IconGroep /> },
   ] },
   { kop: "Beheer", alleenAdmin: true, items: [

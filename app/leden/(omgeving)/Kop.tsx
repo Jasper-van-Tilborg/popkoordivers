@@ -2,13 +2,13 @@ import type { ReactNode } from "react";
 import Reveal from "@/components/Reveal";
 
 // De kop bovenaan elke pagina van de ledenomgeving.
-export function Kop({ titel, tekst, children }: { titel: string; tekst: string; children?: ReactNode }) {
+export function Kop({ titel, tekst, children }: { titel: string; tekst?: string; children?: ReactNode }) {
   return (
     <section className="leden-kopvlak">
       <div className="leden-binnen">
         <Reveal>
           <h1>{titel}</h1>
-          <p>{tekst}</p>
+          {tekst && <p>{tekst}</p>}
           {children}
         </Reveal>
       </div>
