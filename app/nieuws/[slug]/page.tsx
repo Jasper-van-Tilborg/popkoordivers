@@ -1,145 +1,153 @@
+import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
+import DetailKop from "@/components/DetailKop";
+import { IconCalendar, IconNewspaper } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-// Maakt losse URL's in de tekst klikbaar (bijv. YouTube-links)
-function linkify(text: string) {
-  return text.split(/(https?:\/\/\S+)/g).map((part, i) =>
-    /^https?:\/\//.test(part)
-      ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary)", fontWeight: 600, wordBreak: "break-all" }}>{part}</a>
-      : part
+const YOUTUBE = /https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?\S*?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})\S*/g;
+const heeftAfbeelding = (url: string | null) => /^(https?:\/\/|\/)/.test(url ?? "");
+
+// Maakt links in de tekst klikbaar: [tekst](/pad of https://...), losse URL's en e-mailadressen
+function linkify(text: string): ReactNode[] {
+  return text.split(/(\[[^\]]+\]\((?:https?:\/\/|\/)[^)\s]+\)|https?:\/\/\S*[^\s.,;:!?)]|[\w.+-]+@[\w-]+(?:\.[\w-]+)+)/g).map((deel, i) => {
+    const md = deel.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
+    if (md) return md[2].startsWith("/") ? <Link key={i} href={md[2]}>{md[1]}</Link> : <a key={i} href={md[2]} target="_blank" rel="noopener noreferrer">{md[1]}</a>;
+    if (/^https?:\/\//.test(deel)) return <a key={i} href={deel} target="_blank" rel="noopener noreferrer">{deel.replace(/^https?:\/\/(www\.)?/, "")}</a>;
+    if (/^[\w.+-]+@/.test(deel)) return <a key={i} href={`mailto:${deel}`}>{deel}</a>;
+    return deel;
+  });
+}
+
+// Een alinea met een YouTube-link wordt een video; de tekst ervoor ("Optreden ...:") het onderschrift
+function Alinea({ tekst }: { tekst: string }) {
+  const videos = [...tekst.matchAll(YOUTUBE)].map((m) => m[1]);
+  if (videos.length === 0) return <p className="nd-alinea">{linkify(tekst)}</p>;
+
+  const onderschrift = tekst.replace(YOUTUBE, "").trim().replace(/:$/, "");
+  return (
+    <figure className="nd-video">
+      {onderschrift && <figcaption>{linkify(onderschrift)}</figcaption>}
+      {videos.map((id) => (
+        <div key={id} className="nd-video-kader">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${id}`}
+            title={onderschrift || "Video"}
+            loading="lazy"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
+      ))}
+    </figure>
   );
 }
 
 export default async function NieuwsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: bericht } = await supabase
-    .from("berichten")
-    .select("*")
-    .eq("slug", slug)
-    .eq("gepubliceerd", true)
-    .single();
+  const [{ data: bericht }, { data: anderen }] = await Promise.all([
+    supabase.from("berichten").select("*").eq("slug", slug).eq("gepubliceerd", true).single(),
+    supabase.from("berichten").select("id, slug, titel, datum, afbeelding").eq("gepubliceerd", true).neq("slug", slug).order("created_at", { ascending: false }).limit(3),
+  ]);
 
   if (!bericht) notFound();
 
-  const paragraphs = bericht.inhoud.split("\n\n").filter(Boolean);
-  const heeftAfbeelding = /^(https?:\/\/|\/)/.test(bericht.afbeelding ?? "");
+  const alineas = bericht.inhoud.split(/\n\s*\n/).map((a) => a.trim()).filter(Boolean);
+  const meer = anderen ?? [];
 
   return (
     <>
       <Navbar />
-      <main style={{ minHeight: "100vh", background: "#FFFFFF" }}>
+      <main className="detail">
 
-        {/* ── Hero ── */}
-        <section
-          className="page-hero"
-          style={{
-            background: "var(--primary)",
-            padding: "140px 24px 100px",
-            minHeight: "420px",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%)", pointerEvents: "none" }} />
-          <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <Reveal delay={0}>
-              <Link
-                href="/nieuws"
-                className="detail-back"
-                style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.65)", textDecoration: "none", marginBottom: "28px", transition: "color 0.15s" }}
-              >
-                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5M12 5l-7 7 7 7" />
-                </svg>
-                Terug naar nieuws
-              </Link>
-            </Reveal>
-            <Reveal delay={80}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Nieuws</span>
-                <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "rgba(255,255,255,0.35)" }} />
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{bericht.categorie}</span>
+        <DetailKop
+          terug={{ href: "/nieuws", label: "Terug naar nieuws" }}
+          meta={<>
+            <span><IconCalendar size={16} /> {bericht.datum}</span>
+            {bericht.categorie && bericht.categorie !== "Nieuws" && <span className="detail-chip">{bericht.categorie}</span>}
+          </>}
+          titel={bericht.titel}
+          intro={bericht.intro}
+        />
+
+        {/* ── Het artikel, op een kaart die over de kop heen valt ── */}
+        <section className="detail-kaart-vlak">
+          <Reveal>
+            <article className="detail-kaart">
+              {heeftAfbeelding(bericht.afbeelding) && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={bericht.afbeelding} alt="" className="nd-afbeelding" />
+              )}
+              <div className="nd-tekst">
+                {alineas.map((a, i) => <Alinea key={i} tekst={a} />)}
               </div>
-            </Reveal>
-            <Reveal delay={160}>
-              <h1 style={{ fontSize: "clamp(28px, 4.5vw, 56px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 20px", maxWidth: "860px" }}>
-                {bericht.titel}
-              </h1>
-            </Reveal>
-            <Reveal delay={220}>
-              <p style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "rgba(255,255,255,0.75)" }}>{bericht.datum}</p>
-            </Reveal>
-          </div>
-          <div aria-hidden="true" style={{ position: "absolute", bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
-            <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "60px" }}>
-              <path d="M0,60 L0,30 Q360,0 720,25 Q1080,50 1440,15 L1440,60 Z" fill="#FFFFFF" />
-            </svg>
-          </div>
+            </article>
+          </Reveal>
         </section>
 
-        {/* ── Full-width gradient banner ── */}
-        <Reveal>
-          <section style={{ background: "#FFFFFF", padding: "48px 24px 0" }}>
-            <div
-              style={{
-                maxWidth: "1200px",
-                margin: "0 auto",
-                borderRadius: "24px",
-                overflow: "hidden",
-                aspectRatio: "21/9",
-                background: "linear-gradient(135deg, #FDE8D8 0%, rgba(243,106,42,0.08) 50%, #FFF8F4 100%)",
-              }}
-            >
-              {heeftAfbeelding && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={bericht.afbeelding} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-              )}
+        {/* ── Meer nieuws ── */}
+        {meer.length > 0 && (
+          <section className="detail-meer">
+            <div className="detail-binnen">
+              <h2>Meer nieuws</h2>
+              <div className="detail-meer-rij">
+                {meer.map((b, i) => (
+                  <Reveal key={b.id} delay={i * 80}>
+                    <Link href={`/nieuws/${b.slug}`} className="detail-meer-kaart">
+                      <span className="nd-meer-beeld">
+                        {heeftAfbeelding(b.afbeelding) ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={b.afbeelding} alt="" loading="lazy" />
+                        ) : (
+                          <IconNewspaper size={30} />
+                        )}
+                      </span>
+                      <span className="nd-meer-tekst">
+                        <span className="nd-meer-datum">{b.datum}</span>
+                        <span className="nd-meer-titel">{b.titel}</span>
+                        <span className="nd-meer-lees">Lees verder →</span>
+                      </span>
+                    </Link>
+                  </Reveal>
+                ))}
+              </div>
             </div>
           </section>
-        </Reveal>
-
-        {/* ── Artikel tekst ── */}
-        <section className="nieuws-detail-content" style={{ background: "#FFFFFF", padding: "72px 24px 100px" }}>
-          <div style={{ maxWidth: "700px", margin: "0 auto" }}>
-            <p style={{ fontSize: "19px", lineHeight: 1.75, color: "#333", fontWeight: 500, margin: "0 0 36px", paddingBottom: "36px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
-              {bericht.intro}
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              {paragraphs.map((p: string, i: number) => (
-                <p key={i} style={{ fontSize: "16px", lineHeight: 1.85, color: "#444", margin: 0 }}>{linkify(p)}</p>
-              ))}
-            </div>
-            <div style={{ marginTop: "64px", paddingTop: "32px", borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-              <Link
-                href="/nieuws"
-                className="detail-back-btn"
-                style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(243,106,42,0.08)", color: "var(--primary)", fontWeight: 700, fontSize: "14px", padding: "11px 22px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid rgba(243,106,42,0.2)", transition: "background 0.15s, color 0.15s, transform 0.12s" }}
-              >
-                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5M12 5l-7 7 7 7" />
-                </svg>
-                Terug naar nieuws
-              </Link>
-            </div>
-          </div>
-        </section>
+        )}
 
       </main>
       <Footer />
 
       <style>{`
-        .detail-back:hover { color: #fff !important; }
-        .detail-back-btn:hover { background: var(--primary) !important; color: #fff !important; transform: translateY(-1px) !important; }
+        .nd-afbeelding { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+        .nd-tekst { padding: 48px 64px 52px; display: flex; flex-direction: column; gap: 26px; }
+        .nd-alinea { margin: 0; font-size: 18px; line-height: 1.8; color: #2b2b2b; white-space: pre-line; }
+        .nd-tekst a { color: #B54412; font-weight: 600; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; word-break: break-word; }
+        .nd-tekst a:hover { color: var(--primary); }
+        .nd-video { margin: 0; display: flex; flex-direction: column; gap: 14px; }
+        .nd-video figcaption { font-size: 19px; font-weight: 800; color: #111; letter-spacing: -0.3px; line-height: 1.35; }
+        .nd-video-kader { position: relative; aspect-ratio: 16/9; border-radius: 18px; overflow: hidden; background: #111; box-shadow: 0 10px 30px -12px rgba(17,17,17,0.35); }
+        .nd-video-kader iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+        .nd-meer-beeld { aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: #B54412; background: linear-gradient(135deg, #FDE8D8 0%, #FFF3EC 100%); }
+        .nd-meer-beeld img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .nd-meer-tekst { display: flex; flex-direction: column; gap: 6px; padding: 20px 22px 22px; flex: 1; }
+        .nd-meer-datum { font-size: 14px; font-weight: 700; color: #B54412; }
+        .nd-meer-titel { font-size: 19px; font-weight: 800; line-height: 1.3; letter-spacing: -0.3px; color: #111; }
+        .nd-meer-lees { margin-top: auto; padding-top: 8px; font-size: 15px; font-weight: 700; color: #B54412; }
+
         @media (max-width: 640px) {
-          .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 300px !important; }
-          .nieuws-detail-content { padding: 48px 20px 80px !important; }
+          .nd-tekst { padding: 28px 22px 30px; gap: 22px; }
+          .nd-alinea { font-size: 17.5px; }
+          .nd-video figcaption { font-size: 17.5px; }
+          .nd-video-kader { border-radius: 14px; }
         }
       `}</style>
     </>

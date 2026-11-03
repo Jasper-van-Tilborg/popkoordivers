@@ -38,7 +38,14 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   scrollbar-width: none;
+  /* Niet voorbij de boven- of onderkant doorveren: dan zie je een witte achtergrond */
+  overscroll-behavior-y: none;
 }
+/* Veert een browser toch door, dan een kleur die aansluit op de rand van de pagina */
+html:has(.footer-outer) { background: #111111; }
+html:has(.leden-achtergrond) { background: #FFF8F3; }
+/* Anders tekent body wit over de vaste achtergrond van de ledenomgeving heen */
+html:has(.leden-achtergrond) body { background: none; }
 
 html::-webkit-scrollbar {
   display: none;
@@ -150,4 +157,51 @@ a, button { -webkit-tap-highlight-color: transparent; }
   }
   .reveal, .reveal-fade { opacity: 1 !important; }
   html { scroll-behavior: auto; }
+}
+
+/* ── Detailpagina's (nieuws, agenda) ──
+   Oranje kop (components/DetailKop.tsx) met een witte kaart die eroverheen valt,
+   en onderaan "meer" in kaartjes. */
+.detail { min-height: 100vh; background: #FFF8F4; }
+.detail-binnen { max-width: 880px; margin: 0 auto; position: relative; z-index: 1; }
+
+.detail-kop { background: var(--primary); padding: 136px 24px 190px; position: relative; overflow: hidden; }
+.detail-kop-gloed { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.14) 0%, transparent 60%); }
+.detail-terug {
+  display: inline-flex; align-items: center; gap: 8px; margin-bottom: 28px; padding: 8px 16px 8px 12px; border-radius: 100px;
+  font-size: 15px; font-weight: 700; color: #fff; text-decoration: none; background: rgba(255,255,255,0.16); transition: background 0.15s;
+}
+.detail-terug:hover { background: rgba(255,255,255,0.26); }
+.detail-terug:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.detail-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin: 0 0 18px; font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.94); }
+.detail-meta > span { display: inline-flex; align-items: center; gap: 8px; }
+.detail-meta > .detail-chip { padding: 5px 13px; border-radius: 100px; background: rgba(255,255,255,0.2); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.detail-titel { margin: 0; font-size: clamp(34px, 5vw, 60px); font-weight: 800; letter-spacing: -2px; line-height: 1.06; color: #fff; }
+.detail-intro { margin: 22px 0 0; max-width: 680px; font-size: clamp(18px, 1.8vw, 21px); line-height: 1.6; color: rgba(255,255,255,0.94); }
+.detail-golf { position: absolute; bottom: 0; left: 0; right: 0; line-height: 0; }
+.detail-golf svg { display: block; width: 100%; height: 60px; }
+
+.detail-kaart-vlak { padding: 0 24px; margin-top: -130px; position: relative; z-index: 2; }
+.detail-kaart {
+  max-width: 880px; margin: 0 auto; background: #fff; border-radius: 28px; overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 4px rgba(17,17,17,0.04), 0 24px 60px -20px rgba(17,17,17,0.18);
+}
+
+.detail-meer { padding: 88px 24px 110px; }
+.detail-meer h2 { margin: 0 0 22px; font-size: clamp(26px, 3vw, 34px); font-weight: 800; letter-spacing: -1px; color: #111; }
+.detail-meer-rij { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.detail-meer-kaart {
+  display: flex; flex-direction: column; height: 100%; text-decoration: none; background: #fff; border-radius: 22px; overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.07); box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s;
+}
+.detail-meer-kaart:hover { transform: translateY(-3px); box-shadow: 0 16px 40px -12px rgba(17,17,17,0.18); }
+.detail-meer-kaart:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+
+@media (max-width: 640px) {
+  .detail-kop { padding: 104px 20px 150px; }
+  .detail-terug { margin-bottom: 22px; }
+  .detail-titel { letter-spacing: -1.2px; }
+  .detail-kaart-vlak { padding: 0 12px; margin-top: -100px; }
+  .detail-kaart { border-radius: 22px; }
+  .detail-meer { padding: 64px 16px 80px; }
 }
