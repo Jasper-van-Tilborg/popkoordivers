@@ -15,11 +15,13 @@ interface Bestand {
   naam: string;
   categorie: string;
   stemgroep: Stemgroep | null;
+  liednummer: number | null;
   created_at: string;
   url: string | null;
 }
 
 const STEMGROEPEN: Stemgroep[] = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas"];
+const nr = (n: number | null) => (n ? String(n).padStart(3, "0") : "");
 const datumTekst = (s: string) => new Date(s).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
 
 function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }: {
@@ -33,6 +35,7 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
   const [naam, setNaam]           = useState(bestand?.naam ?? "");
   const [categorie, setCategorie] = useState(bestand?.categorie ?? standaardCategorie);
   const [stemgroep, setStemgroep] = useState<Stemgroep | "">(bestand?.stemgroep ?? "");
+  const [liednummer, setLiednummer] = useState(bestand?.liednummer ? String(bestand.liednummer) : "");
   const [voortgang, setVoortgang] = useState<number | null>(null);
   const [fout, setFout]           = useState("");
   const [busy, setBusy]           = useState<"save" | "delete" | null>(null);
@@ -47,7 +50,7 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
   async function save() {
     if (!bestand && !file) { setFout("Kies een bestand."); return; }
     if (!naam.trim()) { setFout("Geef het bestand een naam."); return; }
-    const input: BestandInput = { naam, categorie, stemgroep: stemgroep || null };
+    const input: BestandInput = { naam, categorie, stemgroep: stemgroep || null, liednummer: liednummer.trim() ? Number(liednummer) : null };
 
     setBusy("save");
     setFout("");
@@ -148,11 +151,18 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
                 id="bs-stem"
                 value={stemgroep}
                 onChange={setStemgroep}
-                opties={[{ value: "", label: "Alle stemgroepen" }, ...STEMGROEPEN.map((s) => ({ value: s, label: s }))]}
+                opties={[{ value: "", label: "Compleet (hele koor)" }, ...STEMGROEPEN.map((s) => ({ value: s, label: s }))]}
               />
             </div>
           )}
         </div>
+        {MET_STEMGROEP.includes(categorie) && (
+          <div className="adm-field">
+            <label htmlFor="bs-nr">Liednummer</label>
+            <input id="bs-nr" className="adm-input" inputMode="numeric" value={liednummer} onChange={(e) => setLiednummer(e.target.value.replace(/\D/g, "").slice(0, 3))} placeholder="bijv. 030" style={{ maxWidth: 160 }} />
+            <p className="adm-hint">Het nummer uit de map. De opnames staan op volgorde van liednummer.</p>
+          </div>
+        )}
       </section>
     </Drawer>
   );
@@ -178,10 +188,10 @@ export default function BestandenClient({ categorie, items, loadError, startNieu
   // Bij opnames per stemgroep gegroepeerd, anders één lijst
   const groepen = useMemo(() => {
     const q = zoek.trim().toLowerCase();
-    const lijst = items.filter((b) => !q || b.naam.toLowerCase().includes(q));
+    const lijst = items.filter((b) => !q || b.naam.toLowerCase().includes(q) || nr(b.liednummer) === q.padStart(3, "0"));
     if (!MET_STEMGROEP.includes(categorie)) return lijst.length ? [{ titel: null as string | null, items: lijst }] : [];
     return [...STEMGROEPEN, null]
-      .map((s) => ({ titel: s ?? "Alle stemgroepen", items: lijst.filter((b) => b.stemgroep === s) }))
+      .map((s) => ({ titel: s ?? "Compleet", items: lijst.filter((b) => b.stemgroep === s) }))
       .filter((g) => g.items.length > 0);
   }, [items, zoek, categorie]);
 
@@ -204,7 +214,7 @@ export default function BestandenClient({ categorie, items, loadError, startNieu
               <li key={b.id} data-id={String(b.id)} data-gekozen={gekozen === String(b.id) || undefined} className="adm-row adm-row--plain" onClick={() => kies(String(b.id))}>
                 <div className="adm-main-col">
                   <button className="adm-title" onClick={(e) => { e.stopPropagation(); kies(String(b.id)); }}>{b.naam}</button>
-                  <div className="adm-meta"><span>{datumTekst(b.created_at)}</span></div>
+                  <div className="adm-meta">{b.liednummer && <span>Nr. {nr(b.liednummer)}</span>}<span>{datumTekst(b.created_at)}</span></div>
                 </div>
               </li>
             ))}

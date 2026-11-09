@@ -42,7 +42,7 @@ export async function bestandenLijst(categorieen: string[]) {
   const supabase = await db();
   const { data } = await supabase
     .from("bestanden")
-    .select("id, naam, stemgroep, r2_key")
+    .select("id, naam, stemgroep, liednummer, r2_key")
     .in("categorie", categorieen)
     .order("naam");
   return (data ?? []).map(({ r2_key, ...b }) => ({ ...b, ext: r2_key.split(".").pop()!.toLowerCase() }));

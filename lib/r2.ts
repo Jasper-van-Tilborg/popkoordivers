@@ -48,8 +48,12 @@ export function uploadUrl(bucket: Bucket, key: string, contentType: string): Pro
 }
 
 // Tijdelijke link om een bestand uit de privé bucket te openen
-export function downloadUrl(key: string, expiresIn = 3600): Promise<string> {
-  return getSignedUrl(client, new GetObjectCommand({ Bucket: BUCKETS.prive, Key: key }), { expiresIn });
+// Met een bestandsnaam slaat de browser het bestand op in plaats van het te openen.
+export function downloadUrl(key: string, expiresIn = 3600, bestandsnaam?: string): Promise<string> {
+  const opslaan = bestandsnaam
+    ? `attachment; filename="${bestandsnaam.replace(/[^\x20-\x7e]|"/g, "_")}"; filename*=UTF-8''${encodeURIComponent(bestandsnaam)}`
+    : undefined;
+  return getSignedUrl(client, new GetObjectCommand({ Bucket: BUCKETS.prive, Key: key, ResponseContentDisposition: opslaan }), { expiresIn });
 }
 
 export async function deleteFile(bucket: Bucket, key: string): Promise<void> {

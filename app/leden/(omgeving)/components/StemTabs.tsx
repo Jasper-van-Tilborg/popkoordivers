@@ -1,23 +1,31 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { bestandUrl } from "../actions";
+import { bestandDownload, bestandUrl } from "../actions";
 import Speler from "./Speler";
 
-const stemgroepen = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas"] as const;
+// Compleet: de opnames voor het hele koor, net als op de oude site een eigen tabblad
+const stemgroepen = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas", "Compleet"] as const;
 type Stemgroep = (typeof stemgroepen)[number];
 
 interface Lied {
   id: number;
   titel: string;
+  // Het liednummer uit de map van het koor
+  nummer?: number | null;
   ext?: string;
 }
 
-// "Back It Up (piano, maart 2012)" → titel en details, op twee regels
-const splits = (naam: string) => {
-  const m = naam.match(/^(.*?)\s*\((.+)\)$/);
-  return m ? { kop: m[1], details: m[2] } : { kop: naam, details: "" };
-};
+const nr = (n?: number | null) => (n ? String(n).padStart(3, "0") : "");
+
+// Standaard de hoogste liednummers (het nieuwste repertoire) bovenaan; zonder nummer onderaan
+const SORTERING = {
+  "nummer-af": { label: "Nummer hoog–laag", vergelijk: (a: Lied, b: Lied) => (b.nummer ?? 0) - (a.nummer ?? 0) },
+  "nummer-op": { label: "Nummer laag–hoog", vergelijk: (a: Lied, b: Lied) => (a.nummer ?? 1000) - (b.nummer ?? 1000) },
+  naam: { label: "Naam A–Z", vergelijk: () => 0 },
+} as const;
+type Sortering = keyof typeof SORTERING;
+
 // Zoeken zonder op hoofdletters of accenten te letten
 const gewoon = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -40,13 +48,17 @@ export default function StemTabs({ liedjes, begin }: Props) {
   const [gekozenPagina, setPagina] = useState(0);
   const [perPagina, setPerPagina] = useState(10);
   const [zoek, setZoek] = useState("");
+  const [sortering, setSortering] = useState<Sortering>("nummer-af");
   // Waar de nieuwe rijen vandaan komen: rechts bij verder, links bij terug
   const [richting, setRichting] = useState<"rechts" | "links" | null>(null);
   const tabs = useRef<HTMLDivElement>(null);
   const vlak = useRef<HTMLSpanElement>(null);
   const woorden = gewoon(zoek).split(/\s+/).filter(Boolean);
-  const past = (l: Lied) => woorden.every((w) => gewoon(l.titel).includes(w));
-  const huidigeLiedjes = (liedjes[active] ?? []).filter(past);
+  // Zoeken kan ook op liednummer: "30" en "030" vinden allebei nummer 30
+  const past = (l: Lied) => woorden.every((w) => gewoon(`${nr(l.nummer)} ${l.nummer ?? ""} ${l.titel}`).includes(w));
+  const huidigeLiedjes = (liedjes[active] ?? [])
+    .filter(past)
+    .sort((a, b) => SORTERING[sortering].vergelijk(a, b) || a.titel.localeCompare(b.titel, "nl"));
   const paginas = Math.ceil(huidigeLiedjes.length / perPagina);
   const pagina = Math.min(gekozenPagina, Math.max(paginas - 1, 0));
   const zichtbaar = huidigeLiedjes.slice(pagina * perPagina, (pagina + 1) * perPagina);
@@ -110,6 +122,12 @@ export default function StemTabs({ liedjes, begin }: Props) {
     setPagina(0);
   }
 
+  function sorteer(s: Sortering) {
+    setRichting(null);
+    setSortering(s);
+    setPagina(0);
+  }
+
   function naarPagina(p: number) {
     setRichting(p > pagina ? "rechts" : "links");
     setPagina(p);
@@ -126,6 +144,14 @@ export default function StemTabs({ liedjes, begin }: Props) {
     const url = await bestandUrl(lied.id);
     if (!url) { speler.current?.close(); setFout("Dit bestand kon niet worden geopend. Log opnieuw in en probeer het nog eens."); return; }
     setSpeelt((s) => (s?.lied.id === lied.id ? { lied, url } : s));
+  }
+
+  // De link vraagt de browser het bestand op te slaan; de pagina blijft staan
+  async function download(lied: Lied) {
+    setFout("");
+    const url = await bestandDownload(lied.id);
+    if (url) window.location.assign(url);
+    else setFout("Dit bestand kon niet worden gedownload. Log opnieuw in en probeer het nog eens.");
   }
 
   async function open(lied: Lied) {
@@ -154,9 +180,14 @@ export default function StemTabs({ liedjes, begin }: Props) {
         </div>
       </div>
 
-      <div className="liedjes-zoek">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-        <input type="search" value={zoek} onChange={(e) => zoekNaar(e.target.value)} placeholder="Zoek een nummer" aria-label="Zoek een nummer" />
+      <div className="liedjes-zoekbalk">
+        <div className="liedjes-zoek">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+          <input type="search" value={zoek} onChange={(e) => zoekNaar(e.target.value)} placeholder="Naam of liednummer" aria-label="Zoek op naam of liednummer" />
+        </div>
+        <select className="liedjes-sorteer" value={sortering} onChange={(e) => sorteer(e.target.value as Sortering)} aria-label="Sorteren">
+          {Object.entries(SORTERING).map(([k, s]) => <option key={k} value={k}>{s.label}</option>)}
+        </select>
       </div>
 
       {fout && <p className="liedjes-fout" role="alert">{fout}</p>}
@@ -167,16 +198,20 @@ export default function StemTabs({ liedjes, begin }: Props) {
         <div key={`${active}-${pagina}`} className="liedjes" data-richting={richting ?? undefined}>
           {zichtbaar.map((lied, i) => {
             const s = soort(lied.ext);
-            const { kop, details } = splits(lied.titel);
             return (
               <div key={lied.id} className="lied" style={{ "--i": i } as React.CSSProperties}>
-                <div>
-                  <p className="lied-titel">{kop}</p>
-                  {details && <p className="lied-componist">{details}</p>}
+                <span className="lied-nummer" aria-label={lied.nummer ? `Liednummer ${lied.nummer}` : undefined}>{nr(lied.nummer)}</span>
+                <div className="lied-tekst">
+                  <p className="lied-titel">{lied.titel}</p>
                 </div>
-                <button type="button" className="lied-pdf" aria-label={`${KNOP[s].replace(" ↓", "")}: ${lied.titel}`} onClick={() => (s === "audio" || s === "video" ? speel(lied) : open(lied))}>
-                  {ICOON[s]}<span className="lied-knop-tekst">{KNOP[s]}</span>
-                </button>
+                <div className="lied-knoppen">
+                  <button type="button" className="lied-download" aria-label={`Downloaden: ${lied.titel}`} title="Downloaden" onClick={() => download(lied)}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
+                  </button>
+                  <button type="button" className="lied-pdf" aria-label={`${KNOP[s].replace(" ↓", "")}: ${lied.titel}`} onClick={() => (s === "audio" || s === "video" ? speel(lied) : open(lied))}>
+                    {ICOON[s]}<span className="lied-knop-tekst">{KNOP[s]}</span>
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -203,7 +238,8 @@ export default function StemTabs({ liedjes, begin }: Props) {
         {speelt && (
           <Speler
             key={speelt.lied.id}
-            {...splits(speelt.lied.titel)}
+            kop={speelt.lied.titel}
+            details={speelt.lied.nummer ? `Liednummer ${nr(speelt.lied.nummer)}` : undefined}
             url={speelt.url}
             video={soort(speelt.lied.ext) === "video"}
             onSluit={() => speler.current?.close()}

@@ -424,8 +424,9 @@ html[data-vt="leden-links"]::view-transition-new(leden-pagina) { animation-name:
 @media (prefers-reduced-motion: reduce) { .leden-schakelaar, .leden-schakelaar-bol { transition: none; } }
 
 /* Zoeken in de opnames */
+.liedjes-zoekbalk { display: flex; gap: 10px; margin: 0 0 8px; }
 .liedjes-zoek {
-  display: flex; align-items: center; gap: 10px; margin: 0 0 8px; padding: 0 16px; min-height: 52px;
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 0 16px; min-height: 52px;
   border-radius: 14px; border: 1.5px solid rgba(0,0,0,0.12); background: #fff; color: #666; transition: border-color 0.15s;
 }
 .liedjes-zoek:focus-within { border-color: var(--primary); color: var(--oranje-tekst); }
@@ -479,3 +480,27 @@ html[data-vt="leden-links"]::view-transition-new(leden-pagina) { animation-name:
 .lied:hover .lied-pdf { background: rgba(243,106,42,0.18); }
 .lied:hover .lied-titel { color: var(--oranje-tekst); }
 .lied:has(.lied-pdf:active)::before { background: rgba(243,106,42,0.13); }
+
+/* Sorteren naast het zoekveld */
+.liedjes-sorteer {
+  flex-shrink: 0; min-height: 52px; padding: 0 40px 0 16px; border-radius: 14px; border: 1.5px solid rgba(0,0,0,0.12); cursor: pointer;
+  font: inherit; font-size: 16px; font-weight: 600; color: #222; appearance: none; -webkit-appearance: none;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;
+}
+.liedjes-sorteer:focus-visible { outline: none; border-color: var(--primary); }
+
+/* Liednummer vooraan, de knoppen achteraan */
+.lied { justify-content: flex-start; }
+.lied-nummer {
+  flex-shrink: 0; display: grid; place-items: center; width: 54px; height: 40px; border-radius: 10px;
+  font-size: 16px; font-weight: 800; color: var(--oranje-tekst); background: rgba(243,106,42,0.10); font-variant-numeric: tabular-nums;
+}
+.lied-nummer:empty { background: none; }
+.lied-tekst { flex: 1; min-width: 0; }
+.lied-knoppen { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+.lied-download {
+  position: relative; z-index: 1; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+  border: 1.5px solid rgba(0,0,0,0.12); background: #fff; color: #333; transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.lied-download:hover { border-color: rgba(243,106,42,0.45); color: var(--oranje-tekst); background: rgba(243,106,42,0.06); }
+.lied-download:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }

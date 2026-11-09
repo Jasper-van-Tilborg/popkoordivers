@@ -43,10 +43,10 @@ export default async function OverzichtPage() {
   const ik = sessie();
   const [{ naam }, opnames, { data: optredens }, { data: berichten }] = await Promise.all([
     ik,
-    // Voor de tegel: drie opnames voor de eigen stem (of voor het hele koor)
+    // Voor de tegel: drie opnames voor de eigen stem (zonder stem: die van het hele koor)
     ik.then(async ({ stemgroep }) => {
       let q = supabase.from("bestanden").select("id, naam").eq("categorie", "opnames");
-      if (stemgroep) q = q.or(`stemgroep.is.null,stemgroep.eq.${stemgroep}`);
+      q = stemgroep ? q.eq("stemgroep", stemgroep) : q.is("stemgroep", null);
       const { data } = await q.order("created_at", { ascending: false }).limit(3);
       return data ?? [];
     }),

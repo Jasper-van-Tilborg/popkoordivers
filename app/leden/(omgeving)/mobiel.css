@@ -129,15 +129,16 @@
   .leden-tegel-lijst li { font-size: 16.5px; padding: 12px 0; color: #222; }
   .leden-tegel-noot { width: 34px; height: 34px; border-radius: 10px; }
 
-  /* Opnames: de stemgroepen als vijf gelijke knoppen die bovenaan blijven staan */
+  /* Opnames: de tabbladen als gelijke knoppen die bovenaan blijven staan */
   .leden-opnames { padding: 0; }
   .stemtabs-balk {
     position: sticky; top: env(safe-area-inset-top); z-index: 5; overflow: visible; margin: 0; padding: 10px;
     background: rgba(255,251,248,0.97); border-radius: 20px 20px 0 0; border-bottom: 1px solid rgba(0,0,0,0.07);
   }
-  .stemtabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; gap: 4px; padding: 4px; }
+  /* Zes tabbladen (vijf stemmen en Compleet): twee rijen van drie, het aantal ernaast */
+  .stemtabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 4px; padding: 4px; }
   .stemtab {
-    flex-direction: column; justify-content: center; gap: 1px; min-height: 58px; padding: 6px 2px;
+    justify-content: center; gap: 6px; min-height: 46px; padding: 6px 4px;
     font-size: 15px; font-weight: 600; color: #4a4a4a;
   }
   .stemtab[aria-selected="true"] { font-weight: 800; }
@@ -146,7 +147,11 @@
   .liedjes { padding: 0 18px 4px; }
   .liedjes-leeg { font-size: 16px; color: #666; padding: 20px 18px; }
   .liedjes-fout { margin: 12px 18px 0; }
-  .liedjes-zoek { margin: 12px 18px 4px; }
+  .liedjes-zoekbalk { margin: 12px 18px 4px; gap: 8px; }
+  .liedjes-zoek { padding: 0 12px; }
+  .liedjes-sorteer { padding: 0 34px 0 12px; font-size: 15px; background-position: right 10px center; }
+  .lied-nummer { width: 44px; height: 36px; font-size: 15px; }
+  .lied-download { width: 44px; height: 44px; }
   .liedjes-paginas { margin: 0 18px; padding: 14px 0 18px; }
   .liedjes-pagina-tekst { font-size: 14px; }
   .liedjes-pagina-woord { display: none; }

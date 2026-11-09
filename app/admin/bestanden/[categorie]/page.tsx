@@ -15,7 +15,7 @@ export default async function CategoriePage({ params, searchParams }: {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("bestanden")
-    .select("id, naam, categorie, stemgroep, r2_key, created_at")
+    .select("id, naam, categorie, stemgroep, liednummer, r2_key, created_at")
     .eq("categorie", cat.id)
     .order("created_at", { ascending: false });
 

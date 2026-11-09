@@ -13,6 +13,7 @@ export interface BestandInput {
   naam: string;
   categorie: string;
   stemgroep: Stemgroep | null;
+  liednummer: number | null;
 }
 
 const CATEGORIEEN = ["opnames", "nieuwsbrieven", "alv", "choreo"];
@@ -20,6 +21,7 @@ const CATEGORIEEN = ["opnames", "nieuwsbrieven", "alv", "choreo"];
 function controleer(input: BestandInput) {
   if (!input.naam.trim()) return "Geef het bestand een naam.";
   if (!CATEGORIEEN.includes(input.categorie)) return "Kies een categorie.";
+  if (input.liednummer !== null && !(Number.isInteger(input.liednummer) && input.liednummer >= 1 && input.liednummer <= 999)) return "Een liednummer is een getal van 1 tot 999.";
   return null;
 }
 
@@ -38,6 +40,7 @@ export async function bestandToevoegen(key: string, input: BestandInput) {
     naam: input.naam.trim(),
     categorie: input.categorie,
     stemgroep: MET_STEMGROEP.includes(input.categorie) ? input.stemgroep : null,
+    liednummer: MET_STEMGROEP.includes(input.categorie) ? input.liednummer : null,
     r2_key: key,
   }).select("id").single();
   if (error) {
@@ -59,6 +62,7 @@ export async function wijzigBestand(id: number, input: BestandInput) {
     naam: input.naam.trim(),
     categorie: input.categorie,
     stemgroep: MET_STEMGROEP.includes(input.categorie) ? input.stemgroep : null,
+    liednummer: MET_STEMGROEP.includes(input.categorie) ? input.liednummer : null,
   }).eq("id", id);
   if (error) return { error: error.message };
   await logActiviteit(sessie, "gewijzigd", "bestand", { id, naam: input.naam.trim() });

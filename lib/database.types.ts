@@ -160,6 +160,7 @@ export type Database = {
           categorie: string
           created_at: string
           id: number
+          liednummer: number | null
           naam: string
           r2_key: string
           stemgroep: Database["public"]["Enums"]["stemgroep_type"] | null
@@ -168,6 +169,7 @@ export type Database = {
           categorie: string
           created_at?: string
           id?: never
+          liednummer?: number | null
           naam: string
           r2_key: string
           stemgroep?: Database["public"]["Enums"]["stemgroep_type"] | null
@@ -176,6 +178,7 @@ export type Database = {
           categorie?: string
           created_at?: string
           id?: never
+          liednummer?: number | null
           naam?: string
           r2_key?: string
           stemgroep?: Database["public"]["Enums"]["stemgroep_type"] | null
