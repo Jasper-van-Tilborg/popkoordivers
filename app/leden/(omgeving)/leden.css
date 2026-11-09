@@ -481,13 +481,32 @@ html[data-vt="leden-links"]::view-transition-new(leden-pagina) { animation-name:
 .lied:hover .lied-titel { color: var(--oranje-tekst); }
 .lied:has(.lied-pdf:active)::before { background: rgba(243,106,42,0.13); }
 
-/* Sorteren naast het zoekveld */
-.liedjes-sorteer {
-  flex-shrink: 0; min-height: 52px; padding: 0 40px 0 16px; border-radius: 14px; border: 1.5px solid rgba(0,0,0,0.12); cursor: pointer;
-  font: inherit; font-size: 16px; font-weight: 600; color: #222; appearance: none; -webkit-appearance: none;
-  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;
+/* Sorteren naast het zoekveld: knop in de stijl van het zoekveld, menu als witte kaart */
+.sorteer { position: relative; flex-shrink: 0; }
+.sorteer-knop {
+  display: flex; align-items: center; gap: 10px; height: 100%; min-height: 52px; padding: 0 14px 0 16px; border-radius: 14px; cursor: pointer;
+  border: 1.5px solid rgba(0,0,0,0.12); background: #fff; color: #222; font: inherit; font-size: 16px; font-weight: 600; white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
 }
-.liedjes-sorteer:focus-visible { outline: none; border-color: var(--primary); }
+.sorteer-knop > svg:first-child { color: var(--oranje-tekst); }
+.sorteer-knop:hover, .sorteer-knop[aria-expanded="true"] { border-color: var(--primary); }
+.sorteer-knop:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.sorteer-pijl { color: #666; transition: transform 0.2s var(--ease-out); }
+.sorteer-knop[aria-expanded="true"] .sorteer-pijl { transform: rotate(180deg); }
+.sorteer-menu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 30; min-width: 100%; padding: 6px;
+  background: #fff; border-radius: 16px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 18px 50px -12px rgba(17,17,17,0.28);
+  animation: sorteer-open 0.18s var(--ease-out);
+}
+@keyframes sorteer-open { from { opacity: 0; transform: translateY(-4px); } }
+.sorteer-optie {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 48px; padding: 0 14px;
+  border: none; border-radius: 11px; background: none; cursor: pointer; text-align: left; white-space: nowrap;
+  font: inherit; font-size: 16px; font-weight: 600; color: #222;
+}
+.sorteer-optie:hover, .sorteer-optie:focus-visible { background: rgba(243,106,42,0.08); outline: none; }
+.sorteer-optie[aria-selected="true"] { color: var(--oranje-tekst); font-weight: 800; }
+@media (prefers-reduced-motion: reduce) { .sorteer-menu { animation: none; } .sorteer-pijl { transition: none; } }
 
 /* Liednummer vooraan, de knoppen achteraan */
 .lied { justify-content: flex-start; }

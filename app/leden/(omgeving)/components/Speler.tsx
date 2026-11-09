@@ -22,8 +22,13 @@ function Sprong({ terug }: { terug?: boolean }) {
 
 // Oefenspeler voor de ledenomgeving: audio met eigen bediening, video met die van de browser.
 // Zonder url wordt de link nog opgehaald; de bediening staat dan even uit.
-export default function Speler({ kop, details, url, video, onSluit }: { kop: string; details?: string; url: string | null; video: boolean; onSluit: () => void }) {
+// Een mp4 is soms alleen geluid (zoals de oefenbestanden van Lean On Me): dan meldt de
+// speler onGeenBeeld en krijgt het de bediening van een geluidsbestand.
+export default function Speler({ kop, details, url, video, onSluit, onGeenBeeld }: {
+  kop: string; details?: string; url: string | null; video: boolean; onSluit: () => void; onGeenBeeld?: () => void;
+}) {
   const audio = useRef<HTMLAudioElement>(null);
+  const [beeld, setBeeld] = useState(false);
   const [speelt, setSpeelt] = useState(false);
   const [positie, setPositie] = useState(0);
   const [duur, setDuur] = useState(0);
@@ -46,7 +51,24 @@ export default function Speler({ kop, details, url, video, onSluit }: { kop: str
       </div>
 
       {video ? (
-        url ? <video src={url} controls autoPlay playsInline className="speler-video" /> : <div className="speler-video speler-video--laden" />
+        <>
+          {/* Pas tonen en afspelen als vaststaat dat er beeld in zit */}
+          {url && (
+            <video
+              src={url}
+              controls
+              playsInline
+              preload="metadata"
+              className="speler-video"
+              hidden={!beeld}
+              onLoadedMetadata={(e) => {
+                if (e.currentTarget.videoWidth === 0) onGeenBeeld?.();
+                else { setBeeld(true); e.currentTarget.play().catch(() => {}); }
+              }}
+            />
+          )}
+          {!beeld && <div className="speler-video speler-video--laden" />}
+        </>
       ) : (
         <div className="speler-body" aria-busy={!url}>
           {url && <audio

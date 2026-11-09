@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { bestandDownload, bestandUrl } from "../actions";
 import Speler from "./Speler";
 
@@ -26,16 +26,69 @@ const SORTERING = {
 } as const;
 type Sortering = keyof typeof SORTERING;
 
+// Sorteren in de stijl van de site: een knop met een eigen menu (een gewone keuzelijst
+// toont het menu van het systeem). Pijltjes, Enter en Escape werken zoals verwacht.
+function Sorteer({ waarde, kies }: { waarde: Sortering; kies: (s: Sortering) => void }) {
+  const [open, setOpen] = useState(false);
+  const blok = useRef<HTMLDivElement>(null);
+  const knop = useRef<HTMLButtonElement>(null);
+  const opties = Object.keys(SORTERING) as Sortering[];
+
+  useEffect(() => {
+    if (!open) return;
+    blok.current?.querySelector<HTMLElement>('[aria-selected="true"]')?.focus();
+    const buiten = (e: PointerEvent) => { if (!blok.current?.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("pointerdown", buiten);
+    return () => document.removeEventListener("pointerdown", buiten);
+  }, [open]);
+
+  function toets(e: React.KeyboardEvent) {
+    const items = [...(blok.current?.querySelectorAll<HTMLElement>('[role="option"]') ?? [])];
+    const i = items.indexOf(document.activeElement as HTMLElement);
+    if (e.key === "Escape") { setOpen(false); knop.current?.focus(); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); items[Math.min(i + 1, items.length - 1)]?.focus(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); items[Math.max(i - 1, 0)]?.focus(); }
+    else if (e.key === "Tab") setOpen(false);
+  }
+
+  function neem(s: Sortering) {
+    kies(s);
+    setOpen(false);
+    knop.current?.focus();
+  }
+
+  return (
+    <div ref={blok} className="sorteer" onKeyDown={toets}>
+      <button ref={knop} type="button" className="sorteer-knop" aria-haspopup="listbox" aria-expanded={open} aria-label={`Sorteren: ${SORTERING[waarde].label}`} onClick={() => setOpen(!open)}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 4v16m0 0-3-3m3 3 3-3M17 20V4m0 0-3 3m3-3 3 3" /></svg>
+        <span className="sorteer-tekst">{SORTERING[waarde].label}</span>
+        <svg className="sorteer-pijl" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+      </button>
+      {open && (
+        <div role="listbox" aria-label="Sorteren" className="sorteer-menu">
+          {opties.map((s) => (
+            <button key={s} type="button" role="option" aria-selected={s === waarde} className="sorteer-optie" onClick={() => neem(s)}>
+              {SORTERING[s].label}
+              {s === waarde && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Zoeken zonder op hoofdletters of accenten te letten
 const gewoon = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 // Wat de browser kan afspelen, speelt op de pagina af; de rest (pdf, wma) opent als bestand.
 const AUDIO = ["mp3", "m4a", "wav", "ogg", "aac"];
 const soort = (ext?: string) => ext === "pdf" ? "pdf" : AUDIO.includes(ext ?? "") ? "audio" : ext === "mp4" ? "video" : "anders";
-const KNOP = { pdf: "PDF ↓", audio: "Luisteren", video: "Video", anders: "Openen" };
+// Een mp4 kan video zijn of alleen geluid; de speler ziet dat pas bij het openen
+const KNOP = { pdf: "PDF ↓", audio: "Luisteren", video: "Afspelen", anders: "Openen" };
 // Op de telefoon staat alleen het icoon in de knop (de hele rij is klikbaar)
-const pad = (d: string) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="lied-knop-icoon">{d === "play" ? <path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12.2-7.4a1 1 0 0 0 0-1.72L8.5 3.74A1 1 0 0 0 7 4.6z" fill="currentColor" stroke="none" /> : d === "video" ? <><rect x="3" y="6" width="13" height="12" rx="2" /><path d="m16 10 5-3v10l-5-3" /></> : <path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14" />}</svg>;
-const ICOON = { pdf: pad("omlaag"), audio: pad("play"), video: pad("video"), anders: pad("omlaag") };
+const pad = (d: string) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="lied-knop-icoon">{d === "play" ? <path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12.2-7.4a1 1 0 0 0 0-1.72L8.5 3.74A1 1 0 0 0 7 4.6z" fill="currentColor" stroke="none" /> : <path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14" />}</svg>;
+const ICOON = { pdf: pad("omlaag"), audio: pad("play"), video: pad("play"), anders: pad("omlaag") };
 
 interface Props {
   liedjes: Record<string, Lied[]>;
@@ -64,7 +117,8 @@ export default function StemTabs({ liedjes, begin }: Props) {
   const zichtbaar = huidigeLiedjes.slice(pagina * perPagina, (pagina + 1) * perPagina);
   const lijst = useRef<HTMLDivElement>(null);
   const speler = useRef<HTMLDialogElement>(null);
-  const [speelt, setSpeelt] = useState<{ lied: Lied; url: string | null } | null>(null);
+  const [speelt, setSpeelt] = useState<{ lied: Lied; url: string | null; alleenGeluid?: boolean } | null>(null);
+  const toontBeeld = !!speelt && soort(speelt.lied.ext) === "video" && !speelt.alleenGeluid;
   const [fout, setFout] = useState("");
 
   // Zoveel opnames per pagina dat de hele lijst, met de knoppen eronder, in één
@@ -185,9 +239,7 @@ export default function StemTabs({ liedjes, begin }: Props) {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           <input type="search" value={zoek} onChange={(e) => zoekNaar(e.target.value)} placeholder="Naam of liednummer" aria-label="Zoek op naam of liednummer" />
         </div>
-        <select className="liedjes-sorteer" value={sortering} onChange={(e) => sorteer(e.target.value as Sortering)} aria-label="Sorteren">
-          {Object.entries(SORTERING).map(([k, s]) => <option key={k} value={k}>{s.label}</option>)}
-        </select>
+        <Sorteer waarde={sortering} kies={sorteer} />
       </div>
 
       {fout && <p className="liedjes-fout" role="alert">{fout}</p>}
@@ -230,7 +282,7 @@ export default function StemTabs({ liedjes, begin }: Props) {
       <dialog
         ref={speler}
         className="speler"
-        data-video={speelt && soort(speelt.lied.ext) === "video" ? "" : undefined}
+        data-video={toontBeeld ? "" : undefined}
         aria-label={speelt?.lied.titel}
         onClose={() => setSpeelt(null)}
         onClick={(e) => { if (e.target === e.currentTarget) e.currentTarget.close(); }}
@@ -241,8 +293,9 @@ export default function StemTabs({ liedjes, begin }: Props) {
             kop={speelt.lied.titel}
             details={speelt.lied.nummer ? `Liednummer ${nr(speelt.lied.nummer)}` : undefined}
             url={speelt.url}
-            video={soort(speelt.lied.ext) === "video"}
+            video={toontBeeld}
             onSluit={() => speler.current?.close()}
+            onGeenBeeld={() => setSpeelt((s) => (s ? { ...s, alleenGeluid: true } : s))}
           />
         )}
       </dialog>

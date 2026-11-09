@@ -149,7 +149,9 @@
   .liedjes-fout { margin: 12px 18px 0; }
   .liedjes-zoekbalk { margin: 12px 18px 4px; gap: 8px; }
   .liedjes-zoek { padding: 0 12px; }
-  .liedjes-sorteer { padding: 0 34px 0 12px; font-size: 15px; background-position: right 10px center; }
+  /* Op de telefoon alleen het icoon in de knop; het menu toont de keuzes voluit */
+  .sorteer-knop { gap: 4px; padding: 0 10px; }
+  .sorteer-tekst { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .lied-nummer { width: 44px; height: 36px; font-size: 15px; }
   .lied-download { width: 44px; height: 44px; }
   .liedjes-paginas { margin: 0 18px; padding: 14px 0 18px; }
