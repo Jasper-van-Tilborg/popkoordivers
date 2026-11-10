@@ -6,22 +6,19 @@ import { Keuze } from "../_components/velden";
 import { Werkblad, kiesMetSchuif } from "../_components/Werkblad";
 import { uploadNaarR2 } from "../_components/upload";
 import { bestandToevoegen, verwijderBestand, wijzigBestand, type BestandInput } from "./actions";
-import { CATEGORIEEN, MET_STEMGROEP, categorie as vind, type CategorieId } from "./categorieen";
+import { CATEGORIEEN, categorie as vind, type CategorieId } from "./categorieen";
 
-type Stemgroep = NonNullable<BestandInput["stemgroep"]>;
+// Opnames hebben een eigen pagina (bestanden/opnames)
+const ANDERE = CATEGORIEEN.filter((c) => c.id !== "opnames");
 
 interface Bestand {
   id: number;
   naam: string;
   categorie: string;
-  stemgroep: Stemgroep | null;
-  liednummer: number | null;
   created_at: string;
   url: string | null;
 }
 
-const STEMGROEPEN: Stemgroep[] = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas"];
-const nr = (n: number | null) => (n ? String(n).padStart(3, "0") : "");
 const datumTekst = (s: string) => new Date(s).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
 
 function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }: {
@@ -34,8 +31,6 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
   const [file, setFile]           = useState<File | null>(null);
   const [naam, setNaam]           = useState(bestand?.naam ?? "");
   const [categorie, setCategorie] = useState(bestand?.categorie ?? standaardCategorie);
-  const [stemgroep, setStemgroep] = useState<Stemgroep | "">(bestand?.stemgroep ?? "");
-  const [liednummer, setLiednummer] = useState(bestand?.liednummer ? String(bestand.liednummer) : "");
   const [voortgang, setVoortgang] = useState<number | null>(null);
   const [fout, setFout]           = useState("");
   const [busy, setBusy]           = useState<"save" | "delete" | null>(null);
@@ -50,7 +45,7 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
   async function save() {
     if (!bestand && !file) { setFout("Kies een bestand."); return; }
     if (!naam.trim()) { setFout("Geef het bestand een naam."); return; }
-    const input: BestandInput = { naam, categorie, stemgroep: stemgroep || null, liednummer: liednummer.trim() ? Number(liednummer) : null };
+    const input: BestandInput = { naam, categorie, stemgroep: null, liednummer: null };
 
     setBusy("save");
     setFout("");
@@ -141,28 +136,10 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
         <div className="adm-grid-2">
           <div className="adm-field">
             <label htmlFor="bs-cat">Categorie</label>
-            <Keuze id="bs-cat" value={categorie} onChange={setCategorie} opties={CATEGORIEEN.map((c) => ({ value: c.id, label: c.label }))} />
+            <Keuze id="bs-cat" value={categorie} onChange={setCategorie} opties={ANDERE.map((c) => ({ value: c.id, label: c.label }))} />
             <p className="adm-hint">Een andere categorie verplaatst het bestand naar die pagina.</p>
           </div>
-          {MET_STEMGROEP.includes(categorie) && (
-            <div className="adm-field">
-              <label htmlFor="bs-stem">Stemgroep</label>
-              <Keuze<Stemgroep | "">
-                id="bs-stem"
-                value={stemgroep}
-                onChange={setStemgroep}
-                opties={[{ value: "", label: "Compleet (hele koor)" }, ...STEMGROEPEN.map((s) => ({ value: s, label: s }))]}
-              />
-            </div>
-          )}
         </div>
-        {MET_STEMGROEP.includes(categorie) && (
-          <div className="adm-field">
-            <label htmlFor="bs-nr">Liednummer</label>
-            <input id="bs-nr" className="adm-input" inputMode="numeric" value={liednummer} onChange={(e) => setLiednummer(e.target.value.replace(/\D/g, "").slice(0, 3))} placeholder="bijv. 030" style={{ maxWidth: 160 }} />
-            <p className="adm-hint">Het nummer uit de map. De opnames staan op volgorde van liednummer.</p>
-          </div>
-        )}
       </section>
     </Drawer>
   );
@@ -185,15 +162,11 @@ export default function BestandenClient({ categorie, items, loadError, startNieu
   const kies = (id: string | null) => kiesMetSchuif(gekozen, id, () => setGekozen(id));
   const sluit = () => kies(null);
 
-  // Bij opnames per stemgroep gegroepeerd, anders één lijst
   const groepen = useMemo(() => {
     const q = zoek.trim().toLowerCase();
-    const lijst = items.filter((b) => !q || b.naam.toLowerCase().includes(q) || nr(b.liednummer) === q.padStart(3, "0"));
-    if (!MET_STEMGROEP.includes(categorie)) return lijst.length ? [{ titel: null as string | null, items: lijst }] : [];
-    return [...STEMGROEPEN, null]
-      .map((s) => ({ titel: s ?? "Compleet", items: lijst.filter((b) => b.stemgroep === s) }))
-      .filter((g) => g.items.length > 0);
-  }, [items, zoek, categorie]);
+    const lijst = items.filter((b) => !q || b.naam.toLowerCase().includes(q));
+    return lijst.length ? [{ titel: null as string | null, items: lijst }] : [];
+  }, [items, zoek]);
 
   const lijst = loadError ? (
     <div className="adm-empty"><p className="adm-empty-title">De bestanden konden niet worden geladen</p><p>{loadError}</p></div>
@@ -214,7 +187,7 @@ export default function BestandenClient({ categorie, items, loadError, startNieu
               <li key={b.id} data-id={String(b.id)} data-gekozen={gekozen === String(b.id) || undefined} className="adm-row adm-row--plain" onClick={() => kies(String(b.id))}>
                 <div className="adm-main-col">
                   <button className="adm-title" onClick={(e) => { e.stopPropagation(); kies(String(b.id)); }}>{b.naam}</button>
-                  <div className="adm-meta">{b.liednummer && <span>Nr. {nr(b.liednummer)}</span>}<span>{datumTekst(b.created_at)}</span></div>
+                  <div className="adm-meta"><span>{datumTekst(b.created_at)}</span></div>
                 </div>
               </li>
             ))}

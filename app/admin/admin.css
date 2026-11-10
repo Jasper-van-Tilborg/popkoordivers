@@ -773,3 +773,241 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 .admin-shell .adm-input:focus, .admin-shell .adm-search input:focus {
   border-color: var(--primary); box-shadow: 0 0 0 3px rgba(243,106,42,0.15);
 }
+
+
+/* ── Opnames: één tabel met de liedjes als rijen en de stemmen als kolommen ──
+   (bestanden/opnames). Elk vakje is een plek om bestanden in te slepen. */
+
+.adm-matrix-houder { container-type: inline-size; }
+.adm-matrix { background: #fff; border: 1px solid var(--line); border-radius: 16px; }
+.adm-matrix-kop, .adm-matrix-rij {
+  display: grid; grid-template-columns: 52px minmax(150px, 1.25fr) repeat(6, minmax(0, 1fr));
+}
+.adm-matrix-kop {
+  position: sticky; top: 62px; z-index: 5; border-bottom: 1px solid var(--line); border-radius: 16px 16px 0 0;
+  background: color-mix(in srgb, #fff 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.adm-matrix-kop > span { padding: 12px 10px; font-size: 12px; font-weight: 700; color: var(--ink-2); }
+.adm-matrix-kop > span:first-child { padding-left: 16px; }
+.adm-matrix-sorteer { all: unset; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; border-radius: 4px; }
+.adm-matrix-sorteer:hover { color: var(--ink); }
+.adm-matrix-sorteer:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.adm-matrix-rij + .adm-matrix-rij { border-top: 1px solid var(--line-soft); }
+.adm-matrix-rij:hover { background: #FDFCFB; }
+.adm-matrix-rij:last-child { border-radius: 0 0 16px 16px; }
+.adm-matrix-rij > * { min-width: 0; padding: 8px 6px; }
+.adm-matrix-nr {
+  display: flex; align-items: center; padding-left: 16px !important;
+  font-family: var(--font-display), var(--font-manrope), sans-serif; font-size: 15px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums;
+}
+.adm-matrix-rij[data-geen-nummer] .adm-matrix-nr { color: var(--ink-3); }
+.adm-matrix-lied { display: flex; align-items: center; border-radius: 10px; transition: background 0.12s, box-shadow 0.12s; }
+.adm-matrix-lied[data-drag] { background: #FFF4EE; box-shadow: inset 0 0 0 1.5px var(--primary); }
+.adm-matrix-titel {
+  all: unset; cursor: pointer; padding: 4px 6px; margin-left: -6px; border-radius: 8px;
+  font-size: 14.5px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); overflow-wrap: anywhere;
+}
+.adm-matrix-titel:hover { color: var(--primary); }
+.adm-matrix-titel:focus-visible { outline: 2px solid var(--primary); }
+.adm-matrix-mobielnr { display: none; }
+
+/* Een vakje: de opnames als pilletjes; leeg is een stippelvlak met een plus */
+.adm-vak { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; border-radius: 10px; transition: background 0.12s, box-shadow 0.12s; }
+.adm-vak[data-drag] { background: #FFF4EE; box-shadow: inset 0 0 0 1.5px var(--primary); }
+.adm-chip {
+  display: inline-flex; align-items: center; max-width: 100%; height: 28px; border-radius: 100px;
+  background: #F5F4F2; color: var(--ink); transition: background 0.12s;
+}
+.adm-chip:hover { background: #EFEDEA; }
+.adm-chip[data-speelt] { background: #FFE9DD; }
+.adm-chip-speel {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 22px; height: 22px; margin-left: 3px; padding: 0;
+  border: 0; border-radius: 50%; background: #fff; color: var(--primary); cursor: pointer; box-shadow: 0 1px 2px rgba(28,25,23,0.08);
+  transition: background 0.12s, color 0.12s, transform 0.12s var(--ease-out);
+}
+.adm-chip-speel:active { transform: scale(0.9); }
+.adm-chip[data-speelt] .adm-chip-speel { background: var(--primary); color: #fff; }
+.adm-chip-speel:disabled { color: #D6D3D1; box-shadow: none; cursor: default; }
+.adm-chip-speel:focus-visible, .adm-chip-label:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.adm-chip-label {
+  all: unset; box-sizing: border-box; min-width: 0; padding: 0 10px 0 7px; font-size: 12.5px; font-weight: 600; line-height: 28px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; border-radius: 100px;
+}
+.adm-chip[data-bezig] { width: 100%; max-width: 110px; background: #FFF4EE; }
+.adm-chip[data-bezig] .adm-chip-label { width: 100%; padding: 0 10px; cursor: default; }
+.adm-chip-balk { display: block; height: 5px; border-radius: 100px; background: #FBD9C6; overflow: hidden; }
+.adm-chip-balk span { display: block; height: 100%; background: var(--primary); transition: width 0.2s; }
+.adm-chip[data-fout] { background: #FEF2F2; color: #991B1B; }
+.adm-chip[data-fout] .adm-chip-label { padding-left: 10px; }
+
+.adm-vak-plus {
+  display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 24px; padding: 0; border: 0; border-radius: 8px;
+  background: transparent; color: var(--ink-3); cursor: pointer; opacity: 0; transition: opacity 0.12s, background 0.12s, color 0.12s;
+}
+.adm-vak-plus svg { width: 14px; height: 14px; }
+.adm-matrix-rij:hover .adm-vak-plus, .adm-vak-plus:focus-visible, .adm-vak[data-drag] .adm-vak-plus { opacity: 1; }
+.adm-vak-plus:hover { background: #FFF1EA; color: var(--primary); }
+.adm-vak-plus:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.adm-vak[data-leeg] .adm-vak-plus {
+  opacity: 1; width: 100%; height: 28px; border: 1.5px dashed #E2E0DD; color: #D6D3D1;
+}
+.adm-vak[data-leeg] .adm-vak-plus:hover, .adm-vak[data-leeg][data-drag] .adm-vak-plus { border-color: var(--primary); color: var(--primary); background: #FFF8F4; }
+@media (hover: none) { .adm-vak-plus { opacity: 1; } }
+
+/* Bestanden ergens anders op de pagina loslaten: een nieuw lied */
+.adm-sleep-laag {
+  position: fixed; inset: 0; z-index: 45; pointer-events: none; display: flex; align-items: flex-end; justify-content: center; padding: 32px;
+  background: rgba(243,106,42,0.06); box-shadow: inset 0 0 0 3px var(--primary); animation: adm-fade 0.15s ease-out;
+}
+.adm-sleep-laag span {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 100px;
+  background: var(--primary); color: #fff; font-size: 15px; font-weight: 700; box-shadow: 0 12px 32px -8px rgba(194,65,12,0.5);
+}
+
+/* De speler: onderin in beeld, ook als je verder scrolt */
+.adm-speler {
+  position: sticky; bottom: 16px; z-index: 6; margin-top: 16px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px;
+  padding: 10px 14px; border-radius: 16px; background: #161412; color: #fff;
+  box-shadow: 0 18px 48px -12px rgba(28,25,23,0.5); animation: adm-in 0.25s var(--ease-out) both;
+}
+.adm-speler .adm-icon-btn { color: rgba(255,255,255,0.7); }
+.adm-speler .adm-icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.adm-speler .adm-icon-btn:disabled { color: rgba(255,255,255,0.22); background: transparent; cursor: default; }
+.adm-speler-knoppen { display: flex; align-items: center; gap: 4px; }
+.adm-speler-speel {
+  display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; border: 0; border-radius: 50%;
+  background: var(--primary); color: #fff; cursor: pointer; transition: transform 0.12s var(--ease-out);
+}
+.adm-speler-speel:active { transform: scale(0.93); }
+.adm-speler-speel:focus-visible, .adm-speler .adm-icon-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.adm-speler-midden { min-width: 0; }
+.adm-speler-naam { margin: 0 0 4px; font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-speler-naam span { margin-right: 8px; color: var(--primary); font-variant-numeric: tabular-nums; }
+.adm-speler-tijd { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); font-variant-numeric: tabular-nums; }
+.adm-speler-tijd input { flex: 1; min-width: 0; height: 16px; margin: 0; accent-color: var(--primary); cursor: pointer; }
+.adm-speler-acties { display: flex; align-items: center; gap: 4px; }
+.adm-speler .adm-btn--ghost { background: rgba(255,255,255,0.1); border-color: transparent; color: #fff; }
+.adm-speler .adm-btn--ghost:hover { background: rgba(255,255,255,0.16); }
+
+/* Vensters: een lied (met nieuwe opnames) en één opname */
+.adm-lied-velden { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 14px; }
+.adm-lied-velden .adm-field + .adm-field { margin-top: 0; }
+.adm-input--nummer { font-variant-numeric: tabular-nums; font-weight: 700; }
+.adm-input--klein { padding: 7px 10px; font-weight: 600; }
+.adm-lied-drop {
+  all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+  padding: 18px; border: 1.5px dashed #D6D3D1; border-radius: 14px; background: #FCFBFA; color: var(--ink-2); font-size: 14px; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.adm-lied-drop strong { color: var(--ink); }
+.adm-lied-drop svg { color: var(--primary); flex-shrink: 0; }
+.adm-lied-drop:hover, .adm-lied-drop[data-drag] { border-color: var(--primary); background: #FFF8F4; }
+.adm-lied-drop:focus-visible, .adm-lied-drop:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
+.adm-lied-drop:disabled, .adm-lied-drop[data-disabled] { opacity: 0.6; cursor: not-allowed; }
+
+.adm-wachtrij { list-style: none; margin: 14px 0 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; }
+.adm-wachtrij li { display: grid; grid-template-columns: minmax(0, 1fr) 140px auto; align-items: start; gap: 10px; padding: 10px; }
+.adm-wachtrij li + li { border-top: 1px solid var(--line-soft); }
+.adm-wachtrij li[data-fout] { background: #FFFBFB; }
+.adm-wachtrij-tekst { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adm-wachtrij-tekst .adm-progress { margin-top: 2px; }
+.adm-wachtrij-tekst .adm-err { margin: 0; }
+.adm-wachtrij-meta { font-size: 12px; font-weight: 600; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-wachtrij-stem .adm-input { padding-top: 7px; padding-bottom: 7px; }
+.adm-wachtrij-stem[data-leeg] .adm-input { border-color: var(--primary); color: #C2410C; }
+
+/* Smaller (laptop met smal venster, tablet, telefoon): elk lied als kaart met de stemmen eronder */
+@container (max-width: 860px) {
+  .adm-matrix { background: none; border: 0; display: flex; flex-direction: column; gap: 10px; }
+  .adm-matrix-kop { display: none; }
+  .adm-matrix-rij {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 10px; padding: 12px 14px 14px;
+    background: #fff; border: 1px solid var(--line); border-radius: 16px !important;
+  }
+  .adm-matrix-rij + .adm-matrix-rij { border-top: 1px solid var(--line); }
+  .adm-matrix-rij > * { padding: 0; }
+  .adm-matrix-nr { display: none; }
+  .adm-matrix-lied { grid-column: 1 / -1; padding: 0 0 4px; }
+  .adm-matrix-titel { font-size: 16px; }
+  .adm-matrix-mobielnr { display: inline; margin-right: 10px; color: var(--primary); font-family: var(--font-display), var(--font-manrope), sans-serif; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .adm-matrix-rij[data-geen-nummer] .adm-matrix-mobielnr { display: none; }
+  .adm-vak { padding: 8px; background: #FAF9F7; }
+  .adm-vak::before { content: attr(data-stem); font-size: 11.5px; font-weight: 700; color: var(--ink-2); margin-bottom: 2px; }
+  .adm-vak-plus { opacity: 1; }
+}
+@container (max-width: 520px) {
+  .adm-matrix-rij { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Alleen op een telefoon */
+.adm-matrix-uitklap, .adm-matrix-meer { display: none; }
+
+/* Telefoon: een rustige lijst; tik op een lied en het klapt open met per stem een regel */
+@media (max-width: 760px) {
+  .adm-matrix { gap: 8px; }
+  .adm-matrix-rij { display: block; padding: 0; overflow: hidden; }
+  .adm-matrix-rij:hover { background: #fff; }
+  .adm-matrix-lied { padding: 0; }
+  .adm-matrix-titel { display: none; }
+  .adm-matrix-uitklap {
+    all: unset; box-sizing: border-box; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto 18px; align-items: center; gap: 10px;
+    width: 100%; min-height: 60px; padding: 10px 14px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .adm-matrix-uitklap:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; border-radius: 16px; }
+  .adm-matrix-uitklap-nr { font-family: var(--font-display), var(--font-manrope), sans-serif; font-size: 15px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
+  .adm-matrix-rij[data-geen-nummer] .adm-matrix-uitklap-nr { color: var(--ink-3); }
+  .adm-matrix-uitklap-titel { font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adm-matrix-pijl { color: var(--ink-3); transition: transform 0.2s var(--ease-out); }
+  .adm-matrix-uitklap[aria-expanded="true"] .adm-matrix-pijl { transform: rotate(180deg); }
+  .adm-stippen { display: flex; gap: 3px; }
+  .adm-stippen i {
+    display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; border-radius: 50%;
+    font-style: normal; font-size: 9.5px; font-weight: 800; color: #C9C5C1; box-shadow: inset 0 0 0 1.2px #E2E0DD;
+  }
+  .adm-stippen i[data-vol] { background: #FFF1EA; color: #C2410C; box-shadow: none; }
+
+  /* Dicht: alleen de regel; open: elke stem een regel met de opnames ernaast */
+  .adm-matrix-rij:not([data-open]) .adm-vak, .adm-matrix-rij:not([data-open]) .adm-matrix-meer { display: none; }
+  .adm-matrix-rij[data-open] .adm-matrix-uitklap { border-bottom: 1px solid var(--line-soft); }
+  .adm-matrix-rij[data-open] .adm-vak {
+    position: relative; display: flex; flex-flow: row wrap; align-items: center; gap: 6px; min-height: 54px;
+    padding: 10px 14px 10px 92px; border-radius: 0; background: none; animation: adm-in 0.22s var(--ease-out) both;
+  }
+  .adm-matrix-rij[data-open] .adm-vak + .adm-vak { border-top: 1px solid var(--line-soft); }
+  .adm-matrix-rij[data-open] .adm-vak::before { position: absolute; left: 14px; top: 19px; margin: 0; font-size: 13px; }
+  .adm-matrix-rij[data-open] .adm-vak[data-leeg] .adm-vak-plus { flex: 1; }
+  .adm-matrix-rij[data-open] .adm-vak[data-drag] { background: #FFF4EE; }
+  .adm-matrix-meer { display: block; padding: 12px 14px 14px; border-top: 1px solid var(--line-soft); }
+  .adm-matrix-meer .adm-btn { width: 100%; }
+
+  .adm-speler { grid-template-columns: auto minmax(0, 1fr); gap: 10px 12px; bottom: 8px; margin-left: -8px; margin-right: -8px; }
+  .adm-speler-knoppen .adm-icon-btn { display: none; }
+  .adm-speler-acties { grid-column: 1 / -1; justify-content: space-between; }
+  .adm-wachtrij li { grid-template-columns: minmax(0, 1fr) auto; }
+  .adm-wachtrij-stem { grid-column: 1; grid-row: 2; }
+  .adm-chip, .adm-vak[data-leeg] .adm-vak-plus { height: 34px; }
+  .adm-chip-speel { width: 28px; height: 28px; }
+  .adm-chip-label { line-height: 34px; font-size: 13px; }
+  .adm-vak-plus { width: 34px; height: 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adm-speler, .adm-sleep-laag { animation: none; }
+}
+
+/* Een opname verslepen (useSleep.ts) */
+.adm-chip { touch-action: manipulation; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+.adm-chip-label { cursor: grab; }
+.adm-chip[data-gesleept] { opacity: 0.35; }
+.adm-chip[data-onderweg] { opacity: 0.6; animation: adm-pop-in 0.2s var(--ease-out); }
+.adm-sleept, .adm-sleept * { cursor: grabbing !important; user-select: none !important; -webkit-user-select: none !important; }
+.adm-sleept .adm-vak-plus { opacity: 1; }
+.adm-sleept .adm-matrix-rij:not([data-open]) .adm-matrix-lied[data-drag] { background: #FFF4EE; }
+.adm-sleep-chip {
+  position: fixed; left: 0; top: 0; z-index: 80; pointer-events: none; display: flex; flex-direction: column; gap: 2px;
+  max-width: 260px; margin: 14px 0 0 14px; padding: 8px 12px; border-radius: 12px; background: #161412; color: #fff;
+  box-shadow: 0 14px 36px -8px rgba(28,25,23,0.55); animation: adm-pop-in 0.15s var(--ease-out);
+}
+.adm-sleep-chip strong { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-sleep-chip span { font-size: 12px; font-weight: 600; color: var(--primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (pointer: coarse) { .adm-sleep-chip { margin: -76px 0 0 -40px; } }
