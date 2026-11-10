@@ -136,7 +136,7 @@
     background: rgba(255,251,248,0.97); border-radius: 20px 20px 0 0; border-bottom: 1px solid rgba(0,0,0,0.07);
   }
   /* Zes tabbladen (vijf stemmen en Compleet): twee rijen van drie, het aantal ernaast */
-  .stemtabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 4px; padding: 4px; }
+  .stemtabs { display: grid; grid-template-columns: repeat(var(--kolommen, 3), minmax(0, 1fr)); width: 100%; gap: 4px; padding: 4px; }
   .stemtab {
     justify-content: center; gap: 6px; min-height: 46px; padding: 6px 4px;
     font-size: 15px; font-weight: 600; color: #4a4a4a;
@@ -216,4 +216,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ln-meer, .ln-meer-achter, .ln-tab-icoon { transition: none; }
+}
+
+@media (max-width: 760px) {
+  .lezer { padding: 20px 18px 26px; font-size: 17px; }
 }

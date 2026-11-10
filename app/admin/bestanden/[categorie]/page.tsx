@@ -21,6 +21,7 @@ export default async function CategoriePage({ params, searchParams }: {
 
   const items = await Promise.all((data ?? []).map(async ({ r2_key, ...b }) => ({
     ...b,
+    ext: r2_key.split(".").pop()!.toLowerCase(),
     url: r2_key ? await downloadUrl(r2_key) : null,
   })));
 

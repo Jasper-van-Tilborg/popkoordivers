@@ -6,7 +6,7 @@ import { Keuze } from "../_components/velden";
 import { Werkblad, kiesMetSchuif } from "../_components/Werkblad";
 import { uploadNaarR2 } from "../_components/upload";
 import { bestandToevoegen, verwijderBestand, wijzigBestand, type BestandInput } from "./actions";
-import { CATEGORIEEN, categorie as vind, type CategorieId } from "./categorieen";
+import { CATEGORIEEN, MET_LIEDNUMMER, categorie as vind, type CategorieId } from "./categorieen";
 
 // Opnames hebben een eigen pagina (bestanden/opnames)
 const ANDERE = CATEGORIEEN.filter((c) => c.id !== "opnames");
@@ -15,9 +15,14 @@ interface Bestand {
   id: number;
   naam: string;
   categorie: string;
+  liednummer: number | null;
+  ext: string;
   created_at: string;
   url: string | null;
 }
+
+const nr = (n: number | null | undefined) => (n ? String(n).padStart(3, "0") : "");
+const SOORT: Record<string, string> = { mp4: "Video", mp3: "Geluid", m4a: "Geluid", pdf: "PDF", docx: "Word", doc: "Word" };
 
 const datumTekst = (s: string) => new Date(s).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
 
@@ -31,6 +36,7 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
   const [file, setFile]           = useState<File | null>(null);
   const [naam, setNaam]           = useState(bestand?.naam ?? "");
   const [categorie, setCategorie] = useState(bestand?.categorie ?? standaardCategorie);
+  const [nummer, setNummer]       = useState(nr(bestand?.liednummer));
   const [voortgang, setVoortgang] = useState<number | null>(null);
   const [fout, setFout]           = useState("");
   const [busy, setBusy]           = useState<"save" | "delete" | null>(null);
@@ -45,7 +51,7 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
   async function save() {
     if (!bestand && !file) { setFout("Kies een bestand."); return; }
     if (!naam.trim()) { setFout("Geef het bestand een naam."); return; }
-    const input: BestandInput = { naam, categorie, stemgroep: null, liednummer: null };
+    const input: BestandInput = { naam, categorie, stemgroep: null, liednummer: nummer.trim() ? Number(nummer) : null };
 
     setBusy("save");
     setFout("");
@@ -139,6 +145,12 @@ function BestandDrawer({ bestand, standaardCategorie, onClose, onDone, acties }:
             <Keuze id="bs-cat" value={categorie} onChange={setCategorie} opties={ANDERE.map((c) => ({ value: c.id, label: c.label }))} />
             <p className="adm-hint">Een andere categorie verplaatst het bestand naar die pagina.</p>
           </div>
+          {MET_LIEDNUMMER.includes(categorie) && (
+            <div className="adm-field">
+              <label htmlFor="bs-nr">Liednummer</label>
+              <input id="bs-nr" className="adm-input adm-input--nummer" inputMode="numeric" value={nummer} onChange={(e) => setNummer(e.target.value.replace(/\D/g, "").slice(0, 3))} />
+            </div>
+          )}
         </div>
       </section>
     </Drawer>
@@ -164,7 +176,10 @@ export default function BestandenClient({ categorie, items, loadError, startNieu
 
   const groepen = useMemo(() => {
     const q = zoek.trim().toLowerCase();
-    const lijst = items.filter((b) => !q || b.naam.toLowerCase().includes(q));
+    const lijst = items
+      .filter((b) => !q || `${nr(b.liednummer)} ${b.naam}`.toLowerCase().includes(q))
+      // Met liednummer: hoogste nummer bovenaan, zoals in de ledenomgeving
+      .sort((a, b) => (b.liednummer ?? 0) - (a.liednummer ?? 0));
     return lijst.length ? [{ titel: null as string | null, items: lijst }] : [];
   }, [items, zoek]);
 
@@ -186,8 +201,8 @@ export default function BestandenClient({ categorie, items, loadError, startNieu
             {g.items.map((b) => (
               <li key={b.id} data-id={String(b.id)} data-gekozen={gekozen === String(b.id) || undefined} className="adm-row adm-row--plain" onClick={() => kies(String(b.id))}>
                 <div className="adm-main-col">
-                  <button className="adm-title" onClick={(e) => { e.stopPropagation(); kies(String(b.id)); }}>{b.naam}</button>
-                  <div className="adm-meta"><span>{datumTekst(b.created_at)}</span></div>
+                  <button className="adm-title" onClick={(e) => { e.stopPropagation(); kies(String(b.id)); }}>{b.liednummer ? `${nr(b.liednummer)} ` : ""}{b.naam}</button>
+                  <div className="adm-meta">{SOORT[b.ext] && <span>{SOORT[b.ext]}</span>}<span>{datumTekst(b.created_at)}</span></div>
                 </div>
               </li>
             ))}

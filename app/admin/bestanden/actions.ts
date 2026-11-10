@@ -5,7 +5,7 @@ import { requireBeheer } from "@/lib/auth";
 import { logActiviteit } from "@/lib/activiteit";
 import { deleteFile } from "@/lib/r2";
 import type { Database } from "@/lib/database.types";
-import { MET_STEMGROEP } from "./categorieen";
+import { MET_LIEDNUMMER, MET_STEMGROEP } from "./categorieen";
 
 type Stemgroep = Database["public"]["Enums"]["stemgroep_type"];
 
@@ -40,7 +40,7 @@ export async function bestandToevoegen(key: string, input: BestandInput) {
     naam: input.naam.trim(),
     categorie: input.categorie,
     stemgroep: MET_STEMGROEP.includes(input.categorie) ? input.stemgroep : null,
-    liednummer: MET_STEMGROEP.includes(input.categorie) ? input.liednummer : null,
+    liednummer: MET_LIEDNUMMER.includes(input.categorie) ? input.liednummer : null,
     r2_key: key,
   }).select("id").single();
   if (error) {
@@ -62,7 +62,7 @@ export async function wijzigBestand(id: number, input: BestandInput) {
     naam: input.naam.trim(),
     categorie: input.categorie,
     stemgroep: MET_STEMGROEP.includes(input.categorie) ? input.stemgroep : null,
-    liednummer: MET_STEMGROEP.includes(input.categorie) ? input.liednummer : null,
+    liednummer: MET_LIEDNUMMER.includes(input.categorie) ? input.liednummer : null,
   }).eq("id", id);
   if (error) return { error: error.message };
   await logActiviteit(sessie, "gewijzigd", "bestand", { id, naam: input.naam.trim() });

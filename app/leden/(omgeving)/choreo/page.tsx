@@ -1,23 +1,23 @@
-import { IconSparkle } from "@/components/icons";
 import { Kop, Sectie } from "../Kop";
-import { bestanden } from "../data";
+import StemTabs from "../components/StemTabs";
+import { bestandenLijst } from "../data";
+
+const TABS = ["Video's", "Beschrijvingen"];
 
 export default async function ChoreoPage() {
-  const items = await bestanden(["choreo"]);
+  const items = await bestandenLijst(["choreo"]);
+
+  // De video's apart van de uitgeschreven bewegingen (Word, PDF)
+  const lijst = (video: boolean) => items
+    .filter((b) => (b.ext === "mp4") === video)
+    .map((b) => ({ id: b.id, titel: b.naam, nummer: b.liednummer, ext: b.ext }));
+
   return (
     <>
-      <Kop titel="Choreografie" tekst="De choreografie van de nummers." />
+      <Kop titel="Choreografie" />
       <Sectie>
-        <div className="leden-kaart" style={{ overflow: "hidden" }}>
-          {items.length === 0 ? (
-            <p className="leden-leeg" style={{ padding: "18px 22px" }}>Binnenkort beschikbaar.</p>
-          ) : items.map((b) => (
-            <a key={b.id} href={b.url} target="_blank" rel="noopener" className="leden-row">
-              <span className="leden-row__icon" style={{ background: "rgba(14,165,233,0.10)", color: "#0ea5e9" }}><IconSparkle size={13} /></span>
-              <span className="leden-row__title">{b.naam}</span>
-              <span className="leden-row__action">Bekijken</span>
-            </a>
-          ))}
+        <div className="leden-kaart leden-opnames">
+          <StemTabs liedjes={{ [TABS[0]]: lijst(true), [TABS[1]]: lijst(false) }} tabs={TABS} wat="choreografie" />
         </div>
       </Sectie>
     </>

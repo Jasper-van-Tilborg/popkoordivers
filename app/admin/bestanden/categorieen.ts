@@ -10,5 +10,8 @@ export const CATEGORIEEN = [
 // Bij deze categorieën hoort elk bestand bij een stemgroep (of bij het hele koor)
 export const MET_STEMGROEP: readonly string[] = ["opnames"];
 
+// Bij deze categorieën hoort een bestand bij een liednummer uit de map van het koor
+export const MET_LIEDNUMMER: readonly string[] = ["opnames", "choreo"];
+
 export type CategorieId = (typeof CATEGORIEEN)[number]["id"];
 export const categorie = (id: string) => CATEGORIEEN.find((c) => c.id === id);

@@ -523,3 +523,26 @@ html[data-vt="leden-links"]::view-transition-new(leden-pagina) { animation-name:
 }
 .lied-download:hover { border-color: rgba(243,106,42,0.45); color: var(--oranje-tekst); background: rgba(243,106,42,0.06); }
 .lied-download:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+/* Een document (Word) lezen in het venster van de speler: de tekst scrollt, de kop blijft staan */
+.speler[data-document][open] { display: flex; flex-direction: column; width: min(760px, calc(100vw - 32px)); }
+.speler[data-document] .speler-kop { flex-shrink: 0; }
+.lezer { overflow-y: auto; overscroll-behavior: contain; padding: 26px 32px 32px; font-size: 17px; line-height: 1.6; color: #222; }
+.lezer > :first-child { margin-top: 0; }
+.lezer p { margin: 0 0 0.6em; min-height: 0.6em; }
+.lezer h1, .lezer h2, .lezer h3 { margin: 1.2em 0 0.4em; font-size: 19px; font-weight: 800; color: #111; }
+.lezer ul, .lezer ol { margin: 0 0 0.8em; padding-left: 1.4em; }
+.lezer ul { list-style: disc; }
+.lezer ol { list-style: decimal; }
+.lezer table { border-collapse: collapse; margin: 0 0 1em; width: 100%; }
+.lezer td, .lezer th { border: 1px solid #E6E1DA; padding: 6px 10px; vertical-align: top; }
+.lezer td p, .lezer th p { margin: 0 0 0.3em; }
+.lezer img { max-width: 100%; height: auto; }
+.lezer a { color: var(--oranje-tekst); text-decoration: underline; }
+.lezer--laden { display: flex; flex-direction: column; gap: 12px; }
+.lezer--laden span { height: 14px; border-radius: 7px; background: #F1EEEA; animation: lezer-puls 1.2s ease-in-out infinite; }
+.lezer--laden span:nth-child(2) { width: 85%; }
+.lezer--laden span:nth-child(3) { width: 92%; }
+.lezer--laden span:nth-child(4) { width: 60%; }
+@keyframes lezer-puls { 50% { opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .lezer--laden span { animation: none; } }

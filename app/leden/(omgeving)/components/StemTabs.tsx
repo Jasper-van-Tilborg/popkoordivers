@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { bestandDownload, bestandUrl } from "../actions";
+import { bestandDownload, bestandTekst, bestandUrl } from "../actions";
+import Lezer from "./Lezer";
 import Speler from "./Speler";
 
-// Compleet: de opnames voor het hele koor, net als op de oude site een eigen tabblad
-const stemgroepen = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas", "Compleet"] as const;
-type Stemgroep = (typeof stemgroepen)[number];
+// Compleet: de opnames voor het hele koor, net als op de oude site een eigen tabblad.
+// Andere lijsten (zoals Choreografie) geven hun eigen tabbladen mee.
+const stemgroepen = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas", "Compleet"];
 
 interface Lied {
   id: number;
@@ -81,23 +82,28 @@ function Sorteer({ waarde, kies }: { waarde: Sortering; kies: (s: Sortering) => 
 // Zoeken zonder op hoofdletters of accenten te letten
 const gewoon = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-// Wat de browser kan afspelen, speelt op de pagina af; de rest (pdf, wma) opent als bestand.
+// Zoveel mogelijk op de site zelf: geluid en video in de speler, een Word-bestand (docx)
+// als tekst in hetzelfde venster. De rest (pdf, wma, oude .doc) opent als bestand.
 const AUDIO = ["mp3", "m4a", "wav", "ogg", "aac"];
-const soort = (ext?: string) => ext === "pdf" ? "pdf" : AUDIO.includes(ext ?? "") ? "audio" : ext === "mp4" ? "video" : "anders";
+const soort = (ext?: string) => ext === "pdf" ? "pdf" : AUDIO.includes(ext ?? "") ? "audio" : ext === "mp4" ? "video" : ext === "docx" ? "word" : "anders";
 // Een mp4 kan video zijn of alleen geluid; de speler ziet dat pas bij het openen
-const KNOP = { pdf: "PDF ↓", audio: "Luisteren", video: "Afspelen", anders: "Openen" };
+const KNOP = { pdf: "PDF ↓", audio: "Luisteren", video: "Afspelen", word: "Lezen", anders: "Openen" };
 // Op de telefoon staat alleen het icoon in de knop (de hele rij is klikbaar)
-const pad = (d: string) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="lied-knop-icoon">{d === "play" ? <path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12.2-7.4a1 1 0 0 0 0-1.72L8.5 3.74A1 1 0 0 0 7 4.6z" fill="currentColor" stroke="none" /> : <path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14" />}</svg>;
-const ICOON = { pdf: pad("omlaag"), audio: pad("play"), video: pad("play"), anders: pad("omlaag") };
+const pad = (d: string) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="lied-knop-icoon">{d === "play" ? <path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12.2-7.4a1 1 0 0 0 0-1.72L8.5 3.74A1 1 0 0 0 7 4.6z" fill="currentColor" stroke="none" /> : d === "lees" ? <path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6" /> : <path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14" />}</svg>;
+const ICOON = { pdf: pad("omlaag"), audio: pad("play"), video: pad("play"), word: pad("lees"), anders: pad("omlaag") };
 
 interface Props {
   liedjes: Record<string, Lied[]>;
   // De stemgroep van het lid zelf; daar opent de lijst mee
   begin?: string | null;
+  // De tabbladen, standaard de stemgroepen
+  tabs?: readonly string[];
+  // Wat er in de lijst staat, voor de tekst als er niets is: "opnames"
+  wat?: string;
 }
 
-export default function StemTabs({ liedjes, begin }: Props) {
-  const [active, setActive] = useState<Stemgroep>(stemgroepen.find((s) => s === begin) ?? "Sopraan");
+export default function StemTabs({ liedjes, begin, tabs: tabbladen = stemgroepen, wat = "opnames" }: Props) {
+  const [active, setActive] = useState(tabbladen.find((s) => s === begin) ?? tabbladen[0]);
   const [gekozenPagina, setPagina] = useState(0);
   const [perPagina, setPerPagina] = useState(10);
   const [zoek, setZoek] = useState("");
@@ -119,6 +125,7 @@ export default function StemTabs({ liedjes, begin }: Props) {
   const speler = useRef<HTMLDialogElement>(null);
   const [speelt, setSpeelt] = useState<{ lied: Lied; url: string | null; alleenGeluid?: boolean } | null>(null);
   const toontBeeld = !!speelt && soort(speelt.lied.ext) === "video" && !speelt.alleenGeluid;
+  const [leest, setLeest] = useState<{ lied: Lied; html: string | null } | null>(null);
   const [fout, setFout] = useState("");
 
   // Zoveel opnames per pagina dat de hele lijst, met de knoppen eronder, in één
@@ -162,9 +169,9 @@ export default function StemTabs({ liedjes, begin }: Props) {
     return () => window.removeEventListener("resize", zet);
   }, [active]);
 
-  function kiesStem(stem: Stemgroep) {
+  function kiesStem(stem: string) {
     if (stem === active) return;
-    setRichting(stemgroepen.indexOf(stem) > stemgroepen.indexOf(active) ? "rechts" : "links");
+    setRichting(tabbladen.indexOf(stem) > tabbladen.indexOf(active) ? "rechts" : "links");
     setActive(stem);
     setPagina(0);
   }
@@ -193,11 +200,23 @@ export default function StemTabs({ liedjes, begin }: Props) {
   // De link is een uur geldig en wordt pas bij openen opgehaald
   async function speel(lied: Lied) {
     setFout("");
+    setLeest(null);
     setSpeelt({ lied, url: null });
     speler.current?.showModal();
     const url = await bestandUrl(lied.id);
     if (!url) { speler.current?.close(); setFout("Dit bestand kon niet worden geopend. Log opnieuw in en probeer het nog eens."); return; }
     setSpeelt((s) => (s?.lied.id === lied.id ? { lied, url } : s));
+  }
+
+  // Het document als tekst op de pagina; lukt dat niet, dan gewoon downloaden
+  async function lees(lied: Lied) {
+    setFout("");
+    setSpeelt(null);
+    setLeest({ lied, html: null });
+    speler.current?.showModal();
+    const html = await bestandTekst(lied.id).catch(() => null);
+    if (html === null) { speler.current?.close(); download(lied); return; }
+    setLeest((l) => (l?.lied.id === lied.id ? { lied, html } : l));
   }
 
   // De link vraagt de browser het bestand op te slaan; de pagina blijft staan
@@ -220,9 +239,9 @@ export default function StemTabs({ liedjes, begin }: Props) {
   return (
     <div ref={lijst} className="stemtabs-blok">
       <div className="stemtabs-balk">
-        <div ref={tabs} role="tablist" className="stemtabs stemtabs--vlak">
+        <div ref={tabs} role="tablist" className="stemtabs stemtabs--vlak" style={{ "--kolommen": Math.min(tabbladen.length, 3) } as React.CSSProperties}>
           <span ref={vlak} className="stemtab-vlak" aria-hidden="true" />
-          {stemgroepen.map((stem) => {
+          {tabbladen.map((stem) => {
             const aantal = (liedjes[stem] ?? []).filter(past).length;
             return (
               <button key={stem} role="tab" aria-selected={active === stem} onClick={() => kiesStem(stem)} className="stemtab">
@@ -245,7 +264,7 @@ export default function StemTabs({ liedjes, begin }: Props) {
       {fout && <p className="liedjes-fout" role="alert">{fout}</p>}
 
       {huidigeLiedjes.length === 0 ? (
-        <p className="liedjes-leeg">{zoek.trim() ? `Geen opnames gevonden voor "${zoek.trim()}" bij ${active}.` : "Nog geen opnames toegevoegd."}</p>
+        <p className="liedjes-leeg">{zoek.trim() ? `Geen ${wat} gevonden voor "${zoek.trim()}" bij ${active}.` : `Nog geen ${wat} toegevoegd.`}</p>
       ) : (
         <div key={`${active}-${pagina}`} className="liedjes" data-richting={richting ?? undefined}>
           {zichtbaar.map((lied, i) => {
@@ -260,7 +279,7 @@ export default function StemTabs({ liedjes, begin }: Props) {
                   <button type="button" className="lied-download" aria-label={`Downloaden: ${lied.titel}`} title="Downloaden" onClick={() => download(lied)}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
                   </button>
-                  <button type="button" className="lied-pdf" aria-label={`${KNOP[s].replace(" ↓", "")}: ${lied.titel}`} onClick={() => (s === "audio" || s === "video" ? speel(lied) : open(lied))}>
+                  <button type="button" className="lied-pdf" aria-label={`${KNOP[s].replace(" ↓", "")}: ${lied.titel}`} onClick={() => (s === "audio" || s === "video" ? speel(lied) : s === "word" ? lees(lied) : open(lied))}>
                     {ICOON[s]}<span className="lied-knop-tekst">{KNOP[s]}</span>
                   </button>
                 </div>
@@ -278,13 +297,14 @@ export default function StemTabs({ liedjes, begin }: Props) {
         </nav>
       )}
 
-      {/* Sluiten haalt de speler weg, dan stopt het geluid ook */}
+      {/* Sluiten haalt de speler (of het document) weg, dan stopt het geluid ook */}
       <dialog
         ref={speler}
         className="speler"
         data-video={toontBeeld ? "" : undefined}
-        aria-label={speelt?.lied.titel}
-        onClose={() => setSpeelt(null)}
+        data-document={leest ? "" : undefined}
+        aria-label={(speelt ?? leest)?.lied.titel}
+        onClose={() => { setSpeelt(null); setLeest(null); }}
         onClick={(e) => { if (e.target === e.currentTarget) e.currentTarget.close(); }}
       >
         {speelt && (
@@ -296,6 +316,15 @@ export default function StemTabs({ liedjes, begin }: Props) {
             video={toontBeeld}
             onSluit={() => speler.current?.close()}
             onGeenBeeld={() => setSpeelt((s) => (s ? { ...s, alleenGeluid: true } : s))}
+          />
+        )}
+        {leest && (
+          <Lezer
+            key={leest.lied.id}
+            kop={leest.lied.titel}
+            details={leest.lied.nummer ? `Liednummer ${nr(leest.lied.nummer)}` : undefined}
+            html={leest.html}
+            onSluit={() => speler.current?.close()}
           />
         )}
       </dialog>
