@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getPublicUrl } from "@/lib/r2";
 import VideoSpeler from "@/components/VideoSpeler";
 import AlbumCard from "./AlbumCard";
+import Link from "next/link";
+import { ALBUM_SOORTEN } from "@/lib/albumsoorten";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +15,13 @@ export const dynamic = "force-dynamic";
 const datumTekst = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
 
-export default async function MediaPage() {
+export default async function MediaPage({ searchParams }: { searchParams: Promise<{ soort?: string }> }) {
+  const { soort: gevraagd } = await searchParams;
   const supabase = await createClient();
 
   // Albums uit albums tabel, met eerste impressies-foto als cover
   const [{ data: albumsData }, { data: videosData }] = await Promise.all([
-    supabase.from("albums").select("id, slug, titel, datum, volgorde")
+    supabase.from("albums").select("id, slug, titel, datum, volgorde, soort")
       .order("datum_sorteer", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
     // Alleen openbare video's (RLS); die van een album staan ook op de albumpagina
     supabase.from("videos").select("id, titel, datum, youtube_id, r2_key").eq("openbaar", true)
@@ -42,7 +45,12 @@ export default async function MediaPage() {
     })
   );
 
-  const visibleAlbums = albums.filter((a) => a.photos.length > 0);
+  const metFotos = albums.filter((a) => a.photos.length > 0);
+  // Filteren op soort (vanaf Over ons: optredens, groepsfoto's, repetities). Is er
+  // van die soort nog niets openbaar, dan gewoon alles.
+  const soorten = ALBUM_SOORTEN.filter((s) => metFotos.some((a) => a.soort === s.value));
+  const soort = soorten.find((s) => s.value === gevraagd)?.value ?? null;
+  const visibleAlbums = soort ? metFotos.filter((a) => a.soort === soort) : metFotos;
   const isEmpty = visibleAlbums.length === 0 && videos.length === 0;
 
   return (
@@ -79,6 +87,16 @@ export default async function MediaPage() {
               </Reveal>
             ) : (
               <>
+                {soorten.length > 1 && (
+                  <nav aria-label="Soort foto's" className="media-filter">
+                    {[{ value: null, meervoud: "Alles" }, ...soorten].map((s) => (
+                      <Link key={s.value ?? "alles"} href={s.value ? `/media?soort=${s.value}` : "/media"} scroll={false}
+                        aria-current={soort === s.value ? "page" : undefined}>
+                        {s.meervoud}
+                      </Link>
+                    ))}
+                  </nav>
+                )}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }} className="media-grid">
                   {visibleAlbums.map((album, i) => (
                     <Reveal key={album.id} delay={Math.min(i % 3, 2) * 60}>
@@ -86,7 +104,7 @@ export default async function MediaPage() {
                     </Reveal>
                   ))}
                 </div>
-                {videos.length > 0 && (
+                {!soort && videos.length > 0 && (
                   <>
                     <h2 id="videos" style={{ fontSize: "clamp(26px, 3vw, 36px)", fontWeight: 800, letterSpacing: "-1px", color: "#111", margin: "80px 0 24px" }}>Video&apos;s</h2>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }} className="media-grid">
@@ -113,6 +131,10 @@ export default async function MediaPage() {
       <Footer />
 
       <style>{`
+        .media-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
+        .media-filter a { padding: 9px 18px; border-radius: 100px; background: #FFF4EE; color: #111; font-size: 14px; font-weight: 700; text-decoration: none; transition: background 0.15s, color 0.15s; }
+        .media-filter a:hover { background: #FFE6D8; }
+        .media-filter a[aria-current="page"] { background: var(--primary); color: #fff; }
         @media (max-width: 900px) { .media-grid { grid-template-columns: 1fr 1fr !important; } }
         @media (max-width: 560px) { .media-grid { grid-template-columns: 1fr !important; } }
         @media (max-width: 640px) {

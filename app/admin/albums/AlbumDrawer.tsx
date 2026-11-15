@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { Drawer, DeleteButton, formatDatum, parseNlDatum } from "../_components/ui";
-import { Datum } from "../_components/velden";
+import { Datum, Keuze } from "../_components/velden";
+import { ALBUM_SOORTEN, type AlbumSoort } from "@/lib/albumsoorten";
 import type { AlbumInput } from "./actions";
 
 interface Props {
-  album: { titel: string; datum: string; totaal: number } | null;
+  album: { titel: string; datum: string; soort: string; totaal: number } | null;
   onClose: () => void;
   onSave: (input: AlbumInput) => Promise<string | null>;
   onDelete?: () => Promise<string | null>;
@@ -16,6 +17,7 @@ interface Props {
 export default function AlbumDrawer({ album, onClose, onSave, onDelete, sluitend }: Props) {
   const [titel, setTitel] = useState(album?.titel ?? "");
   const [datum, setDatum] = useState(album ? parseNlDatum(album.datum) : "");
+  const [soort, setSoort] = useState<AlbumSoort>((album?.soort as AlbumSoort) ?? "optreden");
   const [errors, setErrors] = useState<Partial<Record<"titel" | "datum", string>>>({});
   const [serverErr, setServerErr] = useState("");
   const [busy, setBusy] = useState<"save" | "delete" | null>(null);
@@ -29,7 +31,7 @@ export default function AlbumDrawer({ album, onClose, onSave, onDelete, sluitend
 
     setBusy("save");
     setServerErr("");
-    const err = await onSave({ titel, datum: datum ? formatDatum(datum) : album!.datum, datumIso: datum });
+    const err = await onSave({ titel, datum: datum ? formatDatum(datum) : album!.datum, datumIso: datum, soort });
     setBusy(null);
     if (err) setServerErr(`Opslaan lukte niet: ${err}`);
   }
@@ -66,6 +68,10 @@ export default function AlbumDrawer({ album, onClose, onSave, onDelete, sluitend
           <label htmlFor="al-titel">Naam</label>
           <input id="al-titel" className="adm-input" value={titel} onChange={(e) => setTitel(e.target.value)} placeholder="bijv. Kerstconcert De Schakel" aria-invalid={!!errors.titel} />
           {errors.titel && <p className="adm-err">{errors.titel}</p>}
+        </div>
+        <div className="adm-field">
+          <label htmlFor="al-soort">Soort</label>
+          <Keuze<AlbumSoort> id="al-soort" value={soort} onChange={setSoort} opties={ALBUM_SOORTEN.map(({ value, label }) => ({ value, label }))} />
         </div>
         <div className="adm-field">
           <label htmlFor="al-datum">Datum</label>

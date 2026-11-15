@@ -96,6 +96,7 @@ export type Database = {
           datum_sorteer: string | null
           id: string
           slug: string
+          soort: string
           titel: string
           volgorde: number | null
         }
@@ -105,6 +106,7 @@ export type Database = {
           datum_sorteer?: string | null
           id?: string
           slug: string
+          soort?: string
           titel: string
           volgorde?: number | null
         }
@@ -114,6 +116,7 @@ export type Database = {
           datum_sorteer?: string | null
           id?: string
           slug?: string
+          soort?: string
           titel?: string
           volgorde?: number | null
         }
