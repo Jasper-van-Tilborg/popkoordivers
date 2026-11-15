@@ -91,14 +91,16 @@ export default async function WieIsWiePage() {
         ) : (
           <div className="smoelenboek-grid">
             {leden.map((l) => (
-              <div key={l.id} className="leden-kaart smoel">
-                <div className="leden-avatar smoel-avatar">
+              <figure key={l.id} className="leden-kaart smoel">
+                <div className="smoel-foto">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {l.foto ? <img src={l.foto} alt="" loading="lazy" /> : initialen(l.naam)}
+                  {l.foto ? <img src={l.foto} alt="" loading="lazy" /> : <span className="smoel-initialen">{initialen(l.naam)}</span>}
                 </div>
-                <p className="smoel-naam">{l.naam}</p>
-                {l.functie && <span className="smoel-functie">{l.functie}</span>}
-              </div>
+                <figcaption className="smoel-tekst">
+                  <p className="smoel-naam">{l.naam}</p>
+                  {l.functie && <span className="smoel-functie">{l.functie}</span>}
+                </figcaption>
+              </figure>
             ))}
           </div>
         )}
