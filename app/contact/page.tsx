@@ -307,7 +307,7 @@ export default function ContactPage() {
 
               {/* Right: repetitie info */}
               <Reveal delay={120}>
-                <p style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Repetities</p>
+                <p id="repetities" style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase", scrollMarginTop: "120px" }}>Repetities</p>
                 <RevealText text={`Elke ${dag}`} pageDelay={200} style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, letterSpacing: "-1px", color: "#111", margin: "0 0 28px" }} />
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>

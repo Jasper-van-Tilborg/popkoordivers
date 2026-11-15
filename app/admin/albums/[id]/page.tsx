@@ -11,7 +11,7 @@ export default async function AlbumAdminPage({ params, searchParams }: {
   const supabase = await createClient();
 
   const [{ data: album }, { data: fotos }, { data: videos }, { data: albums }] = await Promise.all([
-    supabase.from("albums").select("id, slug, titel, datum").eq("id", id).single(),
+    supabase.from("albums").select("id, slug, titel, datum, soort").eq("id", id).single(),
     supabase.from("fotos").select("id, r2_key, klein_key, impressies, bijschrift").eq("album_id", id).order("volgorde").order("created_at"),
     supabase.from("videos").select("id, titel, datum, album_id, youtube_id, r2_key, openbaar").eq("album_id", id).order("volgorde"),
     supabase.from("albums").select("id, titel, datum")

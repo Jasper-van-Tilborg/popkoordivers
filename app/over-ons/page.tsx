@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
 import { useInstellingen } from "@/components/InstellingenProvider";
+import { publiekeUrl } from "@/lib/publiek";
 
 const infographics = [
   { titel: "Swingend & veelstemmig", sub: "Vijf stemgroepen" },
@@ -13,10 +14,23 @@ const infographics = [
   { titel: "Enthousiast samen", sub: "Een hechte club" },
 ];
 
+// Foto's uit de impressies (openbare bucket); elke kaart gaat naar waar hij over gaat
 const sfeerItems = [
-  { gradient: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 100%)", label: "Repetitie", sub: "" },
-  { gradient: "linear-gradient(135deg, rgba(243,106,42,0.12) 0%, rgba(243,106,42,0.22) 100%)", label: "Optreden", sub: "Op het podium" },
-  { gradient: "linear-gradient(135deg, #FDE8D8 0%, rgba(243,106,42,0.08) 60%, rgba(243,106,42,0.18) 100%)", label: "Groepsfoto", sub: "Het hele koor" },
+  {
+    gradient: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 100%)", label: "Repetitie", sub: "",
+    foto: "albums/96b536a2-97cc-4e72-a2a0-17bf845980cc/klein/gp-AF1QipOm06E6f6NTpMx9py-Wvl7Y3aq5xSGYHsTxCcpg.jpg",
+    href: "/media?soort=repetitie",
+  },
+  {
+    gradient: "linear-gradient(135deg, rgba(243,106,42,0.12) 0%, rgba(243,106,42,0.22) 100%)", label: "Optreden", sub: "Op het podium",
+    foto: "albums/a58ddd47-f315-4d60-85bc-021ac431f6bc/klein/gp-AF1QipPLqnLsDrdVUjKPn3mO2HMgb2C4n7LAD0A1W9aJ.jpg",
+    href: "/media?soort=optreden",
+  },
+  {
+    gradient: "linear-gradient(135deg, #FDE8D8 0%, rgba(243,106,42,0.08) 60%, rgba(243,106,42,0.18) 100%)", label: "Groepsfoto", sub: "Het hele koor",
+    foto: "albums/9d98ab18-5a24-43b9-989d-8fa093882b2f/klein/wp-1973.jpg",
+    href: "/media?soort=groepsfoto",
+  },
 ];
 
 export default function OverOnsPage() {
@@ -235,7 +249,7 @@ export default function OverOnsPage() {
               {sfeerItems.map((item, i) => (
                 <Reveal key={item.label} delay={i * 100}>
                   <Link
-                    href="/media"
+                    href={item.href}
                     style={{
                       display: "block",
                       borderRadius: "20px",
@@ -246,6 +260,9 @@ export default function OverOnsPage() {
                     }}
                     className="card-hover"
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={publiekeUrl(item.foto)} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                      onError={(e) => { e.currentTarget.style.display = "none"; }} />
                     <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)" }} />
                     <div style={{ position: "absolute", top: "16px", left: "16px" }}>
                       <span

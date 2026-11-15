@@ -5,11 +5,13 @@ import { requireBeheer } from "@/lib/auth";
 import { logActiviteit } from "@/lib/activiteit";
 import { copyToPublic, deleteFile, downloadUrl } from "@/lib/r2";
 import { youtubeId } from "./youtube";
+import { isAlbumSoort, type AlbumSoort } from "@/lib/albumsoorten";
 
 export interface AlbumInput {
   titel: string;
   datum: string;     // "14 januari 2024"
   datumIso: string;  // "2024-01-14", voor het webadres
+  soort: AlbumSoort;
 }
 
 function slugify(s: string) {
@@ -31,6 +33,7 @@ export async function maakAlbum(input: AlbumInput) {
   const sessie = await requireBeheer();
   const { supabase } = sessie;
   if (!input.titel.trim() || !input.datum) return { error: "Titel en datum zijn verplicht." };
+  if (!isAlbumSoort(input.soort)) return { error: "Kies een soort." };
 
   const basis = slugify(`${input.titel}-${input.datumIso}`);
   const { data: bestaand } = await supabase.from("albums").select("slug").like("slug", `${basis}%`);
@@ -39,7 +42,7 @@ export async function maakAlbum(input: AlbumInput) {
   for (let n = 2; bezet.has(slug); n++) slug = `${basis}-${n}`;
 
   const { data, error } = await supabase
-    .from("albums").insert({ titel: input.titel.trim(), datum: input.datum, datum_sorteer: input.datumIso || null, slug }).select("id").single();
+    .from("albums").insert({ titel: input.titel.trim(), datum: input.datum, datum_sorteer: input.datumIso || null, soort: input.soort, slug }).select("id").single();
   if (error) return { error: error.message };
   await logActiviteit(sessie, "aangemaakt", "album", { id: data.id, naam: input.titel.trim() });
   vernieuw();
@@ -50,10 +53,11 @@ export async function wijzigAlbum(id: string, input: AlbumInput) {
   const sessie = await requireBeheer();
   const { supabase } = sessie;
   if (!input.titel.trim() || !input.datum) return { error: "Titel en datum zijn verplicht." };
+  if (!isAlbumSoort(input.soort)) return { error: "Kies een soort." };
   // Het webadres blijft gelijk, zodat links vanuit de agenda blijven werken.
   // Zonder nieuwe datum (een oud album met "april 2017") blijft de sorteerdatum staan
   const { error } = await supabase.from("albums")
-    .update({ titel: input.titel.trim(), datum: input.datum, ...(input.datumIso ? { datum_sorteer: input.datumIso } : {}) })
+    .update({ titel: input.titel.trim(), datum: input.datum, soort: input.soort, ...(input.datumIso ? { datum_sorteer: input.datumIso } : {}) })
     .eq("id", id);
   if (error) return { error: error.message };
   await logActiviteit(sessie, "gewijzigd", "album", { id, naam: input.titel.trim() });

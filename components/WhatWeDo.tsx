@@ -1,36 +1,39 @@
 "use client";
 
-import { useInstellingen } from "@/components/InstellingenProvider";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
+import { publiekeUrl } from "@/lib/publiek";
 
+// Echte video's en foto's van het koor (openbaar); elke kaart gaat naar de video of het album
 const media = [
   {
     gradient: "linear-gradient(135deg, rgba(220,38,38,0.12) 0%, rgba(243,106,42,0.06) 100%)",
     label: "YouTube",
-    href: "youtube",
-    title: "Jubileum 15 jaar",
-    sub: "Optreden VÓLkoren",
+    href: "https://www.youtube.com/watch?v=DaHfLWFo0F8",
+    foto: "https://i.ytimg.com/vi/DaHfLWFo0F8/hqdefault.jpg",
+    title: "Jubileumconcert 15 jaar",
+    sub: "1 en 2 april 2023",
   },
   {
     gradient: "linear-gradient(135deg, rgba(243,106,42,0.2) 0%, #FDE8D8 100%)",
     label: "Foto's",
-    href: "/media",
-    title: "Najaarsconcert 2025",
-    sub: "De Schakel, Gilze",
+    href: "/media/korenuitwisseling-molenschot-2023-11-25",
+    foto: publiekeUrl("albums/96b536a2-97cc-4e72-a2a0-17bf845980cc/klein/gp-AF1QipNJm93Jx83nOYq_ip605rhVV__m-RBkc9_7zpvZ.jpg"),
+    title: "Korenuitwisseling Molenschot",
+    sub: "25 november 2023",
   },
   {
     gradient: "linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(243,106,42,0.06) 100%)",
     label: "Backstage",
-    href: "/media",
-    title: "Repetitie",
-    sub: "Achter de schermen",
+    href: "/media/paradiso-korendagen-2024-01-14",
+    foto: publiekeUrl("albums/a58ddd47-f315-4d60-85bc-021ac431f6bc/klein/gp-AF1QipMOLQd-EM45T41mk80v8SrLwRYgF-oGfptMDzoa.jpg"),
+    title: "Achter de schermen",
+    sub: "Inzingen bij de Paradiso Korendagen",
   },
 ];
 
 export default function WhatWeDo() {
-  const { youtube } = useInstellingen();
   return (
     <section id="sfeer" className="sfeer-section" style={{ position: "relative", padding: "100px 24px 140px", overflow: "hidden", background: "#FFFFFF" }}>
       <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 100% 70% at 50% 50%, rgba(243,106,42,0.07) 0%, rgba(255,255,255,0) 70%)", pointerEvents: "none" }} />
@@ -58,7 +61,7 @@ export default function WhatWeDo() {
 
         {/* Media grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }} className="sfeer-grid">
-          {media.map((m) => ({ ...m, href: m.href === "youtube" ? youtube : m.href })).filter((m) => m.href).map((item, i) => (
+          {media.map((item, i) => (
             <Reveal key={item.title} delay={i * 100}>
               <Link
                 href={item.href}
@@ -66,6 +69,9 @@ export default function WhatWeDo() {
                 style={{ display: "block", borderRadius: "20px", overflow: "hidden", position: "relative", aspectRatio: "4/3", background: item.gradient }}
                 className="card-hover"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item.foto} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={(e) => { e.currentTarget.style.display = "none"; }} />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)" }} />
 
                 {/* Play/icon badge */}

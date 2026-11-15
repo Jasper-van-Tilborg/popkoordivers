@@ -81,7 +81,7 @@ function FotoVenster({ foto, nummer, aantal, sluitend, onClose, onBewaar, onVerw
 }
 
 export default function AlbumClient({ album, fotos, videos, albums, startTab }: {
-  album: { id: string; slug: string; titel: string; datum: string };
+  album: { id: string; slug: string; titel: string; datum: string; soort: string };
   fotos: Foto[];
   videos: Video[];
   albums: AlbumKeuze[];
@@ -342,7 +342,7 @@ export default function AlbumClient({ album, fotos, videos, albums, startTab }: 
       {toonBewerken && (
         <AlbumDrawer
           sluitend={sluitend}
-          album={{ titel: album.titel, datum: album.datum, totaal: lijst.length }}
+          album={{ titel: album.titel, datum: album.datum, soort: album.soort, totaal: lijst.length }}
           onClose={sluit}
           onSave={bewaar}
           onDelete={verwijderHeleAlbum}
