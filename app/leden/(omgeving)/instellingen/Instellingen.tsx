@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -14,8 +14,6 @@ export default function Instellingen({ weergave, account, beheer }: {
   const router = useRouter();
   const [groot, setGroot] = useState(weergave === "groot");
   const [bezig, setBezig] = useState(false);
-  // Staat zowel in het paneel als op de pagina: eigen id per keer
-  const label = useId();
 
   function zetGroot(aan: boolean) {
     setGroot(aan);
@@ -36,19 +34,19 @@ export default function Instellingen({ weergave, account, beheer }: {
     <div className="leden-instellingen">
       <section className="leden-kaart">
         <h2 className="leden-kaart-titel">Weergave</h2>
-        <div className="leden-instelling">
-          <span id={label} className="leden-instelling-naam">Grote letters en knoppen</span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={groot}
-            aria-labelledby={label}
-            className="leden-schakelaar"
-            onClick={() => zetGroot(!groot)}
-          >
+        {/* De hele rij is de schakelaar: ook een tik op de tekst zet hem om */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={groot}
+          className="leden-instelling leden-instelling--knop"
+          onClick={() => zetGroot(!groot)}
+        >
+          <span className="leden-instelling-naam">Grote letters en knoppen</span>
+          <span className="leden-schakelaar" aria-hidden="true">
             <span className="leden-schakelaar-bol" />
-          </button>
-        </div>
+          </span>
+        </button>
       </section>
 
       <section className="leden-kaart">

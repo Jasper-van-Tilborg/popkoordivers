@@ -34,6 +34,31 @@ export interface AgendaForm {
   gepubliceerd: boolean;
 }
 
+// Een tijd zoals hij getypt wordt netjes maken: "20u", "20.00", "2000" en "20 uur"
+// worden "20:00", "19.30-21.30" wordt "19:30 – 21:30". Wat niet als tijd te
+// lezen is ("zaal open 19:30"), blijft precies zoals het getypt is.
+function leesTijd(s: string): string | null {
+  const t = s.trim().toLowerCase().replace(/\s*(uur|u|h)$/, "");
+  const m = t.match(/^(\d{1,2})(?:\s*[:.hu]\s*(\d{2}))?$/) ?? t.match(/^(\d{1,2})(\d{2})$/);
+  if (!m) return null;
+  const uur = Number(m[1]), min = Number(m[2] ?? 0);
+  return uur < 24 && min < 60 ? `${uur}:${String(min).padStart(2, "0")}` : null;
+}
+export function normaliseerTijd(s: string) {
+  const delen = s.trim().split(/\s*(?:-|–|—|\btot\b)\s*/i);
+  if (delen.length > 2) return s;
+  const tijden = delen.map(leesTijd);
+  return tijden.every(Boolean) ? tijden.join(" – ") : s;
+}
+
+// Een webadres zonder https:// ervoor ("www.theater.nl/kaarten", "theater.nl")
+// krijgt het er zelf bij. Wat geen webadres lijkt, blijft staan zoals het is.
+export function normaliseerLink(s: string) {
+  const t = s.trim();
+  if (!t || /^https?:\/\//i.test(t)) return t;
+  return /^[^\s/@]+\.[a-z]{2,}(?:[/?#]\S*)?$/i.test(t) ? `https://${t}` : t;
+}
+
 export function toForm(item?: Partial<AgendaItem>): AgendaForm {
   return {
     titel:         item?.titel ?? "",
@@ -70,7 +95,8 @@ export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, o
     const errs: typeof errors = {};
     if (!form.titel.trim()) errs.titel = "Geef het optreden een titel.";
     if (!form.datum_sorteer) errs.datum = "Kies de datum van het optreden.";
-    if (form.link.trim() && !/^https?:\/\//.test(form.link.trim())) errs.link = "Begin de link met https://";
+    const link = normaliseerLink(form.link);
+    if (link && !/^https?:\/\/\S+\.\S+$/i.test(link)) errs.link = "Dit lijkt geen webadres.";
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
@@ -81,10 +107,10 @@ export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, o
       titel:         form.titel.trim(),
       datum_sorteer: form.datum_sorteer,
       datum:         formatDatum(form.datum_sorteer),
-      tijd:          clean(form.tijd),
+      tijd:          clean(normaliseerTijd(form.tijd)),
       locatie:       clean(form.locatie),
       beschrijving:  clean(form.beschrijving),
-      link:          clean(form.link),
+      link:          clean(normaliseerLink(form.link)),
       fotos_url:     clean(form.fotos_url),
       gepubliceerd:  form.gepubliceerd,
     });
@@ -145,7 +171,7 @@ export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, o
           </div>
           <div className="adm-field">
             <label htmlFor="ag-tijd">Tijd <span className="adm-optional">optioneel</span></label>
-            <input id="ag-tijd" className="adm-input" value={form.tijd} onChange={(e) => set("tijd", e.target.value)} placeholder="bijv. 20:00" />
+            <input id="ag-tijd" className="adm-input" value={form.tijd} onChange={(e) => set("tijd", e.target.value)} onBlur={() => set("tijd", normaliseerTijd(form.tijd))} placeholder="bijv. 20:00" />
           </div>
         </div>
 
@@ -164,7 +190,7 @@ export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, o
         <h3>Links</h3>
         <div className="adm-field">
           <label htmlFor="ag-link">Kaartjes of meer info <span className="adm-optional">optioneel</span></label>
-          <input id="ag-link" type="url" className="adm-input" value={form.link} onChange={(e) => set("link", e.target.value)} placeholder="https://" aria-invalid={!!errors.link} />
+          <input id="ag-link" type="url" className="adm-input" value={form.link} onChange={(e) => set("link", e.target.value)} onBlur={() => set("link", normaliseerLink(form.link))} placeholder="https://" aria-invalid={!!errors.link} />
           {errors.link && <p className="adm-err">{errors.link}</p>}
         </div>
         <div className="adm-field">

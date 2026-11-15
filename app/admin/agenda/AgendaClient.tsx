@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { IconClock, IconMapPin, IconEye } from "@/components/icons";
 import { DateStub, IconCopy, IconPlus, IconSearch, Tabs, maandTitel, useNaijlen, useToast, vandaag } from "../_components/ui";
+import { gewoon } from "../_components/zoeken";
+import { useGlijden, useOplichten, useWegvagen } from "../_components/beweging";
 import AgendaDrawer, { toForm, type AgendaForm, type AgendaItem, type Album } from "./AgendaDrawer";
 import { bewaarOptreden, verwijderOptreden, type AgendaInput } from "./actions";
 
@@ -21,10 +23,13 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
   const [gekozen, setGekozen] = useState<Gekozen>(startNieuw ? { id: "nieuw" } : startId ? { id: startId } : null);
   const [open, sluitend] = useNaijlen(gekozen);
   const [toast, melding] = useToast();
+  const [inhoudRef, meetGlijden] = useGlijden<HTMLDivElement>();
+  const { lijst: alle, isWeg } = useWegvagen(items, (i) => i.id, meetGlijden);
+  const [licht, lichtOp] = useOplichten();
 
   const today   = vandaag();
-  const komend  = useMemo(() => items.filter((i) => !i.datum_sorteer || i.datum_sorteer >= today), [items, today]);
-  const archief = useMemo(() => items.filter((i) => i.datum_sorteer && i.datum_sorteer < today).reverse(), [items, today]);
+  const komend  = useMemo(() => alle.filter((i) => !i.datum_sorteer || i.datum_sorteer >= today), [alle, today]);
+  const archief = useMemo(() => alle.filter((i) => i.datum_sorteer && i.datum_sorteer < today).reverse(), [alle, today]);
   const item    = open && open.id !== "nieuw" ? items.find((i) => String(i.id) === open.id) ?? null : null;
 
   // Een optreden uit het archief openen (bijv. via het overzicht): naar het juiste tabblad
@@ -35,9 +40,9 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
   }
 
   const groepen = useMemo(() => {
-    const q = zoek.trim().toLowerCase();
+    const q = gewoon(zoek.trim());
     const gefilterd = (tab === "komend" ? komend : archief).filter(
-      (i) => !q || i.titel.toLowerCase().includes(q) || (i.locatie ?? "").toLowerCase().includes(q)
+      (i) => !q || gewoon(i.titel).includes(q) || gewoon(i.locatie ?? "").includes(q)
     );
     const out: { titel: string; items: AgendaItem[] }[] = [];
     for (const i of gefilterd) {
@@ -57,6 +62,7 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
     if (res.error) return res.error;
     setTab(input.datum_sorteer && input.datum_sorteer < today ? "archief" : "komend");
     setGekozen(null);
+    lichtOp("id" in res ? res.id : item?.id);
     melding(item ? "Wijzigingen opgeslagen" : "Optreden toegevoegd");
     return null;
   }
@@ -95,6 +101,9 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
               <li
                 key={i.id}
                 className="adm-row adm-row--agenda"
+                data-flip={i.id}
+                data-weg={isWeg(i)}
+                data-licht={licht(i.id)}
                 data-hidden={!i.gepubliceerd || undefined}
                 data-past={tab === "archief" || undefined}
                 onClick={() => kies({ id: String(i.id) })}
@@ -163,7 +172,7 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
         </div>
       </div>
 
-      <div className="adm-content">{lijst}</div>
+      <div ref={inhoudRef} className="adm-content">{lijst}</div>
       {venster}
       {toast}
     </div>

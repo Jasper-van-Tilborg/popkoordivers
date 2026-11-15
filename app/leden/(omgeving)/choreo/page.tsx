@@ -1,23 +1,19 @@
 import { Kop, Sectie } from "../Kop";
 import StemTabs from "../components/StemTabs";
 import { bestandenLijst } from "../data";
+import { choreoLiedjes } from "./liedjes";
 
-const TABS = ["Video's", "Beschrijvingen"];
+const LIJST = "Alle";
 
 export default async function ChoreoPage() {
-  const items = await bestandenLijst(["choreo"]);
-
-  // De video's apart van de uitgeschreven bewegingen (Word, PDF)
-  const lijst = (video: boolean) => items
-    .filter((b) => (b.ext === "mp4") === video)
-    .map((b) => ({ id: b.id, titel: b.naam, nummer: b.liednummer, ext: b.ext }));
+  const liedjes = choreoLiedjes(await bestandenLijst(["choreo"]));
 
   return (
     <>
       <Kop titel="Choreografie" />
       <Sectie>
         <div className="leden-kaart leden-opnames">
-          <StemTabs liedjes={{ [TABS[0]]: lijst(true), [TABS[1]]: lijst(false) }} tabs={TABS} wat="choreografie" />
+          <StemTabs liedjes={{ [LIJST]: liedjes }} tabs={[LIJST]} wat="choreografie" />
         </div>
       </Sectie>
     </>

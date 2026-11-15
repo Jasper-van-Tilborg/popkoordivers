@@ -1,0 +1,94 @@
+/* ── Fotomuur met lightbox (components/Galerij.tsx) ──
+   Gebruikt op het openbare album (/media/[slug]) en het album in de ledenomgeving. */
+
+@keyframes galerij-in { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes galerij-glans { from { background-position: -600px 0; } to { background-position: 600px 0; } }
+.galerij { columns: 3; column-gap: 12px; }
+.galerij-foto {
+  position: relative; display: block; width: 100%; margin: 0 0 12px; padding: 0; border: none; border-radius: 14px; overflow: hidden;
+  break-inside: avoid; cursor: zoom-in; min-height: 140px;
+  background: linear-gradient(90deg, rgba(243,106,42,0.07) 0%, rgba(243,106,42,0.16) 40%, rgba(243,106,42,0.07) 100%) 0 0 / 600px 100%;
+  animation: galerij-glans 1.6s ease-in-out infinite;
+  transition: transform 0.15s var(--ease-out);
+}
+.galerij-foto[data-geladen] { min-height: 0; background: #eee; animation: galerij-in 0.5s var(--ease-out) both; animation-delay: var(--vertraging, 0ms); }
+.galerij-foto img { width: 100%; display: block; opacity: 0; transition: opacity 0.3s ease, transform 0.5s var(--ease-out); }
+.galerij-foto[data-geladen] img { opacity: 1; }
+@media (hover: hover) { .galerij-foto:hover img { transform: scale(1.04); } }
+.galerij-foto:active { transform: scale(0.98); transition-duration: 0.1s; }
+.galerij-foto:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+.galerij-bijschrift {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 10px; text-align: left;
+  font-size: 14px; font-weight: 600; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,0.65)); pointer-events: none;
+}
+
+/* Lightbox. Bladeren is kort en klein: dat doe je tientallen keren achter elkaar. */
+@keyframes lichtbak-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lichtbak-open { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes lichtbak-van-rechts { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+@keyframes lichtbak-van-links { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+.lichtbak {
+  position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+  padding: calc(env(safe-area-inset-top) + 76px) 96px calc(env(safe-area-inset-bottom) + 40px);
+  background: rgba(14,11,9,0.95); animation: lichtbak-in 0.25s ease both; touch-action: pan-y;
+}
+.lichtbak-balk {
+  position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: calc(env(safe-area-inset-top) + 16px) 20px 0;
+}
+.lichtbak-teller { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.7); font-variant-numeric: tabular-nums; letter-spacing: 0.03em; }
+.lichtbak-knoppen { display: flex; gap: 8px; }
+.lichtbak-knop {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px 0 14px; border-radius: 100px; border: none; cursor: pointer;
+  font: inherit; font-size: 15px; font-weight: 700; color: #fff; text-decoration: none; background: rgba(255,255,255,0.13);
+  transition: background 0.15s, transform 0.15s;
+}
+.lichtbak-knop:focus-visible, .lichtbak-pijl:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.lichtbak-figuur { width: 100%; margin: 0; display: flex; flex-direction: column; align-items: center; max-width: 100%; max-height: 100%; }
+.lichtbak-foto {
+  --ruimte: 150px;
+  display: block; max-width: min(100%, 1600px); max-height: calc(100vh - var(--ruimte)); max-height: calc(100dvh - var(--ruimte)); object-fit: contain;
+  border-radius: 10px; box-shadow: 0 16px 60px rgba(0,0,0,0.6); user-select: none; -webkit-user-select: none;
+  animation: lichtbak-open 0.3s var(--ease-out) both;
+}
+/* Verhouding bekend: meteen de uiteindelijke breedte, ook als de kleine versie er nog staat */
+.lichtbak-foto[style*="--verhouding"] { width: min(100%, 1600px, calc((100dvh - var(--ruimte)) * var(--verhouding))); height: auto; }
+.lichtbak-foto[data-richting="volgende"] { animation-name: lichtbak-van-rechts; animation-duration: 0.2s; }
+.lichtbak-foto[data-richting="vorige"] { animation-name: lichtbak-van-links; animation-duration: 0.2s; }
+.lichtbak-bijschrift { margin-top: 14px; max-width: 720px; font-size: 16px; font-weight: 500; line-height: 1.5; color: rgba(255,255,255,0.85); text-align: center; }
+.lichtbak-pijl {
+  position: absolute; top: 50%; width: 56px; height: 56px; margin-top: -28px; border-radius: 50%; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(255,255,255,0.13);
+  transition: background 0.15s, opacity 0.15s, transform 0.15s;
+}
+.lichtbak-pijl:disabled { opacity: 0.2; cursor: default; }
+.lichtbak-pijl--vorige { left: 20px; }
+.lichtbak-pijl--volgende { right: 20px; }
+@media (hover: hover) {
+  .lichtbak-knop:hover { background: rgba(255,255,255,0.24); }
+  .lichtbak-pijl:hover:not(:disabled) { background: rgba(255,255,255,0.24); }
+}
+.lichtbak-knop:active, .lichtbak-pijl:active:not(:disabled) { transform: scale(0.94); transition-duration: 0.1s; }
+
+@media (max-width: 900px) {
+  .galerij { columns: 2; }
+}
+@media (max-width: 760px) {
+  .galerij { column-gap: 6px; }
+  .galerij-foto { margin-bottom: 6px; border-radius: 10px; }
+  .galerij-bijschrift { font-size: 12.5px; padding: 16px 8px 6px; }
+  /* Lightbox: de foto over de hele breedte, de pijlen onderin onder de duim */
+  .lichtbak { padding: calc(env(safe-area-inset-top) + 72px) 0 calc(env(safe-area-inset-bottom) + 96px); }
+  .lichtbak-balk { padding: calc(env(safe-area-inset-top) + 12px) 12px 0; }
+  .lichtbak-knop { padding: 0 16px 0 12px; }
+  .lichtbak-foto { --ruimte: 190px; border-radius: 0; }
+  .lichtbak-bijschrift { padding: 0 20px; font-size: 15.5px; }
+  .lichtbak-pijl { top: auto; bottom: calc(env(safe-area-inset-bottom) + 20px); margin-top: 0; }
+  .lichtbak-pijl--vorige { left: calc(50% - 72px); }
+  .lichtbak-pijl--volgende { right: calc(50% - 72px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .galerij-foto img { transition: none; }
+  .galerij-foto:hover img { transform: none; }
+  .galerij-foto, .galerij-foto[data-geladen], .lichtbak, .lichtbak-foto { animation: none; }
+}

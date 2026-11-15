@@ -32,19 +32,30 @@ function nogDagen(sorteer: string) {
   return dagen <= 0 ? "Vandaag" : dagen === 1 ? "Morgen" : `Over ${dagen} dagen`;
 }
 
-export default async function AgendaDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function AgendaDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ van?: string }> }) {
+  const [{ id }, { van }] = await Promise.all([params, searchParams]);
+  // Vanaf de ledenhome terug naar de ledenhome
+  const terug = van === "leden" ? { href: "/leden", label: "Terug naar overzicht" }
+    : van === "fotos" ? { href: "/leden/fotos#optredens", label: "Terug naar foto's" }
+    : { href: "/agenda", label: "Terug naar agenda" };
   const supabase = await createClient();
-  const [{ data: event }, { data: komend }] = await Promise.all([
+  const [{ data: event }, { data: komend }, { data: eerder }] = await Promise.all([
     supabase.from("agenda").select("*").eq("id", Number(id)).eq("gepubliceerd", true).single(),
     supabase.from("agenda").select("id, titel, datum, datum_sorteer, locatie").eq("gepubliceerd", true).neq("id", Number(id)).gte("datum_sorteer", vandaag()).order("datum_sorteer").limit(3),
+    supabase.from("agenda").select("id, titel, datum, datum_sorteer, locatie").eq("gepubliceerd", true).neq("id", Number(id)).lt("datum_sorteer", vandaag()).order("datum_sorteer", { ascending: false }).limit(3),
   ]);
 
   if (!event) notFound();
 
   const isKomend = !event.datum_sorteer || event.datum_sorteer >= vandaag();
   const datum = datumDelen(event.datum, event.datum_sorteer);
-  const meer = komend ?? [];
+  // Onderaan altijd een volgende stap: andere komende optredens, anders de laatste eerdere
+  const meerKomend = (komend ?? []).length > 0;
+  const meer = meerKomend ? komend ?? [] : eerder ?? [];
+  const meerKop = !meerKomend ? "Eerdere optredens" : isKomend ? "Meer optredens" : "Onze komende optredens";
+  const inAgenda = isKomend && !!event.datum_sorteer;
+  // Alleen " uur" achter een echte tijd, niet achter bijv. "middag"
+  const tijd = event.tijd && (/\d$/.test(event.tijd.trim()) ? `${event.tijd} uur` : event.tijd);
   const route = event.locatie && `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.locatie)}`;
 
   return (
@@ -53,7 +64,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
       <main className="detail">
 
         <DetailKop
-          terug={{ href: "/agenda", label: "Terug naar agenda" }}
+          terug={terug}
           meta={<>
             <span className="detail-chip">{isKomend ? "Komend optreden" : "Afgelopen optreden"}</span>
             {isKomend && event.datum_sorteer && <span>{nogDagen(event.datum_sorteer)}</span>}
@@ -62,10 +73,10 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
         />
 
         <section className="detail-kaart-vlak">
-          <Reveal>
+          <Reveal direct delay={200}>
             <article className="detail-kaart">
               <div className="ad-kern">
-                <div className="ad-datum" aria-hidden="true">
+                <div className="ad-datum" aria-hidden={datum.dag ? undefined : true}>
                   {datum.dag ? (
                     <>
                       <span className="ad-datum-weekdag">{datum.weekdag}</span>
@@ -78,14 +89,16 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
                   )}
                 </div>
                 <dl className="ad-feiten">
-                  <div>
-                    <dt><IconCalendar size={18} /> Datum</dt>
-                    <dd>{datum.voluit}</dd>
-                  </div>
-                  {event.tijd && (
+                  {!datum.dag && (
+                    <div>
+                      <dt><IconCalendar size={18} /> Datum</dt>
+                      <dd>{datum.voluit}</dd>
+                    </div>
+                  )}
+                  {tijd && (
                     <div>
                       <dt><IconClock size={18} /> Tijd</dt>
-                      <dd>{event.tijd} uur</dd>
+                      <dd>{tijd}</dd>
                     </div>
                   )}
                   {event.locatie && (
@@ -100,13 +113,16 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
                 </dl>
               </div>
 
-              {(event.beschrijving || event.link || event.fotos_url || !isKomend) && (
+              {(event.beschrijving || event.link || event.fotos_url || !isKomend || inAgenda) && (
                 <div className="ad-verder">
                   {event.beschrijving && <p className="ad-beschrijving">{event.beschrijving}</p>}
-                  {(event.link || event.fotos_url || !isKomend) && (
+                  {(event.link || event.fotos_url || !isKomend || inAgenda) && (
                     <div className="ad-knoppen">
                       {event.link && (
                         <a href={event.link} target="_blank" rel="noopener noreferrer" className="btn btn--primary">Meer info en kaartjes →</a>
+                      )}
+                      {inAgenda && (
+                        <a href={`/agenda/${event.id}/ics`} className="btn btn--soft"><IconCalendar size={18} /> Zet in je agenda</a>
                       )}
                       {event.fotos_url ? (
                         <a href={event.fotos_url} className="btn btn--soft">Foto&apos;s bekijken →</a>
@@ -124,7 +140,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
         {meer.length > 0 && (
           <section className="detail-meer">
             <div className="detail-binnen">
-              <h2>{isKomend ? "Meer optredens" : "Onze komende optredens"}</h2>
+              <h2>{meerKop}</h2>
               <div className="detail-meer-rij">
                 {meer.map((o, i) => {
                   const d = datumDelen(o.datum, o.datum_sorteer);
@@ -144,7 +160,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
                   );
                 })}
               </div>
-              <Link href="/agenda" className="ad-alles">Bekijk de hele agenda →</Link>
+              <Link href="/agenda" className="pijl-link ad-alles">Bekijk de hele agenda →</Link>
             </div>
           </section>
         )}
@@ -167,8 +183,8 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
         .ad-feiten { margin: 0; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
         .ad-feiten dt { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; font-size: 13px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: #B54412; }
         .ad-feiten dd { margin: 0; font-size: 19px; font-weight: 600; line-height: 1.4; color: #111; }
-        .ad-route { display: inline-block; margin-left: 12px; font-size: 16px; font-weight: 700; color: #B54412; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
-        .ad-route:hover { color: var(--primary); }
+        .ad-route { display: inline-block; margin: -10px 0 -10px 4px; padding: 10px 8px; font-size: 16px; font-weight: 700; color: #B54412; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+        @media (hover: hover) { .ad-route:hover { color: var(--primary); } }
 
         .ad-verder { padding: 32px 48px 40px; border-top: 1px solid rgba(0,0,0,0.07); display: flex; flex-direction: column; gap: 26px; }
         .ad-beschrijving { margin: 0; font-size: 18px; line-height: 1.8; color: #2b2b2b; white-space: pre-line; }
@@ -185,7 +201,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
         .ad-meer-tekst { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
         .ad-meer-titel { font-size: 18px; font-weight: 800; line-height: 1.3; letter-spacing: -0.3px; color: #111; }
         .ad-meer-sub { font-size: 15px; color: #555; line-height: 1.4; }
-        .ad-alles { display: inline-block; margin-top: 24px; font-size: 17px; font-weight: 700; color: #B54412; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+        .ad-alles { margin-top: 24px; font-size: 15px; }
 
         @media (max-width: 640px) {
           .ad-kern { flex-direction: column; align-items: stretch; gap: 24px; padding: 22px; }
@@ -193,7 +209,11 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ i
           .ad-datum strong { font-size: 40px; margin: 0; }
           .ad-datum .ad-datum-weekdag { order: -1; }
           .ad-feiten dd { font-size: 18px; }
-          .ad-route { display: block; margin: 4px 0 0; }
+          .ad-route {
+            display: flex; align-items: center; justify-content: center; min-height: 50px; margin: 12px 0 0; padding: 12px 20px; border-radius: 35px;
+            background: rgba(243,106,42,0.08); border: 1.5px solid rgba(243,106,42,0.2); text-decoration: none; transition: transform 0.12s;
+          }
+          .ad-route:active { transform: scale(0.97); transition-duration: 0.1s; }
           .ad-verder { padding: 24px 22px 28px; }
           .ad-beschrijving { font-size: 17.5px; }
           .ad-knoppen .btn { width: 100%; justify-content: center; }

@@ -17,6 +17,19 @@ export function useNaijlen<T>(waarde: T | null, ms = 200): [T | null, boolean] {
   return [waarde ?? laatste, waarde === null && laatste !== null];
 }
 
+// De eigen keuzevelden (velden.tsx, Switch) geven geen input-event; met dit
+// signaal weet het bewerkvenster toch dat er iets is veranderd.
+const WIJZIGING = "adm-wijziging";
+export const meldWijziging = (el: Element | null | undefined) => el?.dispatchEvent(new Event(WIJZIGING, { bubbles: true }));
+
+// Een fout veld trilt even (admin.css, [data-schud]); opnieuw zetten laat het opnieuw trillen.
+function schud(el: HTMLElement) {
+  el.removeAttribute("data-schud");
+  void el.offsetWidth;
+  el.setAttribute("data-schud", "");
+  el.addEventListener("animationend", () => el.removeAttribute("data-schud"), { once: true });
+}
+
 export function Drawer({ title, onClose, children, footer, sluitend, acties }: {
   title: string;
   onClose: () => void;
@@ -29,13 +42,59 @@ export function Drawer({ title, onClose, children, footer, sluitend, acties }: {
   const closeRef = useRef(onClose);
   useEffect(() => { closeRef.current = onClose; });
 
+  // Is er iets ingevuld of gekozen dat nog niet is opgeslagen? Dan sluit het
+  // venster niet zomaar: het kruisje wordt eerst "Wijzigingen weggooien".
+  const gewijzigd = useRef(false);
+  const [vraag, setVraagState] = useState(false);
+  const vraagRef = useRef(false);
+  const setVraag = (v: boolean) => { vraagRef.current = v; setVraagState(v); };
+  const weggooiKnop = useRef<HTMLButtonElement>(null);
+  const probeerSluiten = () => {
+    if (!gewijzigd.current) closeRef.current();
+    else if (vraagRef.current) weggooiKnop.current?.focus();
+    else setVraag(true);
+  };
+  useEffect(() => { if (vraag) weggooiKnop.current?.focus(); }, [vraag]);
+
   // Alleen bij openen: focus op het eerste veld (zonder de pagina te laten verspringen) en Esc om te sluiten
   useEffect(() => {
-    ref.current?.querySelector<HTMLElement>("input:not([type=hidden]):not([type=file]), textarea, select")?.focus({ preventScroll: true });
-    // Een Escape die een kalender of keuzelijst al heeft afgehandeld, sluit niet ook het scherm
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !e.defaultPrevented) closeRef.current(); };
+    const venster = ref.current;
+    venster?.querySelector<HTMLElement>("input:not([type=hidden]):not([type=file]), textarea, select")?.focus({ preventScroll: true });
+    // Een Escape die een kalender of keuzelijst al heeft afgehandeld, sluit niet ook het scherm.
+    // Staat de vraag om weg te gooien open, dan trekt Escape die juist in.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if (vraagRef.current) setVraag(false);
+      else probeerSluiten();
+    };
+    const opWijziging = () => { gewijzigd.current = true; };
+
+    // Opslaan met fouten: naar het eerste foute veld, en dat trilt even
+    const opKlik = (e: MouseEvent) => {
+      if (!(e.target as Element).closest?.(".adm-drawer-foot .adm-btn--primary")) return;
+      setTimeout(() => {
+        const fout = venster?.querySelector<HTMLElement>('.adm-drawer-body :is([aria-invalid="true"], [data-invalid])');
+        if (!fout) return;
+        const rustig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        fout.scrollIntoView({ block: "center", behavior: rustig ? "auto" : "smooth" });
+        fout.focus({ preventScroll: true });
+        schud(fout);
+      });
+    };
+
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    venster?.addEventListener("input", opWijziging);
+    venster?.addEventListener("drop", opWijziging);
+    venster?.addEventListener(WIJZIGING, opWijziging);
+    venster?.addEventListener("click", opKlik);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      venster?.removeEventListener("input", opWijziging);
+      venster?.removeEventListener("drop", opWijziging);
+      venster?.removeEventListener(WIJZIGING, opWijziging);
+      venster?.removeEventListener("click", opKlik);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const inhoud = (
@@ -44,9 +103,15 @@ export function Drawer({ title, onClose, children, footer, sluitend, acties }: {
         <h2 id="adm-drawer-titel">{title}</h2>
         <div className="adm-drawer-acties">
           {acties}
-          <button className="adm-icon-btn" onClick={onClose} aria-label="Sluiten">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-          </button>
+          {vraag ? (
+            <button ref={weggooiKnop} type="button" className="adm-btn adm-btn--danger-solid adm-btn--small" onClick={onClose} onBlur={() => setVraag(false)}>
+              Wijzigingen weggooien
+            </button>
+          ) : (
+            <button type="button" className="adm-icon-btn" onClick={probeerSluiten} aria-label="Sluiten">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+          )}
         </div>
       </header>
       <div className="adm-drawer-body">{children}</div>
@@ -56,7 +121,7 @@ export function Drawer({ title, onClose, children, footer, sluitend, acties }: {
 
   return (
     <>
-      <div className="adm-overlay" data-sluitend={sluitend || undefined} onClick={onClose} />
+      <div className="adm-overlay" data-sluitend={sluitend || undefined} onClick={probeerSluiten} />
       <div ref={ref} className="adm-venster" data-sluitend={sluitend || undefined} role="dialog" aria-modal="true" aria-labelledby="adm-drawer-titel">
         {inhoud}
       </div>
@@ -121,7 +186,7 @@ export function Switch({ checked, onChange, label, disabled }: {
   disabled?: boolean;
 }) {
   return (
-    <button type="button" role="switch" aria-checked={checked} aria-label={label} className="adm-switch" onClick={onChange} disabled={disabled}>
+    <button type="button" role="switch" aria-checked={checked} aria-label={label} className="adm-switch" onClick={(e) => { onChange(); meldWijziging(e.currentTarget); }} disabled={disabled}>
       <span className="adm-switch-knob" />
     </button>
   );

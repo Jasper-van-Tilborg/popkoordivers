@@ -675,7 +675,7 @@ html[data-vt^="pagina-"]::view-transition-old(root) { animation: none; opacity: 
 html[data-vt^="pagina-"]::view-transition-new(root) { animation: none; }
 html[data-vt^="pagina-"]::view-transition-old(adm-pagina),
 html[data-vt^="pagina-"]::view-transition-new(adm-pagina) {
-  mix-blend-mode: normal; animation-duration: 0.55s; animation-timing-function: cubic-bezier(0.55, 0, 0.1, 1); animation-fill-mode: both;
+  mix-blend-mode: normal; animation-duration: 0.32s; animation-timing-function: cubic-bezier(0.55, 0, 0.1, 1); animation-fill-mode: both;
 }
 html[data-vt="pagina-omlaag"]::view-transition-old(adm-pagina) { animation-name: adm-pagina-naar-boven; }
 html[data-vt="pagina-omlaag"]::view-transition-new(adm-pagina) { animation-name: adm-pagina-van-onder; }
@@ -699,6 +699,48 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 .adm-pagina[data-geschoven] :is(.adm-head, .adm-toolbar, .adm-content > *, .adm-list > li, .adm-group-title, .adm-card, .adm-card-nieuw, .adm-photo, .adm-blok, .adm-actie) {
   animation: none;
 }
+/* Na de eerste klik of toets op een pagina (tabblad, zoeken, opslaan) staan nieuwe
+   rijen, kaarten en foto's er meteen; alleen een net geüploade foto popt nog in (PaginaInhoud.tsx) */
+.adm-pagina[data-gezien] :is(.adm-list > li, .adm-group-title, .adm-card, .adm-card-nieuw, .adm-photo, .adm-content > .adm-empty, .adm-content > .adm-hint) {
+  animation: none;
+}
+
+/* ── Lijsten in beweging (beweging.ts) ── */
+/* Net opgeslagen: de rij of kaart licht even op, zodat je ziet waar hij staat */
+@keyframes adm-licht { 0%, 30% { background-color: #FFF1EA; box-shadow: inset 0 0 0 1.5px rgba(243,106,42,0.35); } }
+[data-licht] { animation: adm-licht 1.4s ease-out !important; }
+/* Verwijderd: eerst wegvagen, daarna glijdt de rest in het gat */
+@keyframes adm-weg       { to { opacity: 0; transform: translateX(24px); } }
+@keyframes adm-weg-klein { to { opacity: 0; transform: scale(0.92); } }
+[data-weg] { animation: adm-weg 0.24s ease-in 0.1s forwards !important; pointer-events: none; }
+:is(.adm-card, .adm-photo)[data-weg] { animation-name: adm-weg-klein !important; }
+.adm-photo[data-weg] { animation-duration: 0.2s !important; animation-delay: 0s !important; }
+
+/* Een knop die van betekenis verandert (Verwijderen → Ja, verwijderen; × → Wijzigingen weggooien) doet dat zichtbaar */
+.adm-btn, .adm-photo-btn { transition: background-color 0.15s, color 0.15s, border-color 0.15s; }
+@keyframes adm-knop-in { from { opacity: 0; transform: scale(0.96); } }
+.adm-drawer-acties .adm-btn--danger-solid { animation: adm-knop-in 0.15s var(--ease-out); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-weg] { animation-name: adm-fade-out !important; }
+  .adm-drawer-acties .adm-btn--danger-solid { animation: none; }
+}
+
+/* Een fout veld bij opslaan trilt even (ui.tsx, Drawer) */
+@keyframes adm-schud { 0%, 100% { transform: none; } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+[data-schud] { animation: adm-schud 0.3s var(--ease-out); }
+
+/* Klikvlakken groter dan ze eruitzien. De schakelaar is 21px hoog; zijn klikvlak 44 × 33. */
+.adm-switch::before { content: ""; position: absolute; inset: -6px -4px; }
+/* Op een touchscreen minstens 44px hoog, zonder dat de vlakken van buren elkaar raken */
+@media (pointer: coarse) {
+  .adm-icon-btn, .adm-photo-btn, .adm-opname-speel, .adm-account button { position: relative; }
+  .adm-icon-btn::before { content: ""; position: absolute; inset: -5px -3px; }
+  .adm-photo-btn::before { content: ""; position: absolute; inset: -7px -2px; }
+  .adm-opname-speel::before { content: ""; position: absolute; inset: -4px; }
+  .adm-account button::before { content: ""; position: absolute; inset: -5px; }
+  .adm-kal-kop button, .adm-kal-voet button { min-width: 40px; height: 40px; }
+}
 
 /* Overzicht: rijen zijn alleen een samenvatting, geen knop */
 /* Koppen, rijen en lijstjes in een blok beginnen allemaal op 20px van de rand */
@@ -710,7 +752,7 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 
 @media (prefers-reduced-motion: reduce) {
   .adm-head, .adm-toolbar, .adm-content > *, .adm-list > li, .adm-group-title, .adm-photo, .adm-photo--nieuw,
-  .adm-photo-btn svg, .adm-scrim, .adm-skel, .adm-overlay[data-sluitend], .adm-venster[data-sluitend], .adm-toast[data-sluitend] { animation: none !important; }
+  .adm-photo-btn svg, .adm-scrim, .adm-skel, .adm-overlay[data-sluitend], .adm-venster[data-sluitend], .adm-toast[data-sluitend], [data-schud] { animation: none !important; }
   .adm-tabs-blok, .adm-photo { transition: none; }
 }
 

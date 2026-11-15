@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { gewoon } from "./zoeken";
+import { meldWijziging } from "./ui";
 
 // Eigen formulierelementen in de stijl van Popkoor Divers, in plaats van de
 // standaard keuzelijst, datumkiezer, checkbox en suggestielijst van de browser
@@ -78,7 +80,7 @@ export function Keuze<T extends string>({ id, value, onChange, opties, disabled 
   const gekozen = opties.find((o) => o.value === value);
 
   const openen = () => { setActief(Math.max(0, opties.findIndex((o) => o.value === value))); setOpen(true); };
-  const kies = (o: Optie<T>) => { onChange(o.value); setOpen(false); veld.current?.focus(); };
+  const kies = (o: Optie<T>) => { onChange(o.value); meldWijziging(veld.current); setOpen(false); veld.current?.focus(); };
 
   function toets(e: KeyboardEvent) {
     if (!open) {
@@ -156,15 +158,15 @@ export function Suggestie({ id, value, onChange, suggesties, placeholder }: {
   const lijstId = useId();
   const sluit = () => setOpen(false);
   const { veld, laag, stijl } = useUitklapper<HTMLInputElement>(open, sluit);
-  const q = value.trim().toLowerCase();
-  const lijst = suggesties.filter((s) => !q || (s.toLowerCase().includes(q) && s.toLowerCase() !== q));
+  const q = gewoon(value.trim());
+  const lijst = suggesties.filter((s) => !q || (gewoon(s).includes(q) && gewoon(s) !== q));
   const toon = open && lijst.length > 0;
 
   function toets(e: KeyboardEvent) {
     if (!toon) { if (e.key === "ArrowDown") { setOpen(true); setActief(0); } return; }
     if (e.key === "ArrowDown") { e.preventDefault(); setActief((i) => Math.min(lijst.length - 1, i + 1)); }
     else if (e.key === "ArrowUp") { e.preventDefault(); setActief((i) => Math.max(0, i - 1)); }
-    else if (e.key === "Enter" && actief >= 0) { e.preventDefault(); onChange(lijst[actief]); setOpen(false); }
+    else if (e.key === "Enter" && actief >= 0) { e.preventDefault(); onChange(lijst[actief]); meldWijziging(veld.current); setOpen(false); }
     else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOpen(false); }
   }
 
@@ -193,7 +195,7 @@ export function Suggestie({ id, value, onChange, suggesties, placeholder }: {
                 <li key={s} role="option" aria-selected={false} data-actief={i === actief || undefined}
                   onPointerEnter={() => setActief(i)}
                   onPointerDown={(e) => e.preventDefault()}
-                  onClick={() => { onChange(s); setOpen(false); }}>
+                  onClick={() => { onChange(s); meldWijziging(veld.current); setOpen(false); }}>
                   <span>{s}</span>
                 </li>
               ))}
@@ -209,7 +211,7 @@ export function Suggestie({ id, value, onChange, suggesties, placeholder }: {
 
 export function Vinkje({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode }) {
   return (
-    <button type="button" role="checkbox" aria-checked={checked} className="adm-vinkje" onClick={() => onChange(!checked)}>
+    <button type="button" role="checkbox" aria-checked={checked} className="adm-vinkje" onClick={(e) => { onChange(!checked); meldWijziging(e.currentTarget); }}>
       <span className="adm-vinkje-doos">{checked && <Vink />}</span>
       <span>{children}</span>
     </button>
@@ -246,7 +248,7 @@ export function Datum({ id, value, onChange, placeholder = "Kies een datum", inv
     setFocusDag(value || vandaagIso());
     setOpen(true);
   };
-  const kies = (d: string) => { onChange(d); setOpen(false); veld.current?.focus(); };
+  const kies = (d: string) => { onChange(d); meldWijziging(veld.current); setOpen(false); veld.current?.focus(); };
   const verschuif = (n: number) => setMaand(({ j, m }) => ({ j: j + Math.floor((m + n) / 12), m: ((m + n) % 12 + 12) % 12 }));
 
   // Focus volgt de gekozen dag in het raster (toetsenbord)

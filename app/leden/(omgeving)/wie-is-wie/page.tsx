@@ -1,6 +1,18 @@
 import { downloadUrl } from "@/lib/r2";
 import { Kop, Sectie } from "../Kop";
-import { db, initialen, sessie } from "../data";
+import { STEMGROEPEN, db, initialen, sessie } from "../data";
+import { gewoon } from "./naam";
+import Smoelenboek from "./Smoelenboek";
+
+// Een rond portret, of de initialen als er geen foto is
+function Avatar({ naam, foto, className }: { naam: string; foto: string | null; className: string }) {
+  return (
+    <span className={`leden-avatar ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {foto ? <img src={foto} alt="" loading="lazy" /> : initialen(naam)}
+    </span>
+  );
+}
 
 const Chevron = () => (
   <span className="leden-album__chevron" aria-hidden="true">
@@ -25,20 +37,31 @@ export default async function WieIsWiePage() {
     .map((g) => ({ ...g, contact: bestuursleden.find((l) => l.id === g.contactpersoon_id)?.naam ?? null }));
   const smoelenboek = groepen.find((g) => g.soort === "smoelenboek");
   // Portretten staan in de privé bucket: tijdelijke links (1 uur geldig)
-  const leden = await Promise.all((smoelenboek?.leden ?? []).map(async (l) => ({ ...l, foto: l.foto_key ? await downloadUrl(l.foto_key) : null })));
+  const leden = await Promise.all((smoelenboek?.leden ?? []).map(async (l) => ({
+    id: l.id, naam: l.naam, functie: l.functie, initialen: initialen(l.naam), foto: l.foto_key ? await downloadUrl(l.foto_key) : null,
+  })));
+  // Bestuur en commissies krijgen het portret uit het smoelenboek, als de naam daar (ongeveer) zo in staat
+  const fotos = new Map(leden.filter((l) => l.foto).map((l) => [gewoon(l.naam), l.foto]));
+  const fotoVan = (naam: string) => fotos.get(gewoon(naam)) ?? null;
 
   return (
     <>
-      <Kop titel="Wie is wie" tekst="Het bestuur, de commissies en wie erin zitten, en het smoelenboek van het koor." />
+      <Kop titel="Wie is wie" tekst="Het bestuur, de commissies en wie erin zitten, en het smoelenboek van het koor.">
+        <nav className="wiw-sprong" aria-label="Naar een onderdeel">
+          <a href="#bestuur">Bestuur</a>
+          {commissies.length > 0 && <a href="#commissies">Commissies</a>}
+          <a href="#smoelenboek">{smoelenboek?.naam ?? "Smoelenboek"}{leden.length > 0 && <span>{leden.length}</span>}</a>
+        </nav>
+      </Kop>
 
-      <Sectie titel="Bestuur" id="bestuur">
+      <Sectie titel="Bestuur" id="bestuur" direct>
         {bestuursleden.length === 0 ? (
           <p className="leden-leeg">Binnenkort beschikbaar.</p>
         ) : (
           <div className="bestuur-grid">
             {bestuursleden.map((l) => (
               <div key={l.id} className="leden-kaart bestuur-kaart">
-                <div className="leden-avatar bestuur-avatar">{initialen(l.naam)}</div>
+                <Avatar naam={l.naam} foto={fotoVan(l.naam)} className="bestuur-avatar" />
                 <div style={{ minWidth: 0 }}>
                   <p className="bestuur-naam">{l.naam}</p>
                   <p className="bestuur-functie">{l.functie ?? "Bestuurslid"}</p>
@@ -71,7 +94,7 @@ export default async function WieIsWiePage() {
                     <ul className="commissie-leden">
                       {c.leden.map((l) => (
                         <li key={l.id}>
-                          <span className="leden-avatar commissie-avatar">{initialen(l.naam)}</span>
+                          <Avatar naam={l.naam} foto={fotoVan(l.naam)} className="commissie-avatar" />
                           <span>{l.naam}</span>
                           {l.functie && <span className="commissie-functie">{l.functie}</span>}
                         </li>
@@ -89,20 +112,7 @@ export default async function WieIsWiePage() {
         {leden.length === 0 ? (
           <p className="leden-leeg">Binnenkort beschikbaar.</p>
         ) : (
-          <div className="smoelenboek-grid">
-            {leden.map((l) => (
-              <figure key={l.id} className="leden-kaart smoel">
-                <div className="smoel-foto">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {l.foto ? <img src={l.foto} alt="" loading="lazy" /> : <span className="smoel-initialen">{initialen(l.naam)}</span>}
-                </div>
-                <figcaption className="smoel-tekst">
-                  <p className="smoel-naam">{l.naam}</p>
-                  {l.functie && <span className="smoel-functie">{l.functie}</span>}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
+          <Smoelenboek leden={leden} stemgroepen={[...STEMGROEPEN]} />
         )}
       </Sectie>
     </>

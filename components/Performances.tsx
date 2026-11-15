@@ -28,15 +28,9 @@ export default function Performances({ events }: Props) {
         <Reveal style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "16px" }}>
           <RevealText
             text="Aankomende optredens"
-            pageDelay={500}
             style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
           />
-          <Link
-            href="/agenda"
-            style={{ fontSize: "14px", fontWeight: 600, color: "var(--primary)", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px", paddingBottom: "4px", borderBottom: "2px solid rgba(243,106,42,0.25)", transition: "border-color 0.15s", whiteSpace: "nowrap" }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(243,106,42,0.25)")}
-          >
+          <Link href="/agenda" className="pijl-link">
             Alle data op Agenda →
           </Link>
         </Reveal>

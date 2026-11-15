@@ -44,6 +44,10 @@ export default async function RootLayout({
   return (
     <html lang="nl" className={`${manrope.variable} ${bricolage.variable}`}>
       <body>
+        {/* Zonder JavaScript komt niets "in beeld": dan alles meteen tonen */}
+        <noscript>
+          <style>{`.reveal, .reveal-tekst > span { opacity: 1 !important; animation: none !important; }`}</style>
+        </noscript>
         <InstellingenProvider value={instellingen}>{children}</InstellingenProvider>
         <Analytics />
         <SpeedInsights />

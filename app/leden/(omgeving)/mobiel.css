@@ -89,19 +89,17 @@
 
   /* Rijen: een groot tikvlak, lange titels lopen door op een tweede regel */
   .leden-row { gap: 14px; min-height: 72px; padding: 14px 18px; }
-  .leden-row:hover { background: none; }
-  .leden-row:active { background: #FFF3EC; }
   .leden-row__icon { width: 44px; height: 44px; border-radius: 13px; }
   .leden-row__icon svg { width: 20px; height: 20px; }
   .leden-row__title { font-size: 17px; line-height: 1.35; white-space: normal; }
   .leden-row__sub { font-size: 14.5px; color: #5c5c5c; margin-top: 3px; }
   .leden-row__action { font-size: 15px; color: var(--oranje-tekst); }
-  .leden-row:hover .leden-row__action { transform: none; }
+  .leden-kaart-voet { padding: 14px 18px 18px; }
+  .leden-kaart-leeg { padding: 18px; }
 
   /* Overzicht: geen tegels, die pagina's staan al in de balk onderin */
   .leden-tegels-sectie { display: none; }
   .leden-aftel { gap: 16px; padding: 18px; }
-  .leden-aftel:hover { transform: none; box-shadow: var(--shadow-sm); border-color: rgba(0,0,0,0.06); }
   .leden-aftel:active { background: #FFF3EC; }
   .leden-aftel .leden-tegel-pijl { display: none; }
   .leden-aftel-teller { width: 92px; height: 92px; border-radius: 20px; font-size: 15px; }
@@ -110,24 +108,6 @@
   .leden-aftel-label { font-size: 13px; }
   .leden-aftel-titel { font-size: 21px; letter-spacing: -0.4px; }
   .leden-aftel-details { flex-direction: column; gap: 4px; font-size: 15.5px; }
-
-  /* Overzicht: elke tegel een brede rij met icoon, titel en pijl */
-  .leden-tegels { grid-template-columns: 1fr; gap: 12px; }
-  .leden-tegel--groot { grid-column: auto; }
-  .leden-tegel {
-    display: grid; grid-template-columns: 52px minmax(0, 1fr) 24px; column-gap: 14px; row-gap: 2px; align-items: center;
-    min-height: 0; padding: 18px;
-  }
-  .leden-tegel:hover { transform: none; box-shadow: var(--shadow-sm); border-color: rgba(0,0,0,0.06); }
-  .leden-tegel:active { background: #FFF8F4; }
-  .leden-tegel-icoon { grid-column: 1; grid-row: 1; width: 52px; height: 52px; border-radius: 15px; margin: 0; color: var(--oranje-tekst); }
-  .leden-tegel-titel { grid-column: 2; grid-row: 1; font-size: 19px; }
-  .leden-tegel-pijl { position: static; grid-column: 3; grid-row: 1; width: 24px; height: 24px; background: none; color: #8a8a8a; }
-  .leden-tegel:hover .leden-tegel-pijl { background: none; color: #8a8a8a; transform: none; }
-  .leden-tegel-lijst { grid-column: 1 / -1; }
-  .leden-tegel-lijst { margin-top: 14px; }
-  .leden-tegel-lijst li { font-size: 16.5px; padding: 12px 0; color: #222; }
-  .leden-tegel-noot { width: 34px; height: 34px; border-radius: 10px; }
 
   /* Opnames: de tabbladen als gelijke knoppen die bovenaan blijven staan */
   .leden-opnames { padding: 0; }
@@ -154,13 +134,14 @@
   .sorteer-tekst { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .lied-nummer { width: 44px; height: 36px; font-size: 15px; }
   .lied-download { width: 44px; height: 44px; }
-  .liedjes-paginas { margin: 0 18px; padding: 14px 0 18px; }
-  .liedjes-pagina-tekst { font-size: 14px; }
-  .liedjes-pagina-woord { display: none; }
   /* Rond icoon in plaats van tekst: dan past de omschrijving op een regel */
   .lied-pdf { flex-shrink: 0; justify-content: center; width: 48px; height: 48px; min-height: 0; padding: 0; border-radius: 50%; }
   .lied-knop-tekst { display: none; }
   .lied-knop-icoon { display: block; }
+  /* Choreografie: twee ronde knoppen op vaste plekken; zonder tabbladen begint de kaart met het zoekveld */
+  .lied--knoppen .lied-pdf { min-width: 0; }
+  .lied-knop-leeg { width: 48px; }
+  .stemtabs-blok > .liedjes-zoekbalk:first-child { margin-top: 18px; }
   /* Het tempo in de speler: drie knoppen, niet het raster van de stemmen */
   .speler-tempo .stemtabs { grid-template-columns: repeat(3, minmax(0, 1fr)); width: auto; flex: 1; max-width: 240px; }
   .speler-tempo .stemtab { min-height: 44px; }
@@ -171,25 +152,32 @@
   .lied-pdf:active { background: rgba(243,106,42,0.2); }
   .lied-binnenkort { font-size: 14.5px; color: #777; }
 
-  /* Foto's: twee grote foto's naast elkaar */
-  .leden-album summary { padding: 18px; min-height: 76px; }
-  .leden-album summary:hover, .commissie summary:hover { background: none; }
-  .leden-album-titel { font-size: 18px; }
-  .leden-album-meta { font-size: 14.5px; color: #5c5c5c; margin-top: 3px; }
-  .leden-album__chevron { width: 40px; height: 40px; }
-  .leden-album-inhoud { padding: 0 12px 12px; }
-  .leden-fotos { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .leden-fotos a { border-radius: 10px; }
-  .leden-foto { aspect-ratio: 1; }
-  .leden-foto:hover { transform: none; }
-  .leden-foto__bijschrift { font-size: 12px; padding: 14px 8px 6px; }
+  /* Foto's: albums onder elkaar, groot; in een album twee foto's naast elkaar */
+  .fotoalbum-filter { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -16px 18px; padding: 2px 16px; }
+  .fotoalbum-filter::-webkit-scrollbar { display: none; }
+  .fotoalbum-filter button { flex-shrink: 0; min-height: 48px; font-size: 16px; }
+  .fotos-spring { gap: 6px; margin-top: 14px; }
+  .fotos-spring a { padding: 0 12px; gap: 6px; }
+  .fotoalbum-raster { grid-template-columns: 1fr; gap: 14px; }
+  .fotoalbum { padding: 6px; border-radius: 20px; }
+  .fotoalbum-beeld { border-radius: 15px; }
+  .fotoalbum-tekst { padding: 12px 10px 8px; }
+  .fotoalbum-titel { font-size: 18px; }
+  .fotoalbum-meta { font-size: 15px; }
+  .album-terug { margin-bottom: 16px; }
+  .leden-kopvlak .album-kopmeta { font-size: 16px; row-gap: 5px; }
+  .album-breek { display: block; flex-basis: 100%; height: 0; }
+  .album-verder { gap: 10px; }
+  .album-verder-link { padding: 14px 16px; }
+  .album-verder-titel { font-size: 16px; }
+  #fotos { scroll-margin-top: env(safe-area-inset-top); }
   .leden-videos { grid-template-columns: 1fr; gap: 12px; }
 
   /* Wie is wie */
   .leden-avatar { color: var(--oranje-tekst); }
   .bestuur-grid { grid-template-columns: 1fr; gap: 10px; }
   .bestuur-kaart { flex-direction: row; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 18px; }
-  .bestuur-avatar { width: 52px; height: 52px; font-size: 16px; }
+  .bestuur-avatar { width: 56px; height: 56px; font-size: 16px; }
   .bestuur-naam { font-size: 17px; }
   .bestuur-functie { font-size: 14.5px; color: var(--oranje-tekst); }
   .commissie-kolommen { grid-template-columns: 1fr; gap: 10px; }
@@ -200,7 +188,7 @@
   .commissie-toelichting { color: var(--oranje-tekst); }
   .commissie-leden { grid-template-columns: 1fr; gap: 12px; padding: 4px 18px 18px; }
   .commissie-leden li { font-size: 16px; color: #222; }
-  .commissie-avatar { width: 38px; height: 38px; font-size: 13px; }
+  .commissie-avatar { width: 44px; height: 44px; font-size: 14px; }
   .commissie-functie { font-size: 12.5px; color: #555; }
   .smoelenboek-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .smoel { padding: 6px; border-radius: 18px; }
@@ -209,6 +197,13 @@
   .smoel-tekst { padding: 12px 4px 8px; gap: 6px; }
   .smoel-naam { font-size: 15.5px; }
   .smoel-functie { font-size: 12.5px; padding: 3px 10px; }
+  .wiw-sprong { margin-top: 16px; }
+  .wiw-sprong a { min-height: 48px; }
+  :is(#bestuur, #commissies, #smoelenboek) { scroll-margin-top: env(safe-area-inset-top); }
+  :is(#albums, #videos, #optredens) { scroll-margin-top: env(safe-area-inset-top); }
+  .wiw-filters { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 10px; margin-bottom: 16px; }
+  .wiw-zoek { flex: none; }
+  .wiw-stemmen.fotoalbum-filter { margin: 0 -16px; padding: 2px 16px; }
 }
 
 /* Smalle telefoons: de balk en de stemgroepen net iets kleiner, zodat alles past */

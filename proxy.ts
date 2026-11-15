@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { terugNaar } from "@/lib/terugNaar";
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -32,8 +33,11 @@ export async function proxy(request: NextRequest) {
   const isLoginPage = request.nextUrl.pathname === "/leden/login";
 
   if (!user && !isLoginPage) {
+    // Onthoud waar iemand heen wilde, zodat hij na het inloggen daar uitkomt
+    const { pathname, search } = request.nextUrl;
     const url = request.nextUrl.clone();
     url.pathname = "/leden/login";
+    url.search = pathname === "/leden" && !search ? "" : `?next=${encodeURIComponent(pathname + search)}`;
     return NextResponse.redirect(url);
   }
 
@@ -45,7 +49,10 @@ export async function proxy(request: NextRequest) {
       .single();
 
     const url = request.nextUrl.clone();
-    url.pathname = profile?.rol === "admin" || profile?.rol === "redacteur" ? "/admin" : "/leden";
+    const doel = terugNaar(request.nextUrl.searchParams.get("next"), profile?.rol);
+    const [pad, zoek = ""] = doel.split("?");
+    url.pathname = pad;
+    url.search = zoek ? `?${zoek}` : "";
     return NextResponse.redirect(url);
   }
 

@@ -40,11 +40,22 @@ function aftellen(datum: string) {
 // de agenda en het nieuws van de website.
 export default async function OverzichtPage() {
   const supabase = await db();
-  const [{ naam }, opnames, { data: optredens }, { data: berichten }] = await Promise.all([
+  const [{ naam }, opnames, choreo, { data: optredens }, { data: berichten }] = await Promise.all([
     sessie(),
     // Voor de tegel: de drie nieuwste opnames van het hele koor
     supabase.from("bestanden").select("id, naam").eq("categorie", "opnames").is("stemgroep", null)
       .order("created_at", { ascending: false }).limit(3).then(({ data }) => data ?? []),
+    // En de drie nieuwste choreo-nummers: video en tekst van één lied tellen als één ("Halo (kort)" = "Halo")
+    supabase.from("bestanden").select("id, naam").eq("categorie", "choreo")
+      .order("created_at", { ascending: false }).limit(12).then(({ data }) => {
+        const gezien = new Set<string>();
+        return (data ?? []).flatMap((b) => {
+          const kaal = b.naam.replace(/\s*\([^)]*\)\s*$/, "").trim();
+          if (gezien.has(kaal.toLowerCase())) return [];
+          gezien.add(kaal.toLowerCase());
+          return [{ id: b.id, naam: kaal }];
+        }).slice(0, 3);
+      }),
     supabase.from("agenda").select("id, titel, datum, datum_sorteer, tijd, locatie").eq("gepubliceerd", true).gte("datum_sorteer", vandaag()).order("datum_sorteer").limit(4),
     supabase.from("berichten").select("id, slug, titel, datum").eq("gepubliceerd", true).order("created_at", { ascending: false }).limit(3),
   ]);
@@ -52,6 +63,8 @@ export default async function OverzichtPage() {
   const volgende = komend[0];
   const nieuws = berichten ?? [];
   const teller = volgende?.datum_sorteer ? aftellen(volgende.datum_sorteer) : null;
+  // Het volgende optreden staat al bovenaan: de lijst begint bij het optreden daarna
+  const daarna = teller ? komend.slice(1) : komend;
 
   const voornaam = naam?.split(" ")[0];
 
@@ -60,14 +73,14 @@ export default async function OverzichtPage() {
       <Kop titel={voornaam ? `Welkom, ${voornaam}` : "Welkom"} />
 
       {volgende && teller && (
-        <Sectie>
-          <Link href={`/agenda/${volgende.id}`} className="leden-kaart leden-aftel">
+        <Sectie direct>
+          <Link href={`/agenda/${volgende.id}?van=leden`} className="leden-kaart leden-aftel">
             <span className="leden-aftel-teller">
-              {teller.getal !== null && <strong>{teller.getal}</strong>}
+              {teller.getal !== null && <><span className="leden-verborgen">Nog </span><strong>{teller.getal}</strong></>}
               <span>{teller.tekst}</span>
             </span>
             <span className="leden-aftel-info">
-              <span className="leden-aftel-label">Ons volgende optreden</span>
+              <span className="leden-aftel-label"><span className="leden-verborgen">, </span>Ons volgende optreden<span className="leden-verborgen">:</span></span>
               <span className="leden-aftel-titel">{volgende.titel}</span>
               <span className="leden-aftel-details">
                 <span><IconCalendar size={17} /> {[volgende.datum, volgende.tijd].filter(Boolean).join(", ")}</span>
@@ -82,7 +95,7 @@ export default async function OverzichtPage() {
       {/* Op de telefoon niet: daar staan de pagina's al in de balk onderin */}
       <section className="leden-section leden-tegels-sectie" style={{ paddingTop: 8 }}>
         <div className="leden-binnen">
-          <Reveal>
+          <Reveal direct delay={teller ? 120 : 60}>
             <nav className="leden-tegels" aria-label="Pagina's van de ledenomgeving">
               <Tegel
                 href="/leden/opnames"
@@ -98,7 +111,15 @@ export default async function OverzichtPage() {
                   </ul>
                 )}
               </Tegel>
-              <Tegel href="/leden/choreo" icoon={<IconSparkle size={20} />} titel="Choreografie" />
+              <Tegel href="/leden/choreo" icoon={<IconSparkle size={20} />} titel="Choreografie">
+                {choreo.length > 0 && (
+                  <ul className="leden-tegel-lijst">
+                    {choreo.map((l) => (
+                      <li key={l.id}><span className="leden-tegel-noot"><IconSparkle size={14} /></span><span>{l.naam}</span></li>
+                    ))}
+                  </ul>
+                )}
+              </Tegel>
               <Tegel href="/leden/nieuwsbrieven" icoon={<IconFolder size={20} />} titel="Nieuwsbrieven & ALV" />
               <Tegel href="/leden/fotos" icoon={<IconCamera size={20} />} titel="Foto's" />
               <Tegel href="/leden/wie-is-wie" icoon={<IconUsers size={20} />} titel="Wie is wie" />
@@ -110,11 +131,11 @@ export default async function OverzichtPage() {
       <Sectie>
         <div className="leden-twee">
           <div className="leden-kaart" style={{ overflow: "hidden" }}>
-            <h2 className="leden-kaart-titel">Onze komende optredens</h2>
-            {komend.length === 0 ? (
-              <p className="leden-leeg" style={{ padding: "18px 24px" }}>Nog niets gepland.</p>
-            ) : komend.map((o) => (
-              <Link key={o.id} href={`/agenda/${o.id}`} className="leden-row">
+            <h2 className="leden-kaart-titel">{teller ? "Daarna op de agenda" : "Onze komende optredens"}</h2>
+            {daarna.length === 0 ? (
+              <p className="leden-leeg leden-kaart-leeg">{teller ? "Verder nog niets gepland." : "Nog niets gepland."}</p>
+            ) : daarna.map((o) => (
+              <Link key={o.id} href={`/agenda/${o.id}?van=leden`} className="leden-row">
                 <span className="leden-row__icon"><IconCalendar size={16} /></span>
                 <span className="leden-row__title">
                   {o.titel}
@@ -123,13 +144,14 @@ export default async function OverzichtPage() {
                 <span className="leden-row__action">Bekijken</span>
               </Link>
             ))}
+            <p className="leden-kaart-voet"><Link href="/agenda" className="pijl-link">Hele agenda →</Link></p>
           </div>
           <div className="leden-kaart" style={{ overflow: "hidden" }}>
             <h2 className="leden-kaart-titel">Nieuws</h2>
             {nieuws.length === 0 ? (
-              <p className="leden-leeg" style={{ padding: "18px 24px" }}>Nog geen nieuws.</p>
+              <p className="leden-leeg leden-kaart-leeg">Nog geen nieuws.</p>
             ) : nieuws.map((n) => (
-              <Link key={n.id} href={`/nieuws/${n.slug}`} className="leden-row">
+              <Link key={n.id} href={`/nieuws/${n.slug}?van=leden`} className="leden-row">
                 <span className="leden-row__icon"><IconNewspaper size={16} /></span>
                 <span className="leden-row__title">
                   {n.titel}
@@ -138,6 +160,7 @@ export default async function OverzichtPage() {
                 <span className="leden-row__action">Lezen</span>
               </Link>
             ))}
+            <p className="leden-kaart-voet"><Link href="/nieuws" className="pijl-link">Alle nieuws →</Link></p>
           </div>
         </div>
       </Sectie>

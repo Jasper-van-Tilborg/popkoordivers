@@ -45,20 +45,10 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <p style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 16px" }}>Contact</p>
-            <a
-              href={`mailto:${i.email}`}
-              style={{ display: "block", fontSize: "13px", color: "rgba(255,255,255,0.7)", textDecoration: "none", margin: "0 0 8px", transition: "color 0.15s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--primary)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
-            >
+            <a href={`mailto:${i.email}`} className="footer-link footer-link--licht">
               {i.email}
             </a>
-            <Link
-              href="/contact#boeken"
-              style={{ display: "block", fontSize: "13px", color: "rgba(255,255,255,0.45)", textDecoration: "none", transition: "color 0.15s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
-            >
+            <Link href="/contact#boeken" className="footer-link">
               Uitnodigen voor een optreden
             </Link>
           </div>
@@ -75,9 +65,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   aria-label={s.label}
                   title={s.label}
-                  style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.75)", transition: "background 0.15s, color 0.15s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.color = "#fff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "rgba(255,255,255,0.75)"; }}
+                  className="footer-social"
                 >
                   {s.icon}
                 </a>
@@ -106,25 +94,11 @@ export default function Footer() {
               { label: "Log in", href: "/leden" },
             ].map((l) =>
               l.href.startsWith("http") ? (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", textDecoration: "none", transition: "color 0.15s", display: "inline-block", padding: "12px 0" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.9)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
-                >
+                <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" className="footer-onder">
                   {l.label}
                 </a>
               ) : (
-                <Link
-                  key={l.label}
-                  href={l.href}
-                  style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", textDecoration: "none", transition: "color 0.15s", display: "inline-block", padding: "12px 0" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.9)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
-                >
+                <Link key={l.label} href={l.href} className="footer-onder">
                   {l.label}
                 </Link>
               )
@@ -135,6 +109,31 @@ export default function Footer() {
       </div>
 
       <style>{`
+        /* Links in de footer: tekst blijft klein, het klikvlak is ruim genoeg voor een duim */
+        .footer-link {
+          display: block; width: fit-content; padding: 6px 0; margin: -2px 0 2px;
+          font-size: 13px; color: rgba(255,255,255,0.45); text-decoration: none; transition: color 0.15s;
+        }
+        .footer-link--licht { color: rgba(255,255,255,0.7); }
+        .footer-social {
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 44px; height: 44px; border-radius: 50%;
+          background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75);
+          transition: background-color 0.15s, color 0.15s, transform 0.12s var(--ease-out);
+        }
+        .footer-onder {
+          display: inline-block; padding: 12px 0;
+          font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.15s;
+        }
+        @media (hover: hover) {
+          .footer-link:hover { color: #fff; }
+          .footer-link--licht:hover { color: var(--primary); }
+          .footer-social:hover { background: var(--primary); color: #fff; }
+          .footer-onder:hover { color: rgba(255,255,255,0.9); }
+        }
+        .footer-link:active, .footer-onder:active { color: #fff; }
+        .footer-social:active { background: var(--primary); color: #fff; transform: scale(0.94); transition-duration: 0.1s; }
+
         @media (max-width: 768px) {
           .footer-outer {
             padding: 48px 16px 24px !important;

@@ -45,16 +45,10 @@ export default function WhatWeDo() {
           <div>
             <RevealText
               text="Dit is Divers"
-              pageDelay={900}
               style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
             />
           </div>
-          <Link
-            href="/media"
-            style={{ fontSize: "14px", fontWeight: 600, color: "var(--primary)", textDecoration: "none", paddingBottom: "4px", borderBottom: "2px solid rgba(243,106,42,0.25)", transition: "border-color 0.15s", whiteSpace: "nowrap" }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(243,106,42,0.25)")}
-          >
+          <Link href="/media" className="pijl-link">
             Naar foto&apos;s &amp; video&apos;s →
           </Link>
         </Reveal>

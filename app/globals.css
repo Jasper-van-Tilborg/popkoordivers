@@ -89,7 +89,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
 
 /* ── Scroll reveal animations ── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(24px); filter: blur(6px); }
+  from { opacity: 0; transform: translateY(16px); filter: blur(6px); }
   to   { opacity: 1; transform: translateY(0);    filter: none;      }
 }
 
@@ -102,19 +102,45 @@ a, button { -webkit-tap-highlight-color: transparent; }
   opacity: 0;
 }
 .reveal.in-view {
-  animation: fadeUp 0.8s var(--ease-out) forwards;
+  animation: fadeUp 0.55s var(--ease-out) forwards;
 }
 .reveal-fade.in-view {
   animation: fadeIn 0.65s ease forwards;
 }
 
+/* Koppen woord voor woord (components/RevealText.tsx): beginnen zodra ze in beeld komen */
+@keyframes woordIn {
+  from { opacity: 0; transform: translateY(12px); filter: blur(6px); }
+  to   { opacity: 1; transform: none;             filter: none;      }
+}
+.reveal-tekst > span { display: inline-block; margin-right: 0.28em; opacity: 0; }
+.reveal-tekst.in-view > span { animation: woordIn 0.6s var(--ease-out) both; }
+
+/* Hover alleen met een muis: op een telefoon blijft :hover na een tik hangen.
+   Tikken krijgt in plaats daarvan een korte indruk (:active). */
 .card-hover {
   transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out) !important;
 }
-.card-hover:hover {
-  box-shadow: var(--shadow-md) !important;
-  transform: translateY(-4px) !important;
+@media (hover: hover) {
+  .card-hover:hover {
+    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-4px) !important;
+  }
 }
+.card-hover:active {
+  transform: scale(0.98) !important;
+  transition-duration: 0.1s !important;
+}
+
+/* Tekstlink met pijl (bijv. "Meer over ons →") */
+.pijl-link {
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  font-size: 14px; font-weight: 700; color: var(--primary); text-decoration: none;
+  padding-bottom: 3px; border-bottom: 2px solid rgba(243,106,42,0.3);
+  transition: border-color 0.15s;
+}
+@media (hover: hover) { .pijl-link:hover { border-color: var(--primary); } }
+.pijl-link:active { border-color: var(--primary); }
 /* ── Knoppen ── */
 .btn {
   display: inline-flex;
@@ -128,13 +154,38 @@ a, button { -webkit-tap-highlight-color: transparent; }
   border: 1.5px solid transparent;
   transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s, transform 0.12s;
 }
-.btn:hover { transform: translateY(-1px); }
 .btn--primary { background: var(--primary); color: #fff; box-shadow: 0 4px 16px rgba(243,106,42,0.28); }
-.btn--primary:hover { opacity: 0.9; }
 .btn--soft { background: rgba(243,106,42,0.08); color: var(--primary); border-color: rgba(243,106,42,0.2); }
-.btn--soft:hover { background: var(--primary); color: #fff; }
 .btn--ghost { background: none; color: #888; font-weight: 600; padding: 12px 20px; border-color: rgba(0,0,0,0.12); }
-.btn--ghost:hover { color: #111; border-color: rgba(0,0,0,0.25); transform: none; }
+@media (hover: hover) {
+  .btn:hover { transform: translateY(-1px); }
+  .btn--primary:hover { opacity: 0.9; }
+  .btn--soft:hover { background: var(--primary); color: #fff; }
+  .btn--ghost:hover { color: #111; border-color: rgba(0,0,0,0.25); transform: none; }
+}
+/* Indrukken bij klikken of tikken: je ziet dat het aankwam */
+.btn:active, .druk:active { transform: scale(0.97); transition-duration: 0.1s; }
+
+/* Knoppen op een foto (hero van home en Over ons): oranje vol, paars omlijnd.
+   Meezingen blijft zo de hoofdactie. */
+.hero-knop {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 700; color: #fff; text-decoration: none;
+  padding: 13px 28px; border-radius: 35px; border: 1.5px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.12s var(--ease-out);
+}
+.hero-knop--meezingen { background: var(--primary); border-color: var(--primary); }
+.hero-knop--agenda {
+  font-weight: 600; border: 2px solid #A855F7; padding: 12.5px 27.5px;
+  background: rgba(124,58,237,0.22);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+@media (hover: hover) {
+  .hero-knop:hover { transform: translateY(-1px); }
+  .hero-knop--meezingen:hover { background: var(--primary-light); border-color: var(--primary-light); }
+  .hero-knop--agenda:hover { background: #7C3AED; border-color: #7C3AED; }
+}
+.hero-knop:active { transform: scale(0.96); transition-duration: 0.1s; }
 
 .event-row:hover {
   transform: translateX(4px) !important;
@@ -155,7 +206,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
-  .reveal, .reveal-fade { opacity: 1 !important; }
+  .reveal, .reveal-fade, .reveal-tekst > span { opacity: 1 !important; animation: none !important; }
   html { scroll-behavior: auto; }
 }
 
@@ -169,9 +220,10 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .detail-kop-gloed { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.14) 0%, transparent 60%); }
 .detail-terug {
   display: inline-flex; align-items: center; gap: 8px; margin-bottom: 28px; padding: 8px 16px 8px 12px; border-radius: 100px;
-  font-size: 15px; font-weight: 700; color: #fff; text-decoration: none; background: rgba(255,255,255,0.16); transition: background 0.15s;
+  font-size: 15px; font-weight: 700; color: #fff; text-decoration: none; background: rgba(255,255,255,0.16); transition: background 0.15s, transform 0.12s;
 }
-.detail-terug:hover { background: rgba(255,255,255,0.26); }
+@media (hover: hover) { .detail-terug:hover { background: rgba(255,255,255,0.26); } }
+.detail-terug:active { background: rgba(255,255,255,0.26); transform: scale(0.97); transition-duration: 0.1s; }
 .detail-terug:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .detail-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin: 0 0 18px; font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.94); }
 .detail-meta > span { display: inline-flex; align-items: center; gap: 8px; }
@@ -192,9 +244,10 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .detail-meer-rij { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
 .detail-meer-kaart {
   display: flex; flex-direction: column; height: 100%; text-decoration: none; background: #fff; border-radius: 22px; overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.07); box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(0,0,0,0.07); box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
 }
-.detail-meer-kaart:hover { transform: translateY(-3px); box-shadow: 0 16px 40px -12px rgba(17,17,17,0.18); }
+@media (hover: hover) { .detail-meer-kaart:hover { transform: translateY(-3px); box-shadow: 0 16px 40px -12px rgba(17,17,17,0.18); } }
+.detail-meer-kaart:active { transform: scale(0.98); transition-duration: 0.1s; }
 .detail-meer-kaart:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 
 @media (max-width: 640px) {

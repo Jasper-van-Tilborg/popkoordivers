@@ -1,36 +1,42 @@
 "use client";
 
-import { useEffect, useState, CSSProperties } from "react";
+import { useEffect, useRef, CSSProperties } from "react";
 
 interface Props {
   text: string;
-  pageDelay?: number;
+  /** Extra wachttijd in ms nadat de kop in beeld komt */
+  delay?: number;
   as?: "h1" | "h2" | "h3";
   style?: CSSProperties;
 }
 
-export default function RevealText({ text, pageDelay = 0, as: Tag = "h2", style }: Props) {
-  const [visible, setVisible] = useState(false);
+// Kop die woord voor woord binnenkomt (stijl in globals.css, "reveal-tekst").
+// Een h1 staat altijd bovenaan: die begint meteen met CSS, zonder op JavaScript
+// te wachten. Andere koppen beginnen pas als je ze in beeld scrolt.
+export default function RevealText({ text, delay = 0, as: Tag = "h2", style }: Props) {
+  const ref = useRef<HTMLHeadingElement>(null);
+  const direct = Tag === "h1";
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), pageDelay);
-    return () => clearTimeout(t);
-  }, [pageDelay]);
+    const el = ref.current;
+    if (direct || !el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("in-view");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [direct]);
 
   return (
-    <Tag style={style}>
+    <Tag ref={ref} className={direct ? "reveal-tekst in-view" : "reveal-tekst"} style={style}>
       {text.split(" ").map((word, i) => (
-        <span
-          key={i}
-          style={{
-            display: "inline-block",
-            marginRight: "0.28em",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(12px)",
-            filter: visible ? "none" : "blur(6px)",
-            transition: `opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${i * 50}ms, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${i * 50}ms, filter 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${i * 50}ms`,
-          }}
-        >
+        <span key={i} style={{ animationDelay: `${delay + i * 50}ms` }}>
           {word}
         </span>
       ))}

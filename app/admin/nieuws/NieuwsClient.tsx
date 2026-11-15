@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { IconEye } from "@/components/icons";
 import { IconPlus, IconSearch, useNaijlen, useToast } from "../_components/ui";
+import { gewoon } from "../_components/zoeken";
+import { useGlijden, useOplichten, useWegvagen } from "../_components/beweging";
 import NieuwsDrawer, { type Bericht } from "./NieuwsDrawer";
 import { bewaarBericht, verwijderBericht, type BerichtInput } from "./actions";
 
@@ -17,17 +19,21 @@ export default function NieuwsClient({ items, loadError, startNieuw, startId }: 
   const [gekozen, setGekozen] = useState<string | null>(startNieuw ? "nieuw" : startId ?? null);
   const [open, sluitend] = useNaijlen(gekozen);
   const [toast, melding] = useToast();
+  const [inhoudRef, meetGlijden] = useGlijden<HTMLDivElement>();
+  const { lijst: alle, isWeg } = useWegvagen(items, (b) => b.id, meetGlijden);
+  const [licht, lichtOp] = useOplichten();
 
   const bericht = open && open !== "nieuw" ? items.find((b) => String(b.id) === open) ?? null : null;
   const zichtbaar = useMemo(() => {
-    const q = zoek.trim().toLowerCase();
-    return items.filter((b) => !q || b.titel.toLowerCase().includes(q) || b.intro.toLowerCase().includes(q));
-  }, [items, zoek]);
+    const q = gewoon(zoek.trim());
+    return alle.filter((b) => !q || gewoon(b.titel).includes(q) || gewoon(b.intro).includes(q));
+  }, [alle, zoek]);
 
   async function save(input: BerichtInput) {
     const res = await bewaarBericht(bericht?.id ?? null, input);
     if (res.error) return res.error;
     setGekozen(null);
+    lichtOp("id" in res ? res.id : bericht?.id);
     melding(bericht ? "Wijzigingen opgeslagen" : "Bericht geplaatst");
     return null;
   }
@@ -62,7 +68,7 @@ export default function NieuwsClient({ items, loadError, startNieuw, startId }: 
         </div>
       </div>
 
-      <div className="adm-content">
+      <div ref={inhoudRef} className="adm-content">
         {loadError ? (
           <div className="adm-empty"><p className="adm-empty-title">Het nieuws kon niet worden geladen</p><p>{loadError}</p></div>
         ) : zichtbaar.length === 0 && zoek ? (
@@ -77,7 +83,7 @@ export default function NieuwsClient({ items, loadError, startNieuw, startId }: 
               </li>
             )}
             {zichtbaar.map((b, i) => (
-              <li key={b.id} className="adm-card" data-hidden={!b.gepubliceerd || undefined}
+              <li key={b.id} className="adm-card" data-hidden={!b.gepubliceerd || undefined} data-flip={b.id} data-weg={isWeg(b)} data-licht={licht(b.id)}
                 style={{ animationDelay: `${Math.min(i, 8) * 30 + 60}ms` }} onClick={() => setGekozen(String(b.id))}>
                 <div className="adm-card-beeld">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

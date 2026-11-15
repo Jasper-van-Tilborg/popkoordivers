@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { Drawer, DeleteButton, IconPlus, IconSearch, useNaijlen, useToast } from "../_components/ui";
 import { Keuze } from "../_components/velden";
+import { gewoon } from "../_components/zoeken";
+import { useGlijden, useOplichten, useWegvagen } from "../_components/beweging";
 import { gebruikersnaamVoor, isEmail, isGebruikersnaam } from "@/lib/gebruikersnaam";
 import { maakLid, verwijderLid, wijzigLid, zetWachtwoord, type LidInput } from "./actions";
 
@@ -171,13 +173,16 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
   const [gekozen, setGekozen] = useState<string | null>(startId ?? null);
   const [open, sluitend]      = useNaijlen(gekozen);
   const [toast, melding]      = useToast();
+  const [inhoudRef, meetGlijden] = useGlijden<HTMLDivElement>();
+  const { lijst: alle, isWeg } = useWegvagen(leden, (l) => l.id, meetGlijden);
+  const [licht, lichtOp] = useOplichten();
 
   const lid = open && open !== "nieuw" ? leden.find((l) => l.id === open) ?? null : null;
 
   const gefilterd = useMemo(() => {
-    const q = zoek.trim().toLowerCase();
-    return leden.filter((l) => !q || (l.naam ?? "").toLowerCase().includes(q) || l.email.toLowerCase().includes(q));
-  }, [leden, zoek]);
+    const q = gewoon(zoek.trim());
+    return alle.filter((l) => !q || gewoon(l.naam ?? "").includes(q) || gewoon(l.email).includes(q));
+  }, [alle, zoek]);
 
   const admins  = leden.filter((l) => l.rol === "admin").length;
   const redacteuren = leden.filter((l) => l.rol === "redacteur").length;
@@ -192,7 +197,7 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
       <section className="adm-group">
         <ul className="adm-list">
           {gefilterd.map((l) => (
-            <li key={l.id} className="adm-row adm-row--avatar adm-row--lid" onClick={() => setGekozen(l.id)}>
+            <li key={l.id} className="adm-row adm-row--avatar adm-row--lid" data-flip={l.id} data-weg={isWeg(l)} data-licht={licht(l.id)} onClick={() => setGekozen(l.id)}>
               <span className="adm-avatar" aria-hidden="true">{initialen(l.naam ?? l.email)}</span>
               <div className="adm-main-col">
                 <button className="adm-title" onClick={(e) => { e.stopPropagation(); setGekozen(l.id); }}>{l.naam ?? l.email}</button>
@@ -218,7 +223,7 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
       eigen={lid?.id === eigenId}
       sluitend={sluitend}
       onClose={() => setGekozen(null)}
-      onDone={(m) => { setGekozen(null); melding(m); }}
+      onDone={(m, id) => { setGekozen(null); lichtOp(id); melding(m); }}
     />
   ) : null;
 
@@ -240,7 +245,7 @@ export default function LedenClient({ leden, eigenId, startId }: { leden: Lid[];
         </div>
       </div>
 
-      <div className="adm-content">{lijst}</div>
+      <div ref={inhoudRef} className="adm-content">{lijst}</div>
       {venster}
       {toast}
     </div>

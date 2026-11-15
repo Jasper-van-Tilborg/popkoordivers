@@ -3,6 +3,8 @@
 import { useMemo, useRef, useState } from "react";
 import { Drawer, DeleteButton, IconOmhoog, IconOmlaag, IconPlus, IconSearch, IconTrash, useNaijlen, useToast } from "../_components/ui";
 import { Keuze, Suggestie } from "../_components/velden";
+import { gewoon } from "../_components/zoeken";
+import { useGlijden, useOplichten, useWegvagen } from "../_components/beweging";
 import { uploadNaarR2 } from "../_components/upload";
 import { bewaarGroep, verplaatsGroep, verwijderGroep, type GroepInput } from "./actions";
 
@@ -36,7 +38,7 @@ function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDo
   plek: { eerste: boolean; laatste: boolean };
   sluitend?: boolean;
   onClose: () => void;
-  onDone: (melding: string) => void;
+  onDone: (melding: string, id?: number) => void;
 }) {
   const isBestuur = groep?.soort === "bestuur";
   const isSmoelenboek = groep?.soort === "smoelenboek";
@@ -92,7 +94,7 @@ function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDo
     });
     setBusy(null);
     if (res.error) setFout(res.error);
-    else onDone(groep ? "Wijzigingen opgeslagen" : `${naam.trim()} is toegevoegd`);
+    else onDone(groep ? "Wijzigingen opgeslagen" : `${naam.trim()} is toegevoegd`, "id" in res ? res.id : groep?.id);
   }
 
   async function remove() {
@@ -220,6 +222,9 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
   const [gekozen, setGekozen] = useState<string | null>(startNieuw ? "nieuw:commissie" : startId ?? null);
   const [open, sluitend] = useNaijlen(gekozen);
   const [toast, melding] = useToast();
+  const [inhoudRef, meetGlijden] = useGlijden<HTMLDivElement>();
+  const { lijst: alle, isWeg } = useWegvagen(groepen, (g) => g.id, meetGlijden);
+  const [licht, lichtOp] = useOplichten();
 
   const nieuw = open?.startsWith("nieuw:") ? (open.slice(6) as GroepInput["soort"]) : null;
   const groep = open && !nieuw ? groepen.find((g) => String(g.id) === open) ?? null : null;
@@ -228,10 +233,10 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
   const smoelenboekGroep = groepen.find((g) => g.soort === "smoelenboek");
 
   // Zoeken op de naam van de groep of van iemand erin
-  const q = zoek.trim().toLowerCase();
-  const past = (g: Groep) => !q || g.naam.toLowerCase().includes(q) || g.leden.some((l) => l.naam.toLowerCase().includes(q));
-  const commissies = useMemo(() => groepen.filter((g) => g.soort === "commissie"), [groepen]);
-  const overig = useMemo(() => groepen.filter((g) => g.soort === "overig"), [groepen]);
+  const q = gewoon(zoek.trim());
+  const past = (g: Groep) => !q || gewoon(g.naam).includes(q) || g.leden.some((l) => gewoon(l.naam).includes(q));
+  const commissies = useMemo(() => alle.filter((g) => g.soort === "commissie"), [alle]);
+  const overig = useMemo(() => alle.filter((g) => g.soort === "overig"), [alle]);
 
   const zelfdeSoort = groep ? groepen.filter((g) => g.soort === groep.soort) : [];
   const plek = { eerste: zelfdeSoort[0]?.id === groep?.id, laatste: zelfdeSoort[zelfdeSoort.length - 1]?.id === groep?.id };
@@ -245,7 +250,7 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
         <h2 className="adm-group-title">{titel} <span className="adm-count">{items.length}</span></h2>
         <ul className="adm-cards adm-cards--groep">
           {zichtbaar.map((g, i) => (
-            <li key={g.id} className="adm-card" style={{ animationDelay: `${Math.min(i, 8) * 30 + 60}ms` }} onClick={() => setGekozen(String(g.id))}>
+            <li key={g.id} className="adm-card" data-flip={g.id} data-weg={isWeg(g)} data-licht={licht(g.id)} style={{ animationDelay: `${Math.min(i, 8) * 30 + 60}ms` }} onClick={() => setGekozen(String(g.id))}>
               <div className="adm-card-body">
                 <button className="adm-title" onClick={(e) => { e.stopPropagation(); setGekozen(String(g.id)); }}>{g.naam}</button>
                 {g.toelichting && <p className="adm-card-tekst">{g.toelichting}</p>}
@@ -305,7 +310,7 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
           </div>
           {smoelenboekGroep.leden.length > 0 ? (
             <ul className="adm-bestuur">
-              {smoelenboekGroep.leden.filter((l) => !q || l.naam.toLowerCase().includes(q) || smoelenboekGroep.naam.toLowerCase().includes(q)).map((p) => (
+              {smoelenboekGroep.leden.filter((l) => !q || gewoon(l.naam).includes(q) || gewoon(smoelenboekGroep.naam).includes(q)).map((p) => (
                 <li key={p.id}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <span className="adm-avatar" aria-hidden="true">{p.foto ? <img src={p.foto} alt="" loading="lazy" /> : initialen(p.naam)}</span>
@@ -334,7 +339,7 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
       plek={plek}
       sluitend={sluitend}
       onClose={() => setGekozen(null)}
-      onDone={(m) => { setGekozen(null); melding(m); }}
+      onDone={(m, id) => { setGekozen(null); lichtOp(id); melding(m); }}
     />
   ) : null;
 
@@ -356,7 +361,7 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
         </div>
       </div>
 
-      <div className="adm-content">{inhoud}</div>
+      <div ref={inhoudRef} className="adm-content">{inhoud}</div>
       {venster}
       {toast}
     </div>
