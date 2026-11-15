@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DeleteButton, Drawer, IconBack, IconStarSmall, IconTrash, IconUpload, Tabs, useNaijlen, useToast } from "../../_components/ui";
 import { Vinkje } from "../../_components/velden";
+import { useGlijden } from "../../_components/beweging";
 import { uploadKlein, uploadNaarR2 } from "../../_components/upload";
 import AlbumDrawer from "../AlbumDrawer";
 import { fotoToevoegen, fotosToegevoegd, verwijderAlbum, verwijderFoto, wijzigAlbum, zetBijschrift, zetFotoVolgorde, zetImpressie, type AlbumInput } from "../actions";
@@ -12,7 +13,7 @@ import { VideoLijst, type AlbumKeuze, type Video } from "../Videos";
 
 interface Foto { id: string; impressies: boolean; bijschrift: string | null; url: string; klein: string | null }
 interface Upload { naam: string; voortgang: number; fout?: string }
-type Actie = { soort: "impressie"; id: string; impressies: boolean } | { soort: "volgorde"; ids: string[] } | { soort: "bijschrift"; id: string; bijschrift: string | null };
+type Actie = { soort: "impressie"; id: string; impressies: boolean } | { soort: "volgorde"; ids: string[] } | { soort: "bijschrift"; id: string; bijschrift: string | null } | { soort: "weg"; id: string };
 
 // Eén foto groot, met het bijschrift en of hij op de website staat
 function FotoVenster({ foto, nummer, aantal, sluitend, onClose, onBewaar, onVerwijder }: {
@@ -96,7 +97,9 @@ export default function AlbumClient({ album, fotos, videos, albums, startTab }: 
   const [toonBewerken, sluitend] = useNaijlen(bewerken ? true : null);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [drag, setDrag]       = useState(false);
-  const [bezig, setBezig]     = useState<Set<string>>(new Set());
+  // De foto die na "Ja, verwijderen" wegvaagt; daarna glijden de andere in het gat
+  const [vervaagt, setVervaagt] = useState<string | null>(null);
+  const [rasterRef, meetGlijden] = useGlijden<HTMLUListElement>();
   const [bevestig, setBevestig] = useState<string | null>(null);
   const [, startTransition]   = useTransition();
   const [sleep, setSleep]     = useState<number | null>(null);
@@ -105,6 +108,7 @@ export default function AlbumClient({ album, fotos, videos, albums, startTab }: 
   const [lijst, pasToe] = useOptimistic(fotos, (state, a: Actie) =>
     a.soort === "impressie" ? state.map((f) => (f.id === a.id ? { ...f, impressies: a.impressies } : f))
     : a.soort === "bijschrift" ? state.map((f) => (f.id === a.id ? { ...f, bijschrift: a.bijschrift } : f))
+    : a.soort === "weg" ? state.filter((f) => f.id !== a.id)
     : a.ids.map((id) => state.find((f) => f.id === id)).filter((f): f is Foto => !!f)
   );
 
@@ -160,6 +164,7 @@ export default function AlbumClient({ album, fotos, videos, albums, startTab }: 
     const ids = lijst.map((f) => f.id);
     const [id] = ids.splice(van, 1);
     ids.splice(naar, 0, id);
+    meetGlijden();
     startTransition(async () => {
       pasToe({ soort: "volgorde", ids });
       const res = await zetFotoVolgorde(album.id, ids);
@@ -170,10 +175,16 @@ export default function AlbumClient({ album, fotos, videos, albums, startTab }: 
   async function verwijder(f: Foto) {
     if (bevestig !== f.id) { setBevestig(f.id); return; }
     setBevestig(null);
-    setBezig((s) => new Set(s).add(f.id));
-    const res = await verwijderFoto(f.id);
-    setBezig((s) => { const n = new Set(s); n.delete(f.id); return n; });
-    melding(res.error ? `Verwijderen lukte niet: ${res.error}` : "Foto verwijderd");
+    setVervaagt(f.id);
+    // Eerst wegvagen (admin.css, [data-weg]); lukt het verwijderen niet, dan komt hij terug
+    await new Promise((klaar) => setTimeout(klaar, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 200));
+    meetGlijden();
+    startTransition(async () => {
+      pasToe({ soort: "weg", id: f.id });
+      setVervaagt(null);
+      const res = await verwijderFoto(f.id);
+      melding(res.error ? `Verwijderen lukte niet: ${res.error}` : "Foto verwijderd");
+    });
   }
 
   // Vanuit het venster van één foto: bijschrift en/of website
@@ -194,6 +205,7 @@ export default function AlbumClient({ album, fotos, videos, albums, startTab }: 
   }
 
   async function verwijderUitVenster(f: Foto): Promise<string | null> {
+    meetGlijden();
     const res = await verwijderFoto(f.id);
     if (res.error) return res.error;
     setOpen(null);
@@ -280,12 +292,13 @@ export default function AlbumClient({ album, fotos, videos, albums, startTab }: 
         ) : (
           <>
           <p className="adm-hint" style={{ margin: "0 0 12px" }}>Sleep foto&apos;s of gebruik de pijltjes om de volgorde te veranderen. Zo staan ze ook op de website; de eerste foto met een ster is de omslag.</p>
-          <ul className="adm-photos" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          <ul ref={rasterRef} className="adm-photos" style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {lijst.map((f, i) => (
               <li
                 key={f.id}
                 className={bekend.has(f.id) ? "adm-photo" : "adm-photo adm-photo--nieuw"}
-                data-busy={bezig.has(f.id) || undefined}
+                data-flip={f.id}
+                data-weg={vervaagt === f.id || undefined}
                 data-sleep={sleep === i || undefined}
                 draggable
                 onDragStart={(e) => { setSleep(i); e.dataTransfer.effectAllowed = "move"; }}
@@ -317,7 +330,7 @@ export default function AlbumClient({ album, fotos, videos, albums, startTab }: 
                     onClick={() => verwijder(f)}
                     onBlur={() => setBevestig(null)}
                     aria-label={bevestig === f.id ? "Ja, foto verwijderen" : "Foto verwijderen"}
-                    disabled={bezig.has(f.id)}
+                    disabled={vervaagt === f.id}
                   >
                     {bevestig === f.id ? "Verwijderen?" : <IconTrash />}
                   </button>

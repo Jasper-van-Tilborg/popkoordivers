@@ -1,6 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import heroFoto from "@/public/overons_image.jpg";
+import tomFoto from "@/public/tom_mordang.jpg";
+import schakelFoto from "@/public/deschakel.jpg";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
@@ -42,33 +46,22 @@ export default function OverOnsPage() {
 
         {/* ── Hero — foto ── */}
         <section style={{ position: "relative", overflow: "hidden", minHeight: "78svh", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/overons_image.jpg" alt="" aria-hidden="true"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%" }} />
+          <Image src={heroFoto} alt="" aria-hidden="true" fill preload sizes="100vw" placeholder="blur"
+            style={{ objectFit: "cover", objectPosition: "center 30%" }} />
           <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.25) 100%)" }} />
 
           <div className="overons-hero-inner" style={{ position: "relative", zIndex: 1, maxWidth: "1200px", margin: "0 auto", width: "100%", padding: "160px 24px 120px" }}>
-            <Reveal delay={0}>
-              <RevealText text="Over ons" as="h1" pageDelay={0}
+            <Reveal direct>
+              <RevealText text="Over ons" as="h1"
                 style={{ fontSize: "clamp(44px, 7vw, 88px)", fontWeight: 800, letterSpacing: "-3px", lineHeight: 1, color: "#FFFFFF", margin: "0 0 16px" }} />
               <p style={{ fontSize: "clamp(17px, 1.8vw, 20px)", lineHeight: 1.6, color: "rgba(255,255,255,0.85)", maxWidth: "480px", margin: "0 0 32px" }}>
                 Passie voor zingen sinds 2008
               </p>
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                <Link
-                  href="/contact#meezingen"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--primary)", color: "#fff", fontWeight: 700, fontSize: "15px", padding: "13px 28px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid var(--primary)", transition: "background 0.2s, border-color 0.2s, transform 0.12s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary-light)"; e.currentTarget.style.borderColor = "var(--primary-light)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.transform = "translateY(0)"; }}
-                >
+                <Link href="/contact#meezingen" className="hero-knop hero-knop--meezingen">
                   Kom meezingen →
                 </Link>
-                <Link
-                  href="/agenda"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#7C3AED", color: "#fff", fontWeight: 600, fontSize: "15px", padding: "13px 28px", borderRadius: "35px", textDecoration: "none", border: "1.5px solid #7C3AED", transition: "background 0.2s, border-color 0.2s, transform 0.12s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#a855f7"; e.currentTarget.style.borderColor = "#a855f7"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#7C3AED"; e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.transform = "translateY(0)"; }}
-                >
+                <Link href="/agenda" className="hero-knop hero-knop--agenda">
                   Waar kun je ons zien
                 </Link>
               </div>
@@ -129,8 +122,7 @@ export default function OverOnsPage() {
             <div className="info-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "80px" }}>
               <Reveal delay={0} style={{ height: "100%" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "24px", background: "#FFF8F4", borderRadius: "24px", padding: "24px", height: "100%", border: "1px solid rgba(243,106,42,0.12)" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/tom_mordang.jpg" alt="Tom Mordang" style={{ width: "112px", height: "112px", borderRadius: "18px", objectFit: "cover", flexShrink: 0 }} />
+                  <Image src={tomFoto} alt="Tom Mordang" sizes="112px" style={{ width: "112px", height: "112px", borderRadius: "18px", objectFit: "cover", flexShrink: 0 }} />
                   <div>
                     <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--primary)", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>Dirigent</p>
                     <p style={{ fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px", margin: "0 0 6px" }}>Tom Mordang</p>
@@ -140,11 +132,10 @@ export default function OverOnsPage() {
               </Reveal>
               <Reveal delay={100} style={{ height: "100%" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "24px", background: "#FFF8F4", borderRadius: "24px", padding: "24px", height: "100%", border: "1px solid rgba(243,106,42,0.12)" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/deschakel.jpg" alt="CCGR De Schakel" style={{ width: "112px", height: "112px", borderRadius: "18px", objectFit: "cover", flexShrink: 0 }} />
+                  <Image src={schakelFoto} alt="CCGR De Schakel" sizes="112px" style={{ width: "112px", height: "112px", borderRadius: "18px", objectFit: "cover", flexShrink: 0 }} />
                   <div>
                     <p style={{ fontSize: "11px", fontWeight: 700, color: "#7C3AED", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>Repetities</p>
-                    <p style={{ fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px", margin: "0 0 6px" }}>{inst.repetitie_dag} · {inst.repetitie_tijd}</p>
+                    <p style={{ fontSize: "22px", fontWeight: 800, color: "#111", letterSpacing: "-0.5px", margin: "0 0 6px" }}>{inst.repetitie_dag} · <span style={{ whiteSpace: "nowrap" }}>{inst.repetitie_tijd}</span></p>
                     <p style={{ fontSize: "14px", color: "#555", lineHeight: 1.6, margin: 0 }}>{inst.repetitie_locatie} — meezingen is altijd welkom.</p>
                   </div>
                 </div>
@@ -222,25 +213,10 @@ export default function OverOnsPage() {
                 </p>
                 <RevealText
                   text="Sfeer in beeld"
-                  pageDelay={1050}
                   style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: 0 }}
                 />
               </div>
-              <Link
-                href="/media"
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--primary)",
-                  textDecoration: "none",
-                  paddingBottom: "4px",
-                  borderBottom: "2px solid rgba(243,106,42,0.25)",
-                  transition: "border-color 0.15s",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(243,106,42,0.25)")}
-              >
+              <Link href="/media" className="pijl-link">
                 Naar foto&apos;s &amp; video&apos;s →
               </Link>
             </Reveal>
@@ -264,23 +240,6 @@ export default function OverOnsPage() {
                     <img src={publiekeUrl(item.foto)} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
                       onError={(e) => { e.currentTarget.style.display = "none"; }} />
                     <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)" }} />
-                    <div style={{ position: "absolute", top: "16px", left: "16px" }}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "5px",
-                          background: "rgba(255,255,255,0.92)",
-                          borderRadius: "100px",
-                          padding: "4px 12px",
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          color: "#111",
-                        }}
-                      >
-                        {item.label}
-                      </span>
-                    </div>
                     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px" }}>
                       <p style={{ margin: "0 0 2px", fontSize: "15px", fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>
                         {item.label}
@@ -315,7 +274,6 @@ export default function OverOnsPage() {
             <Reveal>
               <RevealText
                 text="Kom een keer meezingen"
-                pageDelay={1200}
                 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 20px" }}
               />
               <p
@@ -329,32 +287,8 @@ export default function OverOnsPage() {
               >
                 Nieuwsgierig? Kom gewoon langs op {inst.repetitie_dag.toLowerCase()}avond. Geen auditie, geen verplichtingen — gewoon meezingen en kijken of het iets voor jou is.
               </p>
-              <Link
-                href="/contact#meezingen"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  background: "var(--primary)",
-                  color: "#FFFFFF",
-                  fontWeight: 700,
-                  fontSize: "15px",
-                  padding: "14px 28px",
-                  borderRadius: "35px",
-                  textDecoration: "none",
-                  boxShadow: "0 4px 20px rgba(243,106,42,0.28)",
-                  transition: "transform 0.12s, opacity 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "0.9";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                Meer info →
+              <Link href="/contact#meezingen" className="btn btn--primary" style={{ fontSize: "15px", padding: "14px 28px" }}>
+                Kom meezingen →
               </Link>
             </Reveal>
           </div>
@@ -384,11 +318,6 @@ export default function OverOnsPage() {
 
         /* ── Mobile overrides ── */
         @media (max-width: 640px) {
-          .page-hero {
-            padding: 100px 20px 80px !important;
-            height: auto !important;
-            min-height: 320px !important;
-          }
           .section-pad {
             padding-top: 60px !important;
             padding-bottom: 72px !important;

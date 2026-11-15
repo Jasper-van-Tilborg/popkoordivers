@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import heroFoto from "@/public/herosection_image.jpg";
 import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
 import { useSocials } from "@/components/InstellingenProvider";
@@ -16,23 +18,17 @@ export default function Hero() {
         flexDirection: "column",
       }}
     >
-      {/* Full-bleed background image — covers content + wave area */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/herosection_image.jpg"
+      {/* Foto over de hele hero, ook achter de golf. next/image levert een telefoon
+          een kleine versie, en de foto laadt vóór de rest. */}
+      <Image
+        src={heroFoto}
         alt=""
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          objectPosition: "center 0%",
-        }}
+        fill
+        preload
+        sizes="100vw"
+        placeholder="blur"
+        style={{ objectFit: "cover", objectPosition: "center 0%" }}
       />
 
       {/* Gradient overlay — donker achter de tekst, lichter naar onderen zodat de foto meer spreekt */}
@@ -49,6 +45,7 @@ export default function Hero() {
       {/* Main content — exactly 100svh tall, wave follows below */}
       <div style={{ minHeight: "100svh", padding: "0 24px", display: "flex", flexDirection: "column", position: "relative", zIndex: 10 }}>
         <div
+          className="hero-content"
           style={{
             flex: 1,
             maxWidth: "1200px",
@@ -60,13 +57,12 @@ export default function Hero() {
             justifyContent: "center",
           }}
         >
-          <Reveal delay={0}>
+          <Reveal direct>
             <div style={{ maxWidth: "680px", textAlign: "center" }}>
               {/* Headline */}
               <RevealText
                 text="Swingend Popkoor uit Gilze"
                 as="h1"
-                pageDelay={0}
                 style={{ fontSize: "clamp(40px, 6vw, 76px)", fontWeight: 800, lineHeight: 1.05, letterSpacing: "-2.5px", color: "#FFFFFF", margin: "0 0 20px" }}
               />
 
@@ -85,46 +81,10 @@ export default function Hero() {
 
               {/* CTAs */}
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
-                <Link
-                  href="/contact#meezingen"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    background: "var(--primary)",
-                    color: "#FFFFFF",
-                    fontWeight: 700,
-                    fontSize: "15px",
-                    padding: "13px 28px",
-                    borderRadius: "35px",
-                    textDecoration: "none",
-                    border: "1.5px solid var(--primary)",
-                    transition: "background 0.2s, border-color 0.2s, transform 0.12s",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--primary-light)"; e.currentTarget.style.borderColor = "var(--primary-light)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "var(--primary)"; e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.transform = "translateY(0)"; }}
-                >
+                <Link href="/contact#meezingen" className="hero-knop hero-knop--meezingen">
                   Kom meezingen →
                 </Link>
-                <Link
-                  href="/agenda"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    background: "#7C3AED",
-                    color: "#FFFFFF",
-                    fontWeight: 600,
-                    fontSize: "15px",
-                    padding: "13px 28px",
-                    borderRadius: "35px",
-                    textDecoration: "none",
-                    border: "1.5px solid #7C3AED",
-                    transition: "background 0.2s, border-color 0.2s, transform 0.12s",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#a855f7"; e.currentTarget.style.borderColor = "#a855f7"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#7C3AED"; e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.transform = "translateY(0)"; }}
-                >
+                <Link href="/agenda" className="hero-knop hero-knop--agenda">
                   Waar kun je ons zien
                 </Link>
               </div>
@@ -139,9 +99,8 @@ export default function Hero() {
                     rel="noopener noreferrer"
                     aria-label={s.label}
                     title={s.label}
-                    style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "46px", height: "46px", borderRadius: "50%", background: "#fff", border: "1.5px solid #fff", color: s.color, transition: "border-color 0.15s, transform 0.12s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = s.color; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#fff"; e.currentTarget.style.transform = "translateY(0)"; }}
+                    className="hero-social"
+                    style={{ color: s.color, "--merk": s.color } as React.CSSProperties}
                   >
                     {s.icon}
                   </a>
@@ -160,10 +119,19 @@ export default function Hero() {
       </div>
 
       <style>{`
+        .hero-social {
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 46px; height: 46px; border-radius: 50%;
+          background: #fff; border: 1.5px solid #fff;
+          transition: border-color 0.15s, transform 0.12s var(--ease-out);
+        }
+        @media (hover: hover) {
+          .hero-social:hover { border-color: var(--merk); transform: translateY(-2px); }
+        }
+        .hero-social:active { transform: scale(0.96); transition-duration: 0.1s; }
+
         @media (max-width: 768px) {
-          .hero-content {
-            padding-top: 100px !important;
-          }
+          .hero-content { padding-top: 140px !important; }
         }
       `}</style>
     </section>

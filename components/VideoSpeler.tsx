@@ -16,7 +16,8 @@ export default function VideoSpeler({ titel, youtubeId, src, className }: {
   if (src) {
     return (
       <div className={className} style={vlak}>
-        <video src={src} controls preload="metadata" playsInline title={titel}
+        {/* #t=0.1: de browser toont het eerste beeld in plaats van een zwart vlak */}
+        <video src={`${src}#t=0.1`} controls preload="metadata" playsInline title={titel}
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }} />
       </div>
     );

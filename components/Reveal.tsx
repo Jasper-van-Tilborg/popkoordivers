@@ -7,14 +7,16 @@ interface RevealProps {
   delay?: number;
   style?: CSSProperties;
   className?: string;
+  /** Bovenaan de pagina: meteen met CSS binnenkomen, zonder op JavaScript te wachten */
+  direct?: boolean;
 }
 
-export default function Reveal({ children, delay = 0, style, className = "" }: RevealProps) {
+export default function Reveal({ children, delay = 0, style, className = "", direct = false }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (direct || !el) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -23,17 +25,18 @@ export default function Reveal({ children, delay = 0, style, className = "" }: R
           observer.disconnect();
         }
       },
-      { threshold: 0.08 }
+      // Zodra de bovenrand 40px in beeld is, ook bij secties die hoger zijn dan het scherm
+      { threshold: 0, rootMargin: "0px 0px -40px 0px" }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [direct]);
 
   return (
     <div
       ref={ref}
-      className={`reveal ${className}`.trim()}
+      className={`reveal${direct ? " in-view" : ""} ${className}`.trim()}
       style={{ animationDelay: `${delay}ms`, ...style }}
     >
       {children}

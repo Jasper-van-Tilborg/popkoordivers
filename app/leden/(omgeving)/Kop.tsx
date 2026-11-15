@@ -6,7 +6,7 @@ export function Kop({ titel, tekst, children }: { titel: string; tekst?: string;
   return (
     <section className="leden-kopvlak">
       <div className="leden-binnen">
-        <Reveal>
+        <Reveal direct>
           <h1>{titel}</h1>
           {tekst && <p>{tekst}</p>}
           {children}
@@ -16,16 +16,17 @@ export function Kop({ titel, tekst, children }: { titel: string; tekst?: string;
   );
 }
 
-export function Sectie({ titel, aantal, id, children }: { titel?: string; aantal?: number; id?: string; children: ReactNode }) {
+// direct: voor een sectie bovenaan de pagina, die meteen binnenkomt (zie Reveal)
+export function Sectie({ titel, aantal, id, direct, children }: { titel?: string; aantal?: number; id?: string; direct?: boolean; children: ReactNode }) {
   return (
     <section id={id} className="leden-section">
       <div className="leden-binnen">
         {titel && (
-          <Reveal>
+          <Reveal direct={direct}>
             <h2 className="leden-h2">{titel}{aantal ? <span className="leden-telling">{aantal}</span> : null}</h2>
           </Reveal>
         )}
-        <Reveal delay={60}>{children}</Reveal>
+        <Reveal direct={direct} delay={60}>{children}</Reveal>
       </div>
     </section>
   );

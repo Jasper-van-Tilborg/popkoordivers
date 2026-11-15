@@ -31,8 +31,8 @@ export default async function NieuwsPage() {
           className="page-hero"
           style={{
             background: "var(--primary)",
-            padding: "140px 24px 100px",
-            minHeight: "420px",
+            padding: "128px 24px 80px",
+            minHeight: "280px",
             position: "relative",
             overflow: "hidden",
           }}
@@ -42,10 +42,9 @@ export default async function NieuwsPage() {
             <RevealText
               text="Nieuws"
               as="h1"
-              pageDelay={0}
               style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 24px" }}
             />
-            <Reveal delay={180}>
+            <Reveal direct delay={180}>
               <p style={{ fontSize: "clamp(15px, 1.6vw, 18px)", lineHeight: 1.7, color: "rgba(255,255,255,0.82)", maxWidth: "520px", margin: 0 }}>
                 Het laatste nieuws van Popkoor Divers — optredens, nieuwe leden en alles wat er speelt.
               </p>
@@ -64,7 +63,7 @@ export default async function NieuwsPage() {
 
             {!berichten || berichten.length === 0 ? (
               <Reveal>
-                <p style={{ fontSize: "16px", color: "#aaa", textAlign: "center", padding: "60px 0" }}>
+                <p style={{ fontSize: "16px", color: "#666", textAlign: "center", padding: "60px 0" }}>
                   Nog geen berichten gepubliceerd.
                 </p>
               </Reveal>
@@ -72,7 +71,7 @@ export default async function NieuwsPage() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }} className="nieuws-grid">
                 {berichten.map((bericht, i) => (
                   <Reveal key={bericht.id} delay={Math.min(i % 3, 2) * 80}>
-                    <Link href={`/nieuws/${bericht.slug}`} style={{ display: "block", textDecoration: "none", height: "100%" }}>
+                    <Link href={`/nieuws/${bericht.slug}`} style={{ display: "block", textDecoration: "none", height: "100%", borderRadius: "20px" }}>
                       <article
                         style={{
                           background: "#FFFFFF",
@@ -83,7 +82,6 @@ export default async function NieuwsPage() {
                           height: "100%",
                           display: "flex",
                           flexDirection: "column",
-                          transition: "transform 0.2s, box-shadow 0.2s",
                         }}
                         className="card-hover"
                       >
@@ -98,16 +96,18 @@ export default async function NieuwsPage() {
                         >
                           {/^(https?:\/\/|\/)/.test(bericht.afbeelding ?? "") && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={bericht.afbeelding} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                            <img src={bericht.afbeelding} alt="" loading={i < 3 ? "eager" : "lazy"} fetchPriority={i === 0 ? "high" : undefined} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                           )}
                         </div>
 
                         {/* Content */}
                         <div style={{ padding: "24px", display: "flex", flexDirection: "column", flex: 1 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-                            <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--primary)" }}>{bericht.datum}</span>
-                            <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "#ccc", flexShrink: 0 }} />
-                            <span style={{ fontSize: "11px", fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.05em" }}>{bericht.categorie}</span>
+                          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px 10px", marginBottom: "12px" }}>
+                            <span style={{ fontSize: "13px", fontWeight: 700, color: "#B54412" }}>{bericht.datum}</span>
+                            {/* Op de nieuwspagina zegt "Nieuws" niets; andere categorieën wel */}
+                            {bericht.categorie && bericht.categorie.trim().toLowerCase() !== "nieuws" && (
+                              <span style={{ fontSize: "11px", fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: "0.05em", background: "rgba(0,0,0,0.05)", padding: "3px 10px", borderRadius: "100px" }}>{bericht.categorie}</span>
+                            )}
                           </div>
                           <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#111", letterSpacing: "-0.02em", lineHeight: 1.3, margin: "0 0 10px" }}>
                             {bericht.titel}
@@ -147,7 +147,7 @@ export default async function NieuwsPage() {
         @media (max-width: 900px) { .nieuws-grid { grid-template-columns: 1fr 1fr !important; } }
         @media (max-width: 580px) { .nieuws-grid { grid-template-columns: 1fr !important; } }
         @media (max-width: 640px) {
-          .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 320px !important; }
+          .page-hero { padding: 100px 20px 64px !important; height: auto !important; min-height: 240px !important; }
           .section-pad { padding-top: 60px !important; padding-bottom: 72px !important; padding-left: 20px !important; padding-right: 20px !important; }
         }
       `}</style>

@@ -7,7 +7,7 @@ import RevealText from "@/components/RevealText";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicUrl } from "@/lib/r2";
 import VideoSpeler from "@/components/VideoSpeler";
-import Gallery from "./Gallery";
+import Galerij from "@/components/Galerij";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,13 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
   ]);
   const videos = videosData ?? [];
 
-  const photos = (fotosData ?? []).map((f) => getPublicUrl(f.r2_key));
+  // Klein voor de fotomuur (en als eerste beeld in de lightbox), groot in de lightbox.
+  // Bijschriften bevatten soms namen van leden: die blijven op de openbare pagina weg.
+  const fotos = (fotosData ?? []).map((f) => ({
+    groot: getPublicUrl(f.r2_key),
+    klein: getPublicUrl(f.klein_key ?? f.r2_key),
+    bijschrift: null,
+  }));
 
   return (
     <>
@@ -39,16 +45,21 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
       <main style={{ minHeight: "100vh", background: "#FFFFFF" }}>
 
         {/* ── Hero ── */}
-        <section className="page-hero" style={{ background: "var(--primary)", padding: "140px 24px 100px", minHeight: "420px", position: "relative", overflow: "hidden" }}>
+        <section className="page-hero" style={{ background: "var(--primary)", padding: "128px 24px 80px", minHeight: "280px", position: "relative", overflow: "hidden" }}>
           <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%)", pointerEvents: "none" }} />
           <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <Reveal delay={0}>
-              <Link href="/media" className="album-back-link">← Terug naar Impressies</Link>
+            <Reveal direct>
+              <Link href="/media" className="detail-terug">
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+                Terug naar Impressies
+              </Link>
             </Reveal>
-            <RevealText text={album.titel} as="h1" pageDelay={0} style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 16px" }} />
-            <Reveal delay={180}>
+            <RevealText text={album.titel} as="h1" style={{ fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1.1, color: "#FFFFFF", margin: "0 0 16px" }} />
+            <Reveal direct delay={180}>
               <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.75)", margin: 0, fontWeight: 500 }}>
-                {album.datum}{photos.length > 0 ? ` · ${photos.length} foto${photos.length !== 1 ? "'s" : ""}` : ""}
+                {album.datum}{fotos.length > 0 ? ` · ${fotos.length} foto${fotos.length !== 1 ? "'s" : ""}` : ""}
               </p>
             </Reveal>
           </div>
@@ -72,7 +83,11 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
                 ))}
               </div>
             )}
-            <Gallery photos={photos} thumbs={(fotosData ?? []).map((f) => (f.klein_key ? getPublicUrl(f.klein_key) : null))} />
+            {fotos.length > 0 ? (
+              <Galerij fotos={fotos} titel={album.titel} />
+            ) : videos.length === 0 && (
+              <p style={{ textAlign: "center", padding: "80px 24px", background: "#FFF8F4", borderRadius: "20px", fontSize: "17px", color: "#737373", margin: 0 }}>Nog geen foto&apos;s in dit album.</p>
+            )}
           </div>
         </section>
 
@@ -81,22 +96,9 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
 
       <style>{`
         @media (max-width: 640px) {
-          .page-hero { padding: 100px 20px 80px !important; height: auto !important; min-height: 320px !important; }
+          .page-hero { padding: 100px 20px 64px !important; height: auto !important; min-height: 240px !important; }
           .gallery-section { padding: 40px 16px 80px !important; }
         }
-        .album-back-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          color: rgba(255,255,255,0.7);
-          font-size: 13px;
-          font-weight: 600;
-          text-decoration: none;
-          margin-bottom: 20px;
-          letter-spacing: 0.02em;
-          transition: color 0.15s;
-        }
-        .album-back-link:hover { color: #fff; }
         .album-videos { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 48px; }
         .album-video { border-radius: 16px; }
         @media (max-width: 640px) { .album-videos { grid-template-columns: 1fr; } }

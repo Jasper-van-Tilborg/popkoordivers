@@ -1,8 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const TEMPO = [0.75, 1, 1.25];
+// Het gekozen tempo blijft staan voor het volgende nummer (alleen in deze browser)
+const TEMPO_SLEUTEL = "speler-tempo";
+function bewaardTempo() {
+  try { const t = Number(localStorage.getItem(TEMPO_SLEUTEL)); return TEMPO.includes(t) ? t : 1; } catch { return 1; }
+}
 
 const tijd = (s: number) => {
   if (!Number.isFinite(s)) return "0:00";
@@ -24,19 +29,44 @@ function Sprong({ terug }: { terug?: boolean }) {
 // Zonder url wordt de link nog opgehaald; de bediening staat dan even uit.
 // Een mp4 is soms alleen geluid (zoals de oefenbestanden van Lean On Me): dan meldt de
 // speler onGeenBeeld en krijgt het de bediening van een geluidsbestand.
-export default function Speler({ kop, details, url, video, onSluit, onGeenBeeld }: {
+export default function Speler({ kop, details, url, video, onSluit, onGeenBeeld, onDownload }: {
   kop: string; details?: string; url: string | null; video: boolean; onSluit: () => void; onGeenBeeld?: () => void;
+  // Met een downloadknop in de kop, naast het kruisje
+  onDownload?: () => void;
 }) {
   const audio = useRef<HTMLAudioElement>(null);
   const [beeld, setBeeld] = useState(false);
   const [speelt, setSpeelt] = useState(false);
   const [positie, setPositie] = useState(0);
   const [duur, setDuur] = useState(0);
-  const [tempo, setTempo] = useState(1);
+  // De speler bestaat alleen in de browser (na een klik), dus meteen uit de opslag lezen kan
+  const [tempo, setTempo] = useState(bewaardTempo);
 
   const a = () => audio.current!;
   const spring = (sec: number) => { a().currentTime = Math.min(Math.max(a().currentTime + sec, 0), duur || 0); };
-  const kiesTempo = (t: number) => { setTempo(t); if (audio.current) audio.current.playbackRate = t; };
+  const kiesTempo = (t: number) => {
+    setTempo(t);
+    if (audio.current) audio.current.playbackRate = t;
+    try { localStorage.setItem(TEMPO_SLEUTEL, String(t)); } catch {}
+  };
+
+  // Toetsen bij geluid: spatie speelt of pauzeert, de pijltjes springen 10 seconden.
+  // Op de schuifbalk doen de pijltjes wat ze daar altijd doen.
+  useEffect(() => {
+    if (video) return;
+    function toets(e: KeyboardEvent) {
+      const el = audio.current;
+      if (!el || e.metaKey || e.ctrlKey || e.altKey) return;
+      const opBalk = (e.target as HTMLElement).classList?.contains("speler-balk");
+      if (e.key === " ") { e.preventDefault(); if (el.paused) el.play().catch(() => {}); else el.pause(); }
+      else if (!opBalk && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+        e.preventDefault();
+        el.currentTime = Math.min(Math.max(el.currentTime + (e.key === "ArrowLeft" ? -10 : 10), 0), el.duration || 0);
+      }
+    }
+    document.addEventListener("keydown", toets);
+    return () => document.removeEventListener("keydown", toets);
+  }, [video]);
 
   return (
     <>
@@ -45,9 +75,16 @@ export default function Speler({ kop, details, url, video, onSluit, onGeenBeeld 
           <p className="speler-titel">{kop}</p>
           {details && <p className="speler-details">{details}</p>}
         </div>
-        <button type="button" className="speler-sluit" onClick={onSluit} aria-label="Sluiten">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
-        </button>
+        <div className="speler-kopknoppen">
+          {onDownload && (
+            <button type="button" className="speler-sluit" onClick={onDownload} aria-label={`Downloaden: ${kop}`} title="Downloaden">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
+            </button>
+          )}
+          <button type="button" className="speler-sluit" onClick={onSluit} aria-label="Sluiten">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
       </div>
 
       {video ? (
@@ -101,7 +138,7 @@ export default function Speler({ kop, details, url, video, onSluit, onGeenBeeld 
 
           <div className="speler-knoppen">
             <button type="button" className="speler-sprong" disabled={!duur} onClick={() => spring(-10)} aria-label="10 seconden terug"><Sprong terug /></button>
-            <button type="button" className="speler-speel" disabled={!url} onClick={() => (speelt ? a().pause() : a().play())} aria-label={speelt ? "Pauzeren" : "Afspelen"}>
+            <button type="button" className="speler-speel" disabled={!url} onClick={() => (speelt ? a().pause() : a().play())} aria-label={speelt ? "Pauzeren" : "Afspelen"} aria-keyshortcuts="Space">
               {speelt ? (
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2" /><rect x="14" y="4.5" width="4" height="15" rx="1.2" /></svg>
               ) : (

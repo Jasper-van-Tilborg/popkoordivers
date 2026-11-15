@@ -14,7 +14,7 @@ export default function DetailKop({ terug, meta, titel, intro }: {
     <section className="page-hero detail-kop">
       <div aria-hidden="true" className="detail-kop-gloed" />
       <div className="detail-binnen">
-        <Reveal delay={0}>
+        <Reveal direct>
           <Link href={terug.href} className="detail-terug">
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5M12 5l-7 7 7 7" />
@@ -23,15 +23,15 @@ export default function DetailKop({ terug, meta, titel, intro }: {
           </Link>
         </Reveal>
         {meta && (
-          <Reveal delay={80}>
+          <Reveal direct delay={80}>
             <div className="detail-meta">{meta}</div>
           </Reveal>
         )}
-        <Reveal delay={160}>
+        <Reveal direct delay={160}>
           <h1 className="detail-titel">{titel}</h1>
         </Reveal>
         {intro && (
-          <Reveal delay={220}>
+          <Reveal direct delay={220}>
             <p className="detail-intro">{intro}</p>
           </Reveal>
         )}

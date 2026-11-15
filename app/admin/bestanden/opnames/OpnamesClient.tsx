@@ -7,9 +7,8 @@ import { IconPlus, IconSearch, Tabs, useNaijlen, useToast } from "../../_compone
 import { STEMMEN, groepeer, liedHref, nr, stemVan, type Lied, type Opname } from "./liedjes";
 import LiedVenster from "./LiedVenster";
 import { sleeptBestanden } from "./uploaden";
+import { gewoon } from "../../_components/zoeken";
 
-// Zoeken zonder op hoofdletters of accenten te letten
-const gewoon = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 // De stemmen waar een lied nog geen opname voor heeft (Compleet telt niet mee)
 const ontbreekt = (l: Lied) => STEMMEN.filter((s) => s !== "Compleet" && !l.opnames.some((o) => stemVan(o) === s));
 

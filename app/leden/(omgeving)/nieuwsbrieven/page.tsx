@@ -7,7 +7,7 @@ export default async function NieuwsbrievenPage() {
   return (
     <>
       <Kop titel="Nieuwsbrieven & ALV" />
-      <Sectie>
+      <Sectie direct>
         <div className="leden-kaart leden-opnames">
           <Documenten
             nieuwsbrieven={alles.filter((d) => d.categorie === "nieuwsbrieven")}

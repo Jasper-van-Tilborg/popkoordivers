@@ -34,7 +34,6 @@ export default function About() {
           <Reveal delay={120}>
             <RevealText
               text="Wie zijn wij?"
-              pageDelay={300}
               style={{ fontSize: "clamp(28px, 3.5vw, 44px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.15, color: "#111", margin: "0 0 8px" }}
             />
 
@@ -48,23 +47,7 @@ export default function About() {
               {" "}Samen zorgen we voor muziek die bruist, raakt en verbindt.
             </p>
 
-            <Link
-              href="/over-ons"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                color: "var(--primary)",
-                fontWeight: 700,
-                fontSize: "14px",
-                textDecoration: "none",
-                borderBottom: "2px solid rgba(243,106,42,0.3)",
-                paddingBottom: "2px",
-                transition: "border-color 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(243,106,42,0.3)")}
-            >
+            <Link href="/over-ons" className="pijl-link">
               Meer over ons →
             </Link>
           </Reveal>

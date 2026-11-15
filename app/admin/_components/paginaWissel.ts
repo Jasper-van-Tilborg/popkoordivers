@@ -7,7 +7,11 @@
 
 import { maakPaginaWissel } from "@/lib/paginaWissel";
 
-export { DUUR, CURVE } from "@/lib/paginaWissel";
+export { CURVE } from "@/lib/paginaWissel";
+
+// Korter dan in de ledenomgeving: in de admin wissel je vaak van pagina.
+// Even lang als de schuifbeweging in admin.css ("Pagina wisselen").
+export const DUUR = 320;
 
 export const VOLGORDE = [
   "/admin",

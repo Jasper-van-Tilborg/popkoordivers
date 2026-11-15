@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import { bestandDownload, bestandTekst, bestandUrl } from "../actions";
 import Lezer from "./Lezer";
 import { ICOON, KNOP, soort } from "./StemTabs";
@@ -35,7 +35,12 @@ export default function Documenten({ nieuwsbrieven, alv }: { nieuwsbrieven: Docu
   const [active, setActive] = useState<Tab>(TABS[0]);
   const [zoek, setZoek] = useState("");
   const [leest, setLeest] = useState<{ doc: Document; html: string | null } | null>(null);
-  const [fout, setFout] = useState("");
+  // Een fout hoort bij de rij die je aantikte
+  const [fout, setFout] = useState<{ id: number; tekst: string } | null>(null);
+  // Welk document nu wordt opgehaald om te downloaden
+  const [bezig, setBezig] = useState<number | null>(null);
+  // Bij een andere tab schuiven de rijen van die kant binnen (net als bij Opnames)
+  const [richting, setRichting] = useState<"rechts" | "links" | null>(null);
   const tabs = useRef<HTMLDivElement>(null);
   const vlak = useRef<HTMLSpanElement>(null);
   const venster = useRef<HTMLDialogElement>(null);
@@ -63,7 +68,7 @@ export default function Documenten({ nieuwsbrieven, alv }: { nieuwsbrieven: Docu
 
   // Een Word-bestand als tekst op de pagina; lukt dat niet, dan gewoon downloaden
   async function lees(doc: Document) {
-    setFout("");
+    setFout(null);
     setLeest({ doc, html: null });
     venster.current?.showModal();
     const html = await bestandTekst(doc.id).catch(() => null);
@@ -72,20 +77,28 @@ export default function Documenten({ nieuwsbrieven, alv }: { nieuwsbrieven: Docu
   }
 
   async function download(doc: Document) {
-    setFout("");
-    const url = await bestandDownload(doc.id);
-    if (url) window.location.assign(url);
-    else setFout("Dit bestand kon niet worden gedownload. Log opnieuw in en probeer het nog eens.");
+    if (bezig !== null) return;
+    setFout(null);
+    setBezig(doc.id);
+    const url = await bestandDownload(doc.id).catch(() => null);
+    if (url) {
+      window.location.assign(url);
+      // De browser begint de download zelf; het rondje draait nog even tot die er is
+      setTimeout(() => setBezig(null), 1200);
+    } else {
+      setBezig(null);
+      setFout({ id: doc.id, tekst: "Dit bestand kon niet worden gedownload. Log opnieuw in en probeer het nog eens." });
+    }
   }
 
   // Een PDF opent de browser zelf, in een nieuw tabblad
   async function open(doc: Document) {
-    setFout("");
+    setFout(null);
     // Het tabblad meteen openen, anders houdt de browser het tegen
     const tab = window.open("", "_blank");
     const url = await bestandUrl(doc.id);
     if (url && tab) tab.location.href = url;
-    else { tab?.close(); setFout("Dit bestand kon niet worden geopend. Log opnieuw in en probeer het nog eens."); }
+    else { tab?.close(); setFout({ id: doc.id, tekst: "Dit bestand kon niet worden geopend. Log opnieuw in en probeer het nog eens." }); }
   }
 
   return (
@@ -96,7 +109,11 @@ export default function Documenten({ nieuwsbrieven, alv }: { nieuwsbrieven: Docu
           {TABS.map((t) => {
             const aantal = lijsten[t].filter(past).length;
             return (
-              <button key={t} role="tab" aria-selected={active === t} onClick={() => setActive(t)} className="stemtab">
+              <button key={t} role="tab" aria-selected={active === t} onClick={() => {
+                if (t === active) return;
+                setRichting(TABS.indexOf(t) > TABS.indexOf(active) ? "rechts" : "links");
+                setActive(t);
+              }} className="stemtab">
                 {t}
                 {aantal > 0 && <span className="stemtab-aantal">{aantal}</span>}
               </button>
@@ -108,37 +125,42 @@ export default function Documenten({ nieuwsbrieven, alv }: { nieuwsbrieven: Docu
       <div className="liedjes-zoekbalk">
         <div className="liedjes-zoek">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-          <input type="search" value={zoek} onChange={(e) => setZoek(e.target.value)} placeholder="Zoek op naam, nummer of jaar" aria-label="Zoek op naam, nummer of jaar" />
+          <input type="search" value={zoek} onChange={(e) => { setRichting(null); setZoek(e.target.value); }} placeholder="Zoek op nummer, maand of jaar" aria-label="Zoek op nummer, maand of jaar" />
         </div>
       </div>
-
-      {fout && <p className="liedjes-fout" role="alert">{fout}</p>}
 
       {groepen.length === 0 ? (
         <p className="liedjes-leeg">{zoek.trim() ? `Niets gevonden voor "${zoek.trim()}".` : "Binnenkort beschikbaar."}</p>
       ) : (
         <div key={active} className="docs">
-          {groepen.map(([titel, docs]) => (
+          {groepen.map(([titel, docs], g) => (
             <section key={titel} className="docs-groep">
               <h2 className="docs-groep-titel">{titel}</h2>
-              <div className="liedjes">
+              <div className="liedjes" data-richting={richting ?? undefined}>
                 {docs.map((doc, i) => {
                   const s = soort(doc.ext);
+                  // Doorlopend over de groepen heen, maar niet eindeloos na elkaar
+                  const volgorde = Math.min(groepen.slice(0, g).reduce((n, [, d]) => n + d.length, 0) + i, 10);
                   return (
-                    <div key={doc.id} className="lied" style={{ "--i": i } as React.CSSProperties}>
+                    <Fragment key={doc.id}>
+                    <div className="lied" style={{ "--i": volgorde } as React.CSSProperties}>
                       <div className="lied-tekst">
                         <p className="lied-titel">{doc.naam}</p>
                         {active === "Nieuwsbrieven" && <p className="lied-componist">{datumTekst(doc.datum)}</p>}
                       </div>
                       <div className="lied-knoppen">
-                        <button type="button" className="lied-download" aria-label={`Downloaden: ${doc.naam}`} title="Downloaden" onClick={() => download(doc)}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
+                        <button type="button" className="lied-download" aria-label={`Downloaden: ${doc.naam}`} aria-busy={bezig === doc.id} title="Downloaden" onClick={() => download(doc)}>
+                          {bezig === doc.id ? <span className="docs-draai" aria-hidden="true" /> : (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
+                          )}
                         </button>
                         <button type="button" className="lied-pdf" aria-label={`${s === "word" ? "Lezen" : "Openen"}: ${doc.naam}`} onClick={() => (s === "word" ? lees(doc) : s === "pdf" ? open(doc) : download(doc))}>
                           {s === "pdf" ? ICOON.word : ICOON[s]}<span className="lied-knop-tekst">{s === "pdf" ? "Openen" : KNOP[s]}</span>
                         </button>
                       </div>
                     </div>
+                    {fout?.id === doc.id && <p className="liedjes-fout docs-fout" role="alert">{fout.tekst}</p>}
+                    </Fragment>
                   );
                 })}
               </div>
@@ -162,6 +184,7 @@ export default function Documenten({ nieuwsbrieven, alv }: { nieuwsbrieven: Docu
             details={datumTekst(leest.doc.datum)}
             html={leest.html}
             onSluit={() => venster.current?.close()}
+            onDownload={() => download(leest.doc)}
           />
         )}
       </dialog>

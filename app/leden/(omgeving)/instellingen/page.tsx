@@ -8,7 +8,7 @@ export default async function InstellingenPage() {
   return (
     <>
       <Kop titel="Instellingen" />
-      <Sectie>
+      <Sectie direct>
         <Instellingen
           weergave={grootte}
           account={{ naam, inlog: inlognaam(user.email) }}

@@ -17,8 +17,8 @@ const SOORT: Record<string, string> = { mp4: "Video", mov: "Video", m4v: "Video"
 export const soort = (ext: string) => SOORT[ext] ?? ext.toUpperCase();
 export const isVideo = (ext: string) => soort(ext) === "Video";
 
-// Zoeken zonder op hoofdletters of accenten te letten
-export const gewoon = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+// Zoeken zonder op hoofdletters of accenten te letten (voor Choreografie, Nieuwsbrieven en ALV-stukken)
+export { gewoon } from "../_components/zoeken";
 
 export const ext = (bestandsnaam: string) => bestandsnaam.split(".").pop()!.toLowerCase();
 

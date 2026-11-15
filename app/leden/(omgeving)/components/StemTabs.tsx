@@ -9,12 +9,20 @@ import Speler from "./Speler";
 // Andere lijsten (zoals Choreografie) geven hun eigen tabbladen mee.
 const stemgroepen = ["Sopraan", "Mezzo", "Alt", "Tenor", "Bas", "Compleet"];
 
+interface Bestand {
+  id: number;
+  ext: string;
+}
+
 interface Lied {
   id: number;
   titel: string;
   // Het liednummer uit de map van het koor
   nummer?: number | null;
   ext?: string;
+  // Meer bestanden bij één lied (Choreografie: video en beschrijving), elk een eigen
+  // knop op een vaste plek; null laat die plek leeg. Downloaden kan dan in het venster.
+  knoppen?: (Bestand | null)[];
 }
 
 const nr = (n?: number | null) => (n ? String(n).padStart(3, "0") : "");
@@ -98,12 +106,27 @@ interface Props {
   tabs?: readonly string[];
   // Wat er in de lijst staat, voor de tekst als er niets is: "opnames"
   wat?: string;
+  // Het tabblad om mee te openen: de eigen stem, of die van de vorige keer
+  start?: string | null;
+  // Onthoudt het gekozen tabblad in een cookie met deze naam (de server leest hem als start)
+  onthoud?: string;
 }
 
-export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat = "opnames" }: Props) {
-  const [active, setActive] = useState(tabbladen[0]);
-  const [gekozenPagina, setPagina] = useState(0);
-  const [perPagina, setPerPagina] = useState(10);
+// De titel zonder de stem van het tabblad: "Viva La Vida Alt-2" wordt "Viva La Vida",
+// met "Alt-2" klein eronder. Staat de stem er niet (of vooraan) in, dan blijft hij heel.
+function splits(titel: string, tab: string) {
+  // Alleen bij de stemmen en Compleet; de namen zijn gewone woorden
+  const m = stemgroepen.includes(tab) ? new RegExp(`\\s${tab}(?![a-z])`, "i").exec(titel) : null;
+  return m ? { hoofd: titel.slice(0, m.index).trim(), sub: titel.slice(m.index).trim() } : { hoofd: titel, sub: "" };
+}
+
+// Een jaar onthouden, alleen voor de ledenomgeving
+function bewaar(naam: string, waarde: string) {
+  document.cookie = `${naam}=${encodeURIComponent(waarde)}; path=/leden; max-age=31536000; samesite=lax`;
+}
+
+export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat = "opnames", start, onthoud }: Props) {
+  const [active, setActive] = useState(start && tabbladen.includes(start) ? start : tabbladen[0]);
   const [zoek, setZoek] = useState("");
   const [sortering, setSortering] = useState<Sortering>("nummer-af");
   // Waar de nieuwe rijen vandaan komen: rechts bij verder, links bij terug
@@ -116,39 +139,12 @@ export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat =
   const huidigeLiedjes = (liedjes[active] ?? [])
     .filter(past)
     .sort((a, b) => SORTERING[sortering].vergelijk(a, b) || a.titel.localeCompare(b.titel, "nl"));
-  const paginas = Math.ceil(huidigeLiedjes.length / perPagina);
-  const pagina = Math.min(gekozenPagina, Math.max(paginas - 1, 0));
-  const zichtbaar = huidigeLiedjes.slice(pagina * perPagina, (pagina + 1) * perPagina);
   const lijst = useRef<HTMLDivElement>(null);
   const speler = useRef<HTMLDialogElement>(null);
   const [speelt, setSpeelt] = useState<{ lied: Lied; url: string | null; alleenGeluid?: boolean } | null>(null);
   const toontBeeld = !!speelt && soort(speelt.lied.ext) === "video" && !speelt.alleenGeluid;
   const [leest, setLeest] = useState<{ lied: Lied; html: string | null } | null>(null);
   const [fout, setFout] = useState("");
-
-  // Zoveel opnames per pagina dat de hele lijst, met de knoppen eronder, in één
-  // scherm past (bovenaan de pagina). Opnieuw bij een andere stem of schermgrootte.
-  useLayoutEffect(() => {
-    function meet() {
-      const blok = lijst.current;
-      const rijen = blok?.querySelector(".liedjes");
-      if (!blok || !rijen?.children.length) return;
-      const rij = rijen.getBoundingClientRect();
-      const hoogte = rij.height / rijen.children.length;
-      const onder = (blok.parentElement ?? blok).getBoundingClientRect().bottom - rij.bottom;
-      const balk = document.querySelector<HTMLElement>(".ln-tabbalk");
-      const balkHoogte = balk && getComputedStyle(balk).display !== "none" ? balk.offsetHeight : 0;
-      const ruimte = window.innerHeight - (rij.top + window.scrollY) - onder - balkHoogte - 24;
-      const per = Math.min(Math.max(Math.floor(ruimte / hoogte), 4), 30);
-      setPerPagina((oud) => (oud === per ? oud : per));
-    }
-    meet();
-    // Na het inschuiven van de pagina en het laden van de letters nog een keer
-    const laat = setTimeout(meet, 700);
-    document.fonts?.ready.then(meet);
-    window.addEventListener("resize", meet);
-    return () => { clearTimeout(laat); window.removeEventListener("resize", meet); };
-  }, [active]);
 
   // Het witte vlak achter de gekozen stem schuift mee; de eerste keer staat het er meteen
   useLayoutEffect(() => {
@@ -171,28 +167,21 @@ export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat =
     if (stem === active) return;
     setRichting(tabbladen.indexOf(stem) > tabbladen.indexOf(active) ? "rechts" : "links");
     setActive(stem);
-    setPagina(0);
+    if (onthoud) bewaar(onthoud, stem);
+    // Ver naar beneden gescrold (de tabbladen blijven op de telefoon staan): de nieuwe lijst van boven
+    const top = lijst.current?.getBoundingClientRect().top ?? 0;
+    if (top < 0) lijst.current?.scrollIntoView({ block: "start" });
   }
 
   function zoekNaar(tekst: string) {
     // Tijdens het typen niet laten schuiven
     setRichting(null);
     setZoek(tekst);
-    setPagina(0);
   }
 
   function sorteer(s: Sortering) {
     setRichting(null);
     setSortering(s);
-    setPagina(0);
-  }
-
-  function naarPagina(p: number) {
-    setRichting(p > pagina ? "rechts" : "links");
-    setPagina(p);
-    // Bij "Volgende" onderaan: terug naar het begin van de lijst
-    const top = lijst.current?.getBoundingClientRect().top ?? 0;
-    if (top < 0) lijst.current?.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
 
   // De link is een uur geldig en wordt pas bij openen opgehaald
@@ -225,6 +214,18 @@ export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat =
     else setFout("Dit bestand kon niet worden gedownload. Log opnieuw in en probeer het nog eens.");
   }
 
+  // Onder de titel in het venster: de stem en versie, en het liednummer
+  const details = (lied: Lied) =>
+    [splits(lied.titel, active).sub, lied.nummer ? `Liednummer ${nr(lied.nummer)}` : ""].filter(Boolean).join(" · ") || undefined;
+
+  // Wat de knop van een bestand doet: afspelen, lezen of openen
+  function actie(lied: Lied) {
+    const s = soort(lied.ext);
+    if (s === "audio" || s === "video") speel(lied);
+    else if (s === "word") lees(lied);
+    else open(lied);
+  }
+
   async function open(lied: Lied) {
     setFout("");
     // Het venster meteen openen, anders houdt de browser het tegen
@@ -236,7 +237,7 @@ export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat =
 
   return (
     <div ref={lijst} className="stemtabs-blok">
-      <div className="stemtabs-balk">
+      {tabbladen.length > 1 && <div className="stemtabs-balk">
         <div ref={tabs} role="tablist" className="stemtabs stemtabs--vlak" style={{ "--kolommen": Math.min(tabbladen.length, 3) } as React.CSSProperties}>
           <span ref={vlak} className="stemtab-vlak" aria-hidden="true" />
           {tabbladen.map((stem) => {
@@ -249,7 +250,7 @@ export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat =
             );
           })}
         </div>
-      </div>
+      </div>}
 
       <div className="liedjes-zoekbalk">
         <div className="liedjes-zoek">
@@ -262,37 +263,45 @@ export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat =
       {fout && <p className="liedjes-fout" role="alert">{fout}</p>}
 
       {huidigeLiedjes.length === 0 ? (
-        <p className="liedjes-leeg">{zoek.trim() ? `Geen ${wat} gevonden voor "${zoek.trim()}" bij ${active}.` : `Nog geen ${wat} toegevoegd.`}</p>
+        <p className="liedjes-leeg">{zoek.trim() ? `Geen ${wat} gevonden voor "${zoek.trim()}"${tabbladen.length > 1 ? ` bij ${active}` : ""}.` : `Nog geen ${wat} toegevoegd.`}</p>
       ) : (
-        <div key={`${active}-${pagina}`} className="liedjes" data-richting={richting ?? undefined}>
-          {zichtbaar.map((lied, i) => {
+        <div key={active} className="liedjes" data-richting={richting ?? undefined}>
+          {huidigeLiedjes.map((lied, i) => {
             const s = soort(lied.ext);
+            const { hoofd, sub } = splits(lied.titel, active);
             return (
-              <div key={lied.id} className="lied" style={{ "--i": i } as React.CSSProperties}>
+              <div key={lied.id} className={lied.knoppen ? "lied lied--knoppen" : "lied"} style={{ "--i": i } as React.CSSProperties}>
                 <span className="lied-nummer" aria-label={lied.nummer ? `Liednummer ${lied.nummer}` : undefined}>{nr(lied.nummer)}</span>
                 <div className="lied-tekst">
-                  <p className="lied-titel">{lied.titel}</p>
+                  <p className="lied-titel">{hoofd}</p>
+                  {sub && <p className="lied-componist">{sub}</p>}
                 </div>
                 <div className="lied-knoppen">
-                  <button type="button" className="lied-download" aria-label={`Downloaden: ${lied.titel}`} title="Downloaden" onClick={() => download(lied)}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
-                  </button>
-                  <button type="button" className="lied-pdf" aria-label={`${KNOP[s].replace(" ↓", "")}: ${lied.titel}`} onClick={() => (s === "audio" || s === "video" ? speel(lied) : s === "word" ? lees(lied) : open(lied))}>
-                    {ICOON[s]}<span className="lied-knop-tekst">{KNOP[s]}</span>
-                  </button>
+                  {lied.knoppen ? (
+                    lied.knoppen.map((b, k) => {
+                      if (!b) return <span key={k} className="lied-knop-leeg" aria-hidden="true" />;
+                      const bs = soort(b.ext);
+                      return (
+                        <button key={k} type="button" className="lied-pdf" aria-label={`${KNOP[bs].replace(" ↓", "")}: ${lied.titel}`} onClick={() => actie({ ...lied, ...b })}>
+                          {ICOON[bs]}<span className="lied-knop-tekst">{KNOP[bs]}</span>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <>
+                      <button type="button" className="lied-download" aria-label={`Downloaden: ${lied.titel}`} title="Downloaden" onClick={() => download(lied)}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
+                      </button>
+                      <button type="button" className="lied-pdf" aria-label={`${KNOP[s].replace(" ↓", "")}: ${lied.titel}`} onClick={() => actie(lied)}>
+                        {ICOON[s]}<span className="lied-knop-tekst">{KNOP[s]}</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
-      )}
-
-      {paginas > 1 && (
-        <nav className="liedjes-paginas" aria-label="Pagina's">
-          <button type="button" className="liedjes-pagina-knop" onClick={() => naarPagina(pagina - 1)} disabled={pagina === 0}>Vorige</button>
-          <span className="liedjes-pagina-tekst" aria-live="polite"><span className="liedjes-pagina-woord">Pagina </span>{pagina + 1} van {paginas}</span>
-          <button type="button" className="liedjes-pagina-knop" onClick={() => naarPagina(pagina + 1)} disabled={pagina === paginas - 1}>Volgende</button>
-        </nav>
       )}
 
       {/* Sluiten haalt de speler (of het document) weg, dan stopt het geluid ook */}
@@ -308,21 +317,23 @@ export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat =
         {speelt && (
           <Speler
             key={speelt.lied.id}
-            kop={speelt.lied.titel}
-            details={speelt.lied.nummer ? `Liednummer ${nr(speelt.lied.nummer)}` : undefined}
+            kop={splits(speelt.lied.titel, active).hoofd}
+            details={details(speelt.lied)}
             url={speelt.url}
             video={toontBeeld}
             onSluit={() => speler.current?.close()}
             onGeenBeeld={() => setSpeelt((s) => (s ? { ...s, alleenGeluid: true } : s))}
+            onDownload={speelt.lied.knoppen ? () => download(speelt.lied) : undefined}
           />
         )}
         {leest && (
           <Lezer
             key={leest.lied.id}
-            kop={leest.lied.titel}
-            details={leest.lied.nummer ? `Liednummer ${nr(leest.lied.nummer)}` : undefined}
+            kop={splits(leest.lied.titel, active).hoofd}
+            details={details(leest.lied)}
             html={leest.html}
             onSluit={() => speler.current?.close()}
+            onDownload={leest.lied.knoppen ? () => download(leest.lied) : undefined}
           />
         )}
       </dialog>
