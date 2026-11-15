@@ -31,6 +31,7 @@ export function linkVoor(soort: string, id: string | null) {
     bericht: `/admin/nieuws?id=${id}`,
     album: `/admin/albums/${id}`,
     foto: `/admin/albums/${id}`,
+    video: `/admin/albums?video=${id}`,
     bestand: `/admin/bestanden?id=${id}`,
     lid: `/admin/gebruikers?id=${id}`,
     groep: `/admin/organisatie?id=${id}`,
@@ -38,7 +39,7 @@ export function linkVoor(soort: string, id: string | null) {
 }
 
 const soortNaam: Record<string, string> = {
-  optreden: "het optreden", bericht: "het bericht", album: "het album", bestand: "het bestand", lid: "het account van",
+  optreden: "het optreden", bericht: "het bericht", album: "het album", video: "de video", bestand: "het bestand", lid: "het account van",
 };
 
 export function Zin({ a }: { a: ActiviteitRegel }) {

@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { Drawer, DeleteButton, IconOmhoog, IconOmlaag, IconPlus, IconSearch, IconTrash, useToast } from "../_components/ui";
+import { Drawer, DeleteButton, IconOmhoog, IconOmlaag, IconPlus, IconSearch, IconTrash, useNaijlen, useToast } from "../_components/ui";
 import { Keuze, Suggestie } from "../_components/velden";
-import { Werkblad, kiesMetSchuif } from "../_components/Werkblad";
 import { bewaarGroep, verplaatsGroep, verwijderGroep, type GroepInput } from "./actions";
 
 export interface Persoon { id: number; naam: string; functie: string | null }
@@ -28,16 +27,18 @@ const SOORTEN = [
 let teller = 0;
 const sleutel = () => `n${++teller}`;
 
-function GroepDrawer({ groep, bestuur, plek, onClose, onDone }: {
+function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDone }: {
   groep: Groep | null;
+  nieuwSoort: GroepInput["soort"];
   bestuur: Persoon[];
   plek: { eerste: boolean; laatste: boolean };
+  sluitend?: boolean;
   onClose: () => void;
-  onDone: (melding: string, id?: number) => void;
+  onDone: (melding: string) => void;
 }) {
   const isBestuur = groep?.soort === "bestuur";
   const [naam, setNaam] = useState(groep?.naam ?? "");
-  const [soort, setSoort] = useState<GroepInput["soort"]>(groep?.soort === "overig" ? "overig" : "commissie");
+  const [soort, setSoort] = useState<GroepInput["soort"]>(groep ? (groep.soort === "overig" ? "overig" : "commissie") : nieuwSoort);
   const [toelichting, setToelichting] = useState(groep?.toelichting ?? "");
   const [contact, setContact] = useState(groep?.contactpersoon_id ? String(groep.contactpersoon_id) : "");
   const [regels, setRegels] = useState<Regel[]>(() => {
@@ -71,7 +72,7 @@ function GroepDrawer({ groep, bestuur, plek, onClose, onDone }: {
     });
     setBusy(null);
     if (res.error) setFout(res.error);
-    else onDone(groep ? "Wijzigingen opgeslagen" : `${naam.trim()} is toegevoegd`, res.id);
+    else onDone(groep ? "Wijzigingen opgeslagen" : `${naam.trim()} is toegevoegd`);
   }
 
   async function remove() {
@@ -94,8 +95,8 @@ function GroepDrawer({ groep, bestuur, plek, onClose, onDone }: {
 
   return (
     <Drawer
-      inline
-      title={groep ? groep.naam : "Nieuwe commissie"}
+      sluitend={sluitend}
+      title={groep ? groep.naam : nieuwSoort === "overig" ? "Nieuwe taak" : "Nieuwe commissie"}
       onClose={onClose}
       acties={groep && !isBestuur && (
         <>
@@ -176,6 +177,8 @@ function GroepDrawer({ groep, bestuur, plek, onClose, onDone }: {
   );
 }
 
+const initialen = (naam: string) => naam.split(/\s+/).filter((w) => w && w[0] === w[0].toUpperCase()).map((w) => w[0]).join("").slice(0, 2) || naam.slice(0, 2).toUpperCase();
+
 export default function OrganisatieClient({ groepen, loadError, startNieuw, startId }: {
   groepen: Groep[];
   loadError?: string;
@@ -183,71 +186,105 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
   startId?: string;
 }) {
   const [zoek, setZoek] = useState("");
-  const [gekozen, setGekozen] = useState<string | null>(startNieuw ? "nieuw" : startId ?? null);
+  // Een id, of "nieuw:commissie" / "nieuw:overig"
+  const [gekozen, setGekozen] = useState<string | null>(startNieuw ? "nieuw:commissie" : startId ?? null);
+  const [open, sluitend] = useNaijlen(gekozen);
   const [toast, melding] = useToast();
 
-  const groep = gekozen && gekozen !== "nieuw" ? groepen.find((g) => String(g.id) === gekozen) ?? null : null;
-  const bestuur = groepen.find((g) => g.soort === "bestuur")?.leden ?? [];
-  const kies = (id: string | null) => kiesMetSchuif(gekozen, id, () => setGekozen(id));
-  const sluit = () => kies(null);
+  const nieuw = open?.startsWith("nieuw:") ? (open.slice(6) as GroepInput["soort"]) : null;
+  const groep = open && !nieuw ? groepen.find((g) => String(g.id) === open) ?? null : null;
+  const bestuurGroep = groepen.find((g) => g.soort === "bestuur");
+  const bestuur = bestuurGroep?.leden ?? [];
 
   // Zoeken op de naam van de groep of van iemand erin
-  const secties = useMemo(() => {
-    const q = zoek.trim().toLowerCase();
-    const past = (g: Groep) => !q || g.naam.toLowerCase().includes(q) || g.leden.some((l) => l.naam.toLowerCase().includes(q));
-    return [
-      { titel: "Bestuur", items: groepen.filter((g) => g.soort === "bestuur" && past(g)) },
-      { titel: "Commissies", items: groepen.filter((g) => g.soort === "commissie" && past(g)) },
-      { titel: "Overige taken", items: groepen.filter((g) => g.soort === "overig" && past(g)) },
-    ].filter((s) => s.items.length > 0);
-  }, [groepen, zoek]);
+  const q = zoek.trim().toLowerCase();
+  const past = (g: Groep) => !q || g.naam.toLowerCase().includes(q) || g.leden.some((l) => l.naam.toLowerCase().includes(q));
+  const commissies = useMemo(() => groepen.filter((g) => g.soort === "commissie"), [groepen]);
+  const overig = useMemo(() => groepen.filter((g) => g.soort === "overig"), [groepen]);
 
   const zelfdeSoort = groep ? groepen.filter((g) => g.soort === groep.soort) : [];
   const plek = { eerste: zelfdeSoort[0]?.id === groep?.id, laatste: zelfdeSoort[zelfdeSoort.length - 1]?.id === groep?.id };
-  const contactNaam = (g: Groep) => bestuur.find((b) => b.id === g.contactpersoon_id)?.naam.split(" ")[0];
-  const commissies = groepen.filter((g) => g.soort === "commissie").length;
+  const contactNaam = (g: Groep) => bestuur.find((b) => b.id === g.contactpersoon_id)?.naam;
   const mensen = new Set(groepen.flatMap((g) => g.leden.map((l) => l.naam.toLowerCase()))).size;
 
-  const lijst = loadError ? (
+  const kaarten = (titel: string, soort: GroepInput["soort"], items: Groep[]) => {
+    const zichtbaar = items.filter(past);
+    if (q && zichtbaar.length === 0) return null;
+    return (
+      <section className="adm-group">
+        <h2 className="adm-group-title">{titel} <span className="adm-count">{items.length}</span></h2>
+        <ul className="adm-cards adm-cards--groep">
+          {zichtbaar.map((g, i) => (
+            <li key={g.id} className="adm-card" style={{ animationDelay: `${Math.min(i, 8) * 30 + 60}ms` }} onClick={() => setGekozen(String(g.id))}>
+              <div className="adm-card-body">
+                <button className="adm-title" onClick={(e) => { e.stopPropagation(); setGekozen(String(g.id)); }}>{g.naam}</button>
+                {g.toelichting && <p className="adm-card-tekst">{g.toelichting}</p>}
+                {g.leden.length > 0 ? (
+                  <ul className="adm-groep-namen">
+                    {g.leden.map((l) => <li key={l.id}>{l.naam}{l.functie && <span>{l.functie}</span>}</li>)}
+                  </ul>
+                ) : <p className="adm-card-tekst adm-missing">Nog niemand</p>}
+              </div>
+              <div className="adm-card-foot">
+                <span className="adm-pill">{g.leden.length} {g.leden.length === 1 ? "persoon" : "personen"}</span>
+                {contactNaam(g) && <span className="adm-groep-contact">Contact: {contactNaam(g)}</span>}
+              </div>
+            </li>
+          ))}
+          {!q && (
+            <li>
+              <button className="adm-card-nieuw" style={{ width: "100%", height: "100%" }} onClick={() => setGekozen(`nieuw:${soort}`)}>
+                <IconPlus /> {soort === "overig" ? "Taak toevoegen" : "Commissie toevoegen"}
+              </button>
+            </li>
+          )}
+        </ul>
+      </section>
+    );
+  };
+
+  const inhoud = loadError ? (
     <div className="adm-empty"><p className="adm-empty-title">Bestuur en commissies konden niet worden geladen</p><p>{loadError}</p></div>
   ) : (
     <>
-      <button className="adm-wb-nieuw" data-id="nieuw" data-gekozen={gekozen === "nieuw" || undefined} onClick={() => kies("nieuw")}>
-        <IconPlus /> Commissie toevoegen
-      </button>
-      {secties.length === 0 ? (
-        <div className="adm-empty"><p className="adm-empty-title">{zoek ? <>Niets gevonden voor &ldquo;{zoek}&rdquo;</> : "Nog geen bestuur of commissies"}</p></div>
-      ) : secties.map((s) => (
-        <section key={s.titel} className="adm-group">
-          <h2 className="adm-group-title">{s.titel}</h2>
-          <ul className="adm-list">
-            {s.items.map((g) => (
-              <li key={g.id} data-id={String(g.id)} data-gekozen={gekozen === String(g.id) || undefined} className="adm-row adm-row--plain" onClick={() => kies(String(g.id))}>
-                <div className="adm-main-col">
-                  <button className="adm-title" onClick={(e) => { e.stopPropagation(); kies(String(g.id)); }}>{g.naam}</button>
-                  <div className="adm-meta">
-                    <span>{g.soort === "bestuur" ? g.leden.map((l) => l.naam.split(" ")[0]).join(", ") : `${g.leden.length} ${g.leden.length === 1 ? "persoon" : "personen"}`}</span>
-                    {g.toelichting && <span>{g.toelichting}</span>}
-                    {contactNaam(g) && <span>Contact: {contactNaam(g)}</span>}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+      {bestuurGroep && past(bestuurGroep) && (
+        <section className="adm-blok adm-blok--bestuur">
+          <div className="adm-blok-kop">
+            <h2>{bestuurGroep.naam}</h2>
+            <button className="adm-btn adm-btn--ghost adm-btn--small" onClick={() => setGekozen(String(bestuurGroep.id))}>Bewerken</button>
+          </div>
+          {bestuurGroep.toelichting && <p className="adm-blok-tekst">{bestuurGroep.toelichting}</p>}
+          {bestuur.length > 0 ? (
+            <ul className="adm-bestuur">
+              {bestuur.map((p) => (
+                <li key={p.id}>
+                  <span className="adm-avatar" aria-hidden="true">{initialen(p.naam)}</span>
+                  <span className="adm-bestuur-naam">{p.naam}</span>
+                  {p.functie && <span className="adm-bestuur-functie">{p.functie}</span>}
+                </li>
+              ))}
+            </ul>
+          ) : <p className="adm-blok-leeg">Nog niemand in het bestuur</p>}
         </section>
-      ))}
+      )}
+      {kaarten("Commissies", "commissie", commissies)}
+      {kaarten("Overige taken", "overig", overig)}
+      {q && !groepen.some(past) && (
+        <div className="adm-empty"><p className="adm-empty-title">Niets gevonden voor &ldquo;{zoek}&rdquo;</p></div>
+      )}
     </>
   );
 
-  const blad = gekozen && (gekozen === "nieuw" || groep) ? (
+  const venster = open && (nieuw || groep) ? (
     <GroepDrawer
-      // Na opslaan komen nieuwe mensen terug met een id: dan opnieuw beginnen met de verse gegevens
-      key={`${gekozen}:${groep?.leden.map((l) => l.id).join(",") ?? ""}`}
+      key={open}
       groep={groep}
+      nieuwSoort={nieuw ?? "commissie"}
       bestuur={bestuur}
       plek={plek}
-      onClose={sluit}
-      onDone={(m, id) => { setGekozen(id ? String(id) : null); melding(m); }}
+      sluitend={sluitend}
+      onClose={() => setGekozen(null)}
+      onDone={(m) => { setGekozen(null); melding(m); }}
     />
   ) : null;
 
@@ -256,9 +293,9 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
       <header className="adm-head">
         <div>
           <h1>Bestuur &amp; commissies</h1>
-          <p className="adm-sub">{bestuur.length} in het bestuur, {commissies} commissies, {mensen} mensen in totaal. Te zien in de ledenomgeving.</p>
+          <p className="adm-sub">{bestuur.length} in het bestuur, {commissies.length} commissies, {mensen} mensen in totaal.</p>
         </div>
-        <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Commissie toevoegen</button>
+        <button className="adm-btn adm-btn--primary" onClick={() => setGekozen("nieuw:commissie")}><IconPlus /> Commissie toevoegen</button>
       </header>
 
       <div className="adm-toolbar">
@@ -269,20 +306,8 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
         </div>
       </div>
 
-      <div className="adm-content">
-        <Werkblad
-          gekozen={gekozen}
-          lijst={lijst}
-          blad={blad}
-          leeg={
-            <>
-              <p className="adm-empty-title">Kies het bestuur of een commissie</p>
-              <p>Pas namen, functies en de volgorde aan. Leden zien het in de ledenomgeving.</p>
-              <button className="adm-btn adm-btn--primary" onClick={() => kies("nieuw")}><IconPlus /> Commissie toevoegen</button>
-            </>
-          }
-        />
-      </div>
+      <div className="adm-content">{inhoud}</div>
+      {venster}
       {toast}
     </div>
   );

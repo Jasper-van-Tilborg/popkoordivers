@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { Drawer, DeleteButton, IconUpload } from "../../_components/ui";
 import { Keuze } from "../../_components/velden";
 import { opnamesToevoegen, verwijderOpnames, wijzigLied } from "./actions";
-import { STEMMEN, leesBestandsnaam, naamVoor, naarStemgroep, nr, type Lied, type Stem } from "./liedjes";
+import { STEMMEN, leesBestandsnaam, naamVoor, naarStemgroep, nr, sleutelVoor, type Lied, type Stem } from "./liedjes";
 import { OPNAME_TYPES, foutTekst, sleeptBestanden, uploadReeks } from "./uploaden";
 
 // Een opname die nog geüpload moet worden
@@ -44,7 +44,8 @@ export default function LiedVenster({ lied, liedjes, bestanden = [], sluitend, o
   bestanden?: File[];
   sluitend?: boolean;
   onClose: () => void;
-  onDone: (melding: string) => void;
+  // sleutel: waar het lied na het opslaan staat (null als het is verwijderd)
+  onDone: (melding: string, sleutel: string | null) => void;
 }) {
   // Bij een nieuw lied: titel en nummer uit de eerste bestandsnaam waar ze in staan
   const uitBestand = bestanden.map((f) => leesBestandsnaam(f.name));
@@ -101,7 +102,10 @@ export default function LiedVenster({ lied, liedjes, bestanden = [], sluitend, o
         const res = await wijzigLied(lied.opnames.map((o) => o.id), { liednummer: n, oudeTitel: lied.titel, titel });
         if (res.error) throw new Error(res.error);
       }
-      onDone(!lied ? "Lied toegevoegd" : aantal ? `${aantal} ${aantal === 1 ? "opname" : "opnames"} toegevoegd` : "Wijzigingen opgeslagen");
+      onDone(
+        !lied ? "Lied toegevoegd" : aantal ? `${aantal} ${aantal === 1 ? "opname" : "opnames"} toegevoegd` : "Wijzigingen opgeslagen",
+        sleutelVoor(n, titel.trim()),
+      );
     } catch (e) {
       setFout(foutTekst(e));
     }
@@ -114,7 +118,7 @@ export default function LiedVenster({ lied, liedjes, bestanden = [], sluitend, o
     const res = await verwijderOpnames(lied.opnames.map((o) => o.id), lied.titel);
     setBusy(null);
     if (res.error) setFout(`Verwijderen lukte niet: ${res.error}`);
-    else onDone("Lied verwijderd");
+    else onDone("Lied verwijderd", null);
   }
 
   const aantalKlaar = wachtrij.filter((x) => x.voortgang === 1).length;

@@ -174,12 +174,12 @@
 .adm-kolomkop { display: none; }
 @media (min-width: 1180px) {
   .adm-col { display: block; }
-  .adm-row--agenda { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 240px) 130px auto; }
+  .adm-row--agenda { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 240px) 130px 96px; }
   .adm-row--bestand { grid-template-columns: minmax(0, 1fr) 160px 170px auto; }
   .adm-row--lid { grid-template-columns: 44px minmax(0, 1fr) 190px 120px 150px; }
   .adm-row--agenda .adm-meta, .adm-row--bestand .adm-meta, .adm-row--lid .adm-meta-col { display: none; }
   .adm-kolomkop { display: grid; gap: 20px; padding: 0 16px 8px 14px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
-  .adm-kolomkop--agenda { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 240px) 130px 196px; }
+  .adm-kolomkop--agenda { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 240px) 130px 96px; }
   .adm-kolomkop--bestand { grid-template-columns: minmax(0, 1fr) 160px 170px 34px; padding-left: 20px; }
   .adm-kolomkop--lid { grid-template-columns: 44px minmax(0, 1fr) 190px 120px 150px; }
 }
@@ -206,6 +206,20 @@
 }
 .adm-card-nieuw:hover { border-color: var(--primary); color: var(--primary); background: #FFF8F4; }
 .adm-card-nieuw:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Bestuur & commissies */
+.adm-blok--bestuur { margin-bottom: 32px; }
+.adm-blok--bestuur .adm-blok-tekst { padding-bottom: 6px; }
+.adm-bestuur { list-style: none; margin: 0; padding: 6px 20px 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px 20px; }
+.adm-bestuur li { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: center; }
+.adm-bestuur .adm-avatar { grid-row: span 2; }
+.adm-bestuur-naam { font-size: 15px; font-weight: 700; color: var(--ink); align-self: end; }
+.adm-bestuur-naam:last-child { align-self: center; grid-row: span 2; }
+.adm-bestuur-functie { font-size: 13px; color: var(--ink-2); align-self: start; }
+.adm-cards--groep .adm-card-nieuw { min-height: 150px; }
+.adm-groep-namen { list-style: none; margin: 12px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 5px; font-size: 14px; color: var(--ink); }
+.adm-groep-namen span { margin-left: 8px; font-size: 13px; color: var(--ink-3); }
+.adm-groep-contact { margin-left: auto; font-size: 12.5px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Instellingen: uitleg links, velden rechts */
 .adm-instelling { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 40px; padding: 28px 0; border-top: 1px solid var(--line); }
@@ -312,19 +326,11 @@
 .adm-meter > span { display: block; height: 100%; border-radius: inherit; background: var(--ok); }
 .adm-meter > span[data-vol] { background: var(--danger); }
 
-/* Filters bovenaan Activiteit: één knop per keuze, de gekozen is gevuld */
-.adm-filters { display: flex; flex-wrap: wrap; gap: 6px; }
-.adm-filters a {
-  padding: 7px 13px; border-radius: 100px; border: 1px solid var(--line); background: #fff;
-  font-size: 13px; font-weight: 700; color: var(--ink-2); text-decoration: none; transition: border-color 0.15s, color 0.15s;
-}
-.adm-filters a:hover { border-color: var(--primary); color: var(--ink); }
-.adm-filters a[aria-current] { background: var(--primary); border-color: var(--primary); color: #fff; }
-.adm-filters a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* Activiteit: de persoon kiezen naast de tabbladen */
+.adm-toolbar-keuze { width: 220px; }
 
 /* Logboek: tijd links, de zin ernaast */
 .adm-logboek li { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 12px 20px; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
-.adm-logboek--datum li { grid-template-columns: 120px minmax(0, 1fr); }
 .adm-logboek li + li { border-top: 1px solid var(--line-soft); }
 .adm-logboek time { font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .adm-logboek strong { color: var(--ink); }
@@ -430,12 +436,6 @@
 .adm-bestand-kaart > div { flex: 1; min-width: 0; }
 .adm-bestand-kaart strong { display: block; font-size: 15px; overflow-wrap: anywhere; }
 
-/* Knoppenbalk onder in het bewerkscherm: zichtbaarheid links, knoppen rechts op één regel */
-.adm-blad .adm-drawer-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 16px; }
-.adm-blad .adm-drawer-foot .adm-server-err { flex-basis: 100%; margin: 0; }
-.adm-blad .adm-drawer-foot .adm-check { margin: 0; }
-.adm-blad .adm-foot-actions { flex: 1; }
-
 /* Schakelaar */
 .adm-switch { position: relative; flex-shrink: 0; width: 36px; height: 21px; padding: 0; border: 0; border-radius: 100px; background: #D6D3D1; cursor: pointer; transition: background 0.18s; }
 .adm-switch[aria-checked="true"] { background: var(--ok); }
@@ -471,54 +471,6 @@
 .adm-empty p { margin: 0 0 6px; }
 .adm-empty-title { font-size: 16px; font-weight: 700; color: var(--ink); }
 .adm-empty .adm-btn { margin-top: 14px; }
-
-/* Werkblad: links de lijst, rechts het bewerkscherm (Werkblad.tsx) */
-.adm-wb { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 24px; align-items: start; }
-/* De lijst blijft in beeld terwijl je in een lang bewerkscherm scrolt */
-.adm-wb-lijst {
-  position: sticky; top: 74px; max-height: calc(100vh - 96px); overflow-y: auto; scrollbar-width: none;
-  display: flex; flex-direction: column; gap: 18px; padding-bottom: 8px;
-}
-.adm-wb-lijst::-webkit-scrollbar { display: none; }
-.adm-wb-lijst .adm-group + .adm-group { margin-top: 0; }
-.adm-wb-lijst .adm-group-title { font-size: 15px; margin-bottom: 8px; }
-.adm-wb-lijst .adm-row { position: relative; z-index: 1; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; padding: 12px 14px; background: transparent; }
-.adm-wb-lijst .adm-row--plain { grid-template-columns: minmax(0, 1fr) auto; padding-left: 16px; }
-.adm-wb-lijst .adm-row:hover { background: rgba(28,25,23,0.025); }
-.adm-wb-lijst .adm-row[data-gekozen] .adm-title { color: var(--ink); }
-.adm-wb-lijst .adm-title { font-size: 15px; }
-.adm-wb-lijst .adm-stub { height: 54px; width: 52px; }
-.adm-wb-lijst .adm-stub-num { font-size: 22px; }
-.adm-wb-lijst .adm-thumb { width: 64px; }
-.adm-wb-lijst .adm-avatar { width: 38px; height: 38px; font-size: 14px; }
-/* Het vlak achter de gekozen regel, met een oranje streep links */
-.adm-wb-vlak {
-  position: absolute; z-index: 0; pointer-events: none; border-radius: 12px; opacity: 0;
-  background: #FFF4EE; box-shadow: inset 0 0 0 1px rgba(243,106,42,0.28);
-}
-.adm-wb-vlak::before { content: ""; position: absolute; top: 10px; bottom: 10px; left: 0; width: 3px; border-radius: 0 3px 3px 0; background: var(--primary); }
-.adm-wb-nieuw {
-  all: unset; box-sizing: border-box; position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 13px 16px; border: 1.5px dashed #D6D3D1; border-radius: 14px; font-size: 14px; font-weight: 700; color: var(--ink-2); cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-.adm-wb-nieuw:hover, .adm-wb-nieuw[data-gekozen] { border-color: var(--primary); color: var(--primary); }
-.adm-wb-nieuw:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.adm-wb-blad { min-width: 0; }
-.adm-wb-leeg {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 360px; padding: 48px 32px;
-  text-align: center; border: 1.5px dashed #D6D3D1; border-radius: 16px; color: var(--ink-2); font-size: 14px;
-}
-.adm-wb-leeg p { margin: 0; }
-.adm-wb-leeg .adm-empty-title { font-size: 17px; }
-.adm-wb-leeg .adm-btn { margin-top: 12px; }
-
-/* Het bewerkscherm als blok op de pagina; de knoppen onderin blijven in beeld */
-.adm-blad { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line); border-radius: 16px; }
-.adm-blad .adm-drawer-head { padding: 22px 28px 18px; }
-.adm-blad .adm-drawer-body { padding: 4px 28px 28px; overflow: visible; }
-.adm-blad .adm-drawer-foot { position: sticky; bottom: 0; z-index: 2; padding: 14px 28px 16px; border-radius: 0 0 16px 16px; }
-.adm-blad .adm-fieldset { max-width: 820px; }
 
 /* Venster in het midden, voor korte formulieren */
 .adm-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(28,25,23,0.36); animation: adm-fade 0.2s ease-out; }
@@ -643,28 +595,15 @@ textarea.adm-input { resize: vertical; line-height: 1.55; }
   .adm-row--plain .adm-actions { grid-column: 1; margin-left: -8px; }
   .adm-grid-2 { grid-template-columns: 1fr; }
   .adm-photos { grid-template-columns: repeat(2, 1fr); }
-  .adm-drawer-body, .adm-drawer-head, .adm-drawer-foot,
-  .adm-blad .adm-drawer-body, .adm-blad .adm-drawer-head, .adm-blad .adm-drawer-foot { padding-left: 16px; padding-right: 16px; }
+  .adm-drawer-body, .adm-drawer-head, .adm-drawer-foot { padding-left: 16px; padding-right: 16px; }
   .adm-foot-actions { flex-wrap: wrap; }
 
-  /* Werkblad op een telefoon: de lijst, en het bewerkscherm over het hele scherm */
   .adm-toast { left: 50%; top: 72px; }
-  .adm-wb { grid-template-columns: 1fr; }
-  .adm-wb-lijst { position: static; max-height: none; overflow: visible; }
-  .adm-wb:not([data-open]) .adm-wb-blad { display: none; }
-  .adm-blad {
-    position: fixed; inset: 0; z-index: 51; border: 0; border-radius: 0; overflow-y: auto;
-    animation: adm-in 0.3s var(--ease-out) both;
-  }
-  .adm-blad .adm-drawer-foot { border-radius: 0; }
-  .adm-blad .adm-foot-actions .adm-spacer { display: none; }
-  .adm-blad .adm-foot-actions .adm-btn--primary { order: -1; flex-basis: 100%; }
-  .adm-blad .adm-foot-actions .adm-btn--ghost { flex: 1; }
   .adm-venster { width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .adm-overlay, .adm-venster, .adm-blad, .adm-toast, .adm-sidebar { animation: none; transition: none; }
+  .adm-overlay, .adm-venster, .adm-toast, .adm-sidebar { animation: none; transition: none; }
   .adm-switch, .adm-switch-knob { transition: none; }
 }
 
@@ -734,12 +673,6 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 @keyframes adm-pagina-naar-onder { to { transform: translateY(100%); } }
 @keyframes adm-pagina-van-boven  { from { transform: translateY(-100%); } }
 
-/* ── Bewerkscherm wisselen (Werkblad.tsx, kiesMetSchuif) ──
-   Het oude scherm (een kopie) en het nieuwe schuiven samen binnen het kader;
-   wat erbuiten valt, is weg. */
-.adm-wb-blad { position: relative; }
-.adm-wb-blad.is-schuivend { overflow: clip; border-radius: 16px; }
-.adm-wb-kopie { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
 
 /* Laden: een rustige melding onder de echte kop (Skelet.tsx) */
 .adm-laden { margin: 8px 0 0; font-size: 14px; color: var(--ink-2); animation: adm-fade 0.3s ease-out 0.25s both; }
@@ -775,85 +708,83 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 }
 
 
-/* ── Opnames: één tabel met de liedjes als rijen en de stemmen als kolommen ──
-   (bestanden/opnames). Elk vakje is een plek om bestanden in te slepen. */
+/* ── Opnames: een lijst van liedjes (bestanden/opnames) en per lied een eigen
+   pagina met per stem de opnames (bestanden/opnames/[lied]). ── */
 
-.adm-matrix-houder { container-type: inline-size; }
-.adm-matrix { background: #fff; border: 1px solid var(--line); border-radius: 16px; }
-.adm-matrix-kop, .adm-matrix-rij {
-  display: grid; grid-template-columns: 52px minmax(150px, 1.25fr) repeat(6, minmax(0, 1fr));
+.adm-liedkop {
+  display: grid; grid-template-columns: 56px minmax(0, 1fr) auto 34px; align-items: center; gap: 14px;
+  padding: 0 14px 8px 18px; font-size: 12px; font-weight: 700; color: var(--ink-3);
 }
-.adm-matrix-kop {
-  position: sticky; top: 62px; z-index: 5; border-bottom: 1px solid var(--line); border-radius: 16px 16px 0 0;
-  background: color-mix(in srgb, #fff 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-}
-.adm-matrix-kop > span { padding: 12px 10px; font-size: 12px; font-weight: 700; color: var(--ink-2); }
-.adm-matrix-kop > span:first-child { padding-left: 16px; }
-.adm-matrix-sorteer { all: unset; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; border-radius: 4px; }
-.adm-matrix-sorteer:hover { color: var(--ink); }
-.adm-matrix-sorteer:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.adm-liedkop-sorteer { all: unset; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; border-radius: 4px; }
+.adm-liedkop-sorteer:hover { color: var(--ink); }
+.adm-liedkop-sorteer:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.adm-liedkop-stemmen { display: flex; gap: 5px; }
+.adm-liedkop-stemmen span { width: 24px; overflow: hidden; text-overflow: clip; white-space: nowrap; font-size: 0; }
+.adm-liedkop-stemmen span::first-letter { font-size: 12px; }
 
-.adm-matrix-rij + .adm-matrix-rij { border-top: 1px solid var(--line-soft); }
-.adm-matrix-rij:hover { background: #FDFCFB; }
-.adm-matrix-rij:last-child { border-radius: 0 0 16px 16px; }
-.adm-matrix-rij > * { min-width: 0; padding: 8px 6px; }
-.adm-matrix-nr {
-  display: flex; align-items: center; padding-left: 16px !important;
-  font-family: var(--font-display), var(--font-manrope), sans-serif; font-size: 15px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums;
+.adm-liedlijst li + li { border-top: 1px solid var(--line-soft); }
+.adm-liedrij {
+  display: grid; grid-template-columns: 56px minmax(0, 1fr) auto 34px; align-items: center; gap: 14px;
+  min-height: 60px; padding: 8px 14px 8px 18px; color: inherit; text-decoration: none; transition: background 0.12s;
 }
-.adm-matrix-rij[data-geen-nummer] .adm-matrix-nr { color: var(--ink-3); }
-.adm-matrix-lied { display: flex; align-items: center; border-radius: 10px; transition: background 0.12s, box-shadow 0.12s; }
-.adm-matrix-lied[data-drag] { background: #FFF4EE; box-shadow: inset 0 0 0 1.5px var(--primary); }
-.adm-matrix-titel {
-  all: unset; cursor: pointer; padding: 4px 6px; margin-left: -6px; border-radius: 8px;
-  font-size: 14.5px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); overflow-wrap: anywhere;
-}
-.adm-matrix-titel:hover { color: var(--primary); }
-.adm-matrix-titel:focus-visible { outline: 2px solid var(--primary); }
-.adm-matrix-mobielnr { display: none; }
+.adm-liedrij:hover { background: #FCFBFA; }
+.adm-liedrij:hover .adm-liedrij-pijl { color: var(--primary); transform: translateX(2px); }
+.adm-liedrij:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; border-radius: 16px; }
+.adm-liedrij-nr { font-family: var(--font-display), var(--font-manrope), sans-serif; font-size: 16px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
+.adm-liedrij[data-geen-nummer] .adm-liedrij-nr { color: var(--ink-3); }
+.adm-liedrij-titel { min-width: 0; font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-liedrij-sub { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 500; color: var(--ink-3); }
+.adm-liedrij-pijl { display: flex; color: var(--ink-3); transition: color 0.12s, transform 0.15s var(--ease-out); }
 
-/* Een vakje: de opnames als pilletjes; leeg is een stippelvlak met een plus */
-.adm-vak { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; border-radius: 10px; transition: background 0.12s, box-shadow 0.12s; }
-.adm-vak[data-drag] { background: #FFF4EE; box-shadow: inset 0 0 0 1.5px var(--primary); }
-.adm-chip {
-  display: inline-flex; align-items: center; max-width: 100%; height: 28px; border-radius: 100px;
-  background: #F5F4F2; color: var(--ink); transition: background 0.12s;
+/* Per stem een bolletje: oranje als er een opname is */
+.adm-stemmen { display: flex; gap: 5px; }
+.adm-stemmen i {
+  display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;
+  font-style: normal; font-size: 11px; font-weight: 800; color: #C9C5C1; box-shadow: inset 0 0 0 1.5px #E7E5E2;
 }
-.adm-chip:hover { background: #EFEDEA; }
-.adm-chip[data-speelt] { background: #FFE9DD; }
-.adm-chip-speel {
-  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 22px; height: 22px; margin-left: 3px; padding: 0;
-  border: 0; border-radius: 50%; background: #fff; color: var(--primary); cursor: pointer; box-shadow: 0 1px 2px rgba(28,25,23,0.08);
-  transition: background 0.12s, color 0.12s, transform 0.12s var(--ease-out);
-}
-.adm-chip-speel:active { transform: scale(0.9); }
-.adm-chip[data-speelt] .adm-chip-speel { background: var(--primary); color: #fff; }
-.adm-chip-speel:disabled { color: #D6D3D1; box-shadow: none; cursor: default; }
-.adm-chip-speel:focus-visible, .adm-chip-label:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-.adm-chip-label {
-  all: unset; box-sizing: border-box; min-width: 0; padding: 0 10px 0 7px; font-size: 12.5px; font-weight: 600; line-height: 28px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; border-radius: 100px;
-}
-.adm-chip[data-bezig] { width: 100%; max-width: 110px; background: #FFF4EE; }
-.adm-chip[data-bezig] .adm-chip-label { width: 100%; padding: 0 10px; cursor: default; }
-.adm-chip-balk { display: block; height: 5px; border-radius: 100px; background: #FBD9C6; overflow: hidden; }
-.adm-chip-balk span { display: block; height: 100%; background: var(--primary); transition: width 0.2s; }
-.adm-chip[data-fout] { background: #FEF2F2; color: #991B1B; }
-.adm-chip[data-fout] .adm-chip-label { padding-left: 10px; }
+.adm-stemmen i[data-vol] { background: #FFF1EA; color: #C2410C; box-shadow: none; }
 
-.adm-vak-plus {
-  display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 24px; padding: 0; border: 0; border-radius: 8px;
-  background: transparent; color: var(--ink-3); cursor: pointer; opacity: 0; transition: opacity 0.12s, background 0.12s, color 0.12s;
+/* De pagina van een lied */
+.adm-head-nr { margin-right: 12px; color: var(--primary); font-variant-numeric: tabular-nums; }
+.adm-stemlijst { overflow: visible; }
+.adm-stemrij {
+  display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; align-items: center; gap: 16px;
+  min-height: 64px; padding: 10px 14px 10px 20px; transition: background 0.12s, box-shadow 0.12s;
 }
-.adm-vak-plus svg { width: 14px; height: 14px; }
-.adm-matrix-rij:hover .adm-vak-plus, .adm-vak-plus:focus-visible, .adm-vak[data-drag] .adm-vak-plus { opacity: 1; }
-.adm-vak-plus:hover { background: #FFF1EA; color: var(--primary); }
-.adm-vak-plus:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-.adm-vak[data-leeg] .adm-vak-plus {
-  opacity: 1; width: 100%; height: 28px; border: 1.5px dashed #E2E0DD; color: #D6D3D1;
+.adm-stemrij + .adm-stemrij { border-top: 1px solid var(--line-soft); }
+.adm-stemrij:first-child { border-radius: 16px 16px 0 0; }
+.adm-stemrij:last-child { border-radius: 0 0 16px 16px; }
+.adm-stemrij[data-drag] { background: #FFF4EE; box-shadow: inset 0 0 0 1.5px var(--primary); }
+.adm-stemrij-stem { font-size: 14px; font-weight: 800; color: var(--ink); }
+.adm-stemrij[data-leeg] .adm-stemrij-stem { color: var(--ink-3); }
+.adm-stemrij-opnames { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adm-stemrij-leeg { font-size: 14px; color: var(--ink-3); }
+
+.adm-opname { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 3px 4px 3px 3px; border-radius: 100px; transition: background 0.12s; }
+.adm-opname:hover { background: #F7F6F4; }
+.adm-opname[data-speelt] { background: #FFF1EA; }
+.adm-opname-speel {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 30px; height: 30px; padding: 0;
+  border: 0; border-radius: 50%; background: #F2F1EF; color: var(--primary); cursor: pointer; transition: background 0.12s, color 0.12s, transform 0.12s var(--ease-out);
 }
-.adm-vak[data-leeg] .adm-vak-plus:hover, .adm-vak[data-leeg][data-drag] .adm-vak-plus { border-color: var(--primary); color: var(--primary); background: #FFF8F4; }
-@media (hover: none) { .adm-vak-plus { opacity: 1; } }
+.adm-opname-speel:hover { background: #FFE9DD; }
+.adm-opname-speel:active { transform: scale(0.92); }
+.adm-opname[data-speelt] .adm-opname-speel { background: var(--primary); color: #fff; }
+.adm-opname-speel:disabled { color: #D6D3D1; background: #F7F6F4; cursor: default; }
+.adm-opname-speel:focus-visible, .adm-opname-naam:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.adm-opname-naam {
+  all: unset; box-sizing: border-box; flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; border-radius: 6px;
+  font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.adm-opname-naam:hover { color: var(--primary); }
+.adm-opname-naam--bezig { flex-direction: column; align-items: stretch; gap: 6px; cursor: default; padding-left: 38px; }
+.adm-opname-naam--bezig:hover { color: inherit; }
+.adm-opname-ext { font-size: 11px; font-weight: 700; color: var(--ink-3); }
+.adm-opname .adm-icon-btn { opacity: 0; transition: opacity 0.12s; }
+.adm-opname:hover .adm-icon-btn, .adm-opname .adm-icon-btn:focus-visible { opacity: 1; }
+@media (hover: none) { .adm-opname .adm-icon-btn { opacity: 1; } }
+.adm-opname .adm-progress { display: block; height: 5px; }
+.adm-opname .adm-progress span { display: block; height: 100%; background: var(--primary); transition: width 0.2s; }
 
 /* Bestanden ergens anders op de pagina loslaten: een nieuw lied */
 .adm-sleep-laag {
@@ -883,12 +814,9 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 .adm-speler-speel:focus-visible, .adm-speler .adm-icon-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .adm-speler-midden { min-width: 0; }
 .adm-speler-naam { margin: 0 0 4px; font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.adm-speler-naam span { margin-right: 8px; color: var(--primary); font-variant-numeric: tabular-nums; }
 .adm-speler-tijd { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); font-variant-numeric: tabular-nums; }
 .adm-speler-tijd input { flex: 1; min-width: 0; height: 16px; margin: 0; accent-color: var(--primary); cursor: pointer; }
 .adm-speler-acties { display: flex; align-items: center; gap: 4px; }
-.adm-speler .adm-btn--ghost { background: rgba(255,255,255,0.1); border-color: transparent; color: #fff; }
-.adm-speler .adm-btn--ghost:hover { background: rgba(255,255,255,0.16); }
 
 /* Vensters: een lied (met nieuwe opnames) en één opname */
 .adm-lied-velden { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 14px; }
@@ -917,97 +845,104 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 .adm-wachtrij-stem .adm-input { padding-top: 7px; padding-bottom: 7px; }
 .adm-wachtrij-stem[data-leeg] .adm-input { border-color: var(--primary); color: #C2410C; }
 
-/* Smaller (laptop met smal venster, tablet, telefoon): elk lied als kaart met de stemmen eronder */
-@container (max-width: 860px) {
-  .adm-matrix { background: none; border: 0; display: flex; flex-direction: column; gap: 10px; }
-  .adm-matrix-kop { display: none; }
-  .adm-matrix-rij {
-    grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 10px; padding: 12px 14px 14px;
-    background: #fff; border: 1px solid var(--line); border-radius: 16px !important;
-  }
-  .adm-matrix-rij + .adm-matrix-rij { border-top: 1px solid var(--line); }
-  .adm-matrix-rij > * { padding: 0; }
-  .adm-matrix-nr { display: none; }
-  .adm-matrix-lied { grid-column: 1 / -1; padding: 0 0 4px; }
-  .adm-matrix-titel { font-size: 16px; }
-  .adm-matrix-mobielnr { display: inline; margin-right: 10px; color: var(--primary); font-family: var(--font-display), var(--font-manrope), sans-serif; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .adm-matrix-rij[data-geen-nummer] .adm-matrix-mobielnr { display: none; }
-  .adm-vak { padding: 8px; background: #FAF9F7; }
-  .adm-vak::before { content: attr(data-stem); font-size: 11.5px; font-weight: 700; color: var(--ink-2); margin-bottom: 2px; }
-  .adm-vak-plus { opacity: 1; }
-}
-@container (max-width: 520px) {
-  .adm-matrix-rij { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-/* Alleen op een telefoon */
-.adm-matrix-uitklap, .adm-matrix-meer { display: none; }
-
-/* Telefoon: een rustige lijst; tik op een lied en het klapt open met per stem een regel */
 @media (max-width: 760px) {
-  .adm-matrix { gap: 8px; }
-  .adm-matrix-rij { display: block; padding: 0; overflow: hidden; }
-  .adm-matrix-rij:hover { background: #fff; }
-  .adm-matrix-lied { padding: 0; }
-  .adm-matrix-titel { display: none; }
-  .adm-matrix-uitklap {
-    all: unset; box-sizing: border-box; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto 18px; align-items: center; gap: 10px;
-    width: 100%; min-height: 60px; padding: 10px 14px; cursor: pointer; -webkit-tap-highlight-color: transparent;
-  }
-  .adm-matrix-uitklap:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; border-radius: 16px; }
-  .adm-matrix-uitklap-nr { font-family: var(--font-display), var(--font-manrope), sans-serif; font-size: 15px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
-  .adm-matrix-rij[data-geen-nummer] .adm-matrix-uitklap-nr { color: var(--ink-3); }
-  .adm-matrix-uitklap-titel { font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .adm-matrix-pijl { color: var(--ink-3); transition: transform 0.2s var(--ease-out); }
-  .adm-matrix-uitklap[aria-expanded="true"] .adm-matrix-pijl { transform: rotate(180deg); }
-  .adm-stippen { display: flex; gap: 3px; }
-  .adm-stippen i {
-    display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; border-radius: 50%;
-    font-style: normal; font-size: 9.5px; font-weight: 800; color: #C9C5C1; box-shadow: inset 0 0 0 1.2px #E2E0DD;
-  }
-  .adm-stippen i[data-vol] { background: #FFF1EA; color: #C2410C; box-shadow: none; }
-
-  /* Dicht: alleen de regel; open: elke stem een regel met de opnames ernaast */
-  .adm-matrix-rij:not([data-open]) .adm-vak, .adm-matrix-rij:not([data-open]) .adm-matrix-meer { display: none; }
-  .adm-matrix-rij[data-open] .adm-matrix-uitklap { border-bottom: 1px solid var(--line-soft); }
-  .adm-matrix-rij[data-open] .adm-vak {
-    position: relative; display: flex; flex-flow: row wrap; align-items: center; gap: 6px; min-height: 54px;
-    padding: 10px 14px 10px 92px; border-radius: 0; background: none; animation: adm-in 0.22s var(--ease-out) both;
-  }
-  .adm-matrix-rij[data-open] .adm-vak + .adm-vak { border-top: 1px solid var(--line-soft); }
-  .adm-matrix-rij[data-open] .adm-vak::before { position: absolute; left: 14px; top: 19px; margin: 0; font-size: 13px; }
-  .adm-matrix-rij[data-open] .adm-vak[data-leeg] .adm-vak-plus { flex: 1; }
-  .adm-matrix-rij[data-open] .adm-vak[data-drag] { background: #FFF4EE; }
-  .adm-matrix-meer { display: block; padding: 12px 14px 14px; border-top: 1px solid var(--line-soft); }
-  .adm-matrix-meer .adm-btn { width: 100%; }
-
+  .adm-liedkop { display: none; }
+  .adm-liedrij { grid-template-columns: 40px minmax(0, 1fr) 18px; gap: 10px; padding: 10px 12px 10px 14px; }
+  .adm-liedrij .adm-stemmen { grid-column: 2; grid-row: 2; gap: 4px; }
+  .adm-liedrij-pijl { grid-column: 3; grid-row: 1 / span 2; }
+  .adm-liedrij-sub { display: none; }
+  .adm-stemmen i { width: 20px; height: 20px; font-size: 10px; }
+  .adm-stemrij { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 10px; padding: 12px 12px 12px 14px; }
+  .adm-stemrij-opnames { grid-column: 1 / -1; grid-row: 2; }
+  .adm-opname-speel { width: 36px; height: 36px; }
   .adm-speler { grid-template-columns: auto minmax(0, 1fr); gap: 10px 12px; bottom: 8px; margin-left: -8px; margin-right: -8px; }
   .adm-speler-knoppen .adm-icon-btn { display: none; }
   .adm-speler-acties { grid-column: 1 / -1; justify-content: space-between; }
   .adm-wachtrij li { grid-template-columns: minmax(0, 1fr) auto; }
   .adm-wachtrij-stem { grid-column: 1; grid-row: 2; }
-  .adm-chip, .adm-vak[data-leeg] .adm-vak-plus { height: 34px; }
-  .adm-chip-speel { width: 28px; height: 28px; }
-  .adm-chip-label { line-height: 34px; font-size: 13px; }
-  .adm-vak-plus { width: 34px; height: 30px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .adm-speler, .adm-sleep-laag { animation: none; }
 }
 
-/* Een opname verslepen (useSleep.ts) */
-.adm-chip { touch-action: manipulation; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
-.adm-chip-label { cursor: grab; }
-.adm-chip[data-gesleept] { opacity: 0.35; }
-.adm-chip[data-onderweg] { opacity: 0.6; animation: adm-pop-in 0.2s var(--ease-out); }
-.adm-sleept, .adm-sleept * { cursor: grabbing !important; user-select: none !important; -webkit-user-select: none !important; }
-.adm-sleept .adm-vak-plus { opacity: 1; }
-.adm-sleept .adm-matrix-rij:not([data-open]) .adm-matrix-lied[data-drag] { background: #FFF4EE; }
-.adm-sleep-chip {
-  position: fixed; left: 0; top: 0; z-index: 80; pointer-events: none; display: flex; flex-direction: column; gap: 2px;
-  max-width: 260px; margin: 14px 0 0 14px; padding: 8px 12px; border-radius: 12px; background: #161412; color: #fff;
-  box-shadow: 0 14px 36px -8px rgba(28,25,23,0.55); animation: adm-pop-in 0.15s var(--ease-out);
+/* Documenten (Choreografie, Nieuwsbrieven, ALV-stukken): snel een vergadering kiezen */
+.adm-snelkeuze { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.adm-snelkeuze .adm-pill { border: 0; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.adm-snelkeuze .adm-pill[aria-pressed="true"] { background: #FFF1EA; color: #C2410C; }
+
+/* Foto's & video's: een foto openen, het bijschrift erop, en video's in een lijst */
+.adm-photo-open { all: unset; display: block; width: 100%; height: 100%; cursor: pointer; }
+.adm-photo-open:focus-visible { outline: 3px solid var(--primary); outline-offset: -3px; border-radius: 12px; }
+.adm-photo-bijschrift {
+  position: absolute; left: 0; right: 0; top: 0; padding: 8px 10px 18px; pointer-events: none;
+  font-size: 12px; font-weight: 600; color: #fff; background: linear-gradient(rgba(0,0,0,0.6), transparent);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: opacity 0.15s;
 }
-.adm-sleep-chip strong { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.adm-sleep-chip span { font-size: 12px; font-weight: 600; color: var(--primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (pointer: coarse) { .adm-sleep-chip { margin: -76px 0 0 -40px; } }
+.adm-photo:hover .adm-photo-bijschrift, .adm-photo:focus-within .adm-photo-bijschrift { opacity: 0; }
+.adm-foto-groot { display: block; border-radius: 12px; overflow: hidden; background: #EDECE9; }
+.adm-foto-groot img { display: block; width: 100%; max-height: 52vh; object-fit: contain; }
+
+.adm-video-kop { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+.adm-video-thumb { display: flex; align-items: center; justify-content: center; color: var(--primary); }
+.adm-video-groot { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.adm-video-groot img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; background: #111; }
+.adm-video-speler { display: block; width: 100%; aspect-ratio: 16/9; border-radius: 12px; background: #111; }
+@media (max-width: 760px) {
+  .adm-video-kop .adm-btn { width: 100%; justify-content: center; }
+}
+
+
+/* ── Choreografie: per lied een eigen pagina met de video en de beschrijving ── */
+.adm-soorten { display: flex; gap: 6px; }
+.adm-soorten i {
+  font-style: normal; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 100px;
+  color: #B5B0AB; box-shadow: inset 0 0 0 1.5px #E7E5E2;
+}
+.adm-soorten i[data-vol] { background: #FFF1EA; color: #C2410C; box-shadow: none; }
+
+.adm-choreo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 1180px) { .adm-choreo { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); } }
+.adm-choreo-kolom { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.adm-choreo-kolom > .adm-blok + .adm-blok { margin-top: 0; }
+.adm-choreo-blok .adm-blok-kop { align-items: baseline; flex-wrap: wrap; }
+.adm-choreo-naam { font-family: var(--font-manrope), sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0; color: var(--ink-2); }
+.adm-choreo-soort { font-size: 12.5px; color: var(--ink-3); }
+.adm-choreo-inhoud { padding: 0 20px 16px; display: flex; flex-direction: column; gap: 12px; }
+.adm-choreo-inhoud > .adm-blok-leeg { padding: 0; }
+.adm-choreo-video { border-radius: 12px; }
+.adm-choreo-acties { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 12px 20px; border-top: 1px solid var(--line-soft); }
+.adm-choreo-acties .adm-spacer { flex: 1; }
+.adm-choreo-acties label.adm-btn { cursor: pointer; }
+.adm-btn[data-disabled], .adm-drop[data-disabled] { opacity: 0.6; pointer-events: none; }
+.adm-choreo-kiezers { display: flex; flex-direction: column; gap: 10px; }
+
+/* Een Word-beschrijving als gewone tekst */
+.adm-doc-tekst { max-height: 640px; overflow: auto; font-size: 14.5px; line-height: 1.6; color: var(--ink); overflow-wrap: anywhere; }
+.adm-doc-tekst > :first-child { margin-top: 0; }
+.adm-doc-tekst p { margin: 0 0 10px; }
+.adm-doc-tekst h1, .adm-doc-tekst h2, .adm-doc-tekst h3 { margin: 18px 0 8px; font-size: 16px; font-weight: 800; }
+.adm-doc-tekst ul, .adm-doc-tekst ol { margin: 0 0 10px; padding-left: 22px; }
+.adm-doc-tekst table { border-collapse: collapse; margin: 0 0 12px; font-size: 13.5px; }
+.adm-doc-tekst td, .adm-doc-tekst th { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+.adm-doc-tekst img { max-width: 100%; height: auto; }
+
+/* ALV: meerdere stukken tegelijk toevoegen */
+.adm-stukken { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.adm-stukken li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 10px; align-items: center; }
+.adm-stukken .adm-progress { grid-column: 1 / -1; }
+.adm-stukken-ext { font-size: 12px; font-weight: 700; color: var(--ink-3); }
+
+/* Sitestatus: getallen als rustige regels, de keepalive als een week aan dagen */
+.adm-tellijst { margin: 0; padding: 0 20px 10px; display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 32px; }
+.adm-tellijst > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line-soft); font-size: 14px; }
+.adm-tellijst dt { color: var(--ink-2); }
+.adm-tellijst dd { margin: 0; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
+.adm-tellijst dd span { margin-left: 6px; font-weight: 500; color: var(--ink-3); }
+@media (min-width: 1180px) { .adm-tellijst--twee { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.adm-dagen { list-style: none; margin: 0; padding: 0 20px 20px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.adm-dagen li { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 0 7px; border-radius: 10px; background: #E9F6EE; color: var(--ok); font-size: 11px; font-weight: 700; }
+.adm-dagen li strong { font-family: var(--font-display), var(--font-manrope), sans-serif; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.adm-dagen li[data-fout] { background: #FDECEC; color: var(--danger); }
+@media (max-width: 760px) {
+  .adm-blok-kop { flex-wrap: wrap; }
+}

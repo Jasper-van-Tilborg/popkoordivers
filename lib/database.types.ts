@@ -93,6 +93,7 @@ export type Database = {
         Row: {
           created_at: string | null
           datum: string
+          datum_sorteer: string | null
           id: string
           slug: string
           titel: string
@@ -101,6 +102,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           datum: string
+          datum_sorteer?: string | null
           id?: string
           slug: string
           titel: string
@@ -109,6 +111,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           datum?: string
+          datum_sorteer?: string | null
           id?: string
           slug?: string
           titel?: string
@@ -159,6 +162,7 @@ export type Database = {
         Row: {
           categorie: string
           created_at: string
+          datum: string | null
           id: number
           liednummer: number | null
           naam: string
@@ -168,6 +172,7 @@ export type Database = {
         Insert: {
           categorie: string
           created_at?: string
+          datum?: string | null
           id?: never
           liednummer?: number | null
           naam: string
@@ -177,6 +182,7 @@ export type Database = {
         Update: {
           categorie?: string
           created_at?: string
+          datum?: string | null
           id?: never
           liednummer?: number | null
           naam?: string
@@ -188,25 +194,31 @@ export type Database = {
       fotos: {
         Row: {
           album_id: string
+          bijschrift: string | null
           created_at: string | null
           id: string
           impressies: boolean | null
+          klein_key: string | null
           r2_key: string
           volgorde: number | null
         }
         Insert: {
           album_id: string
+          bijschrift?: string | null
           created_at?: string | null
           id?: string
           impressies?: boolean | null
+          klein_key?: string | null
           r2_key: string
           volgorde?: number | null
         }
         Update: {
           album_id?: string
+          bijschrift?: string | null
           created_at?: string | null
           id?: string
           impressies?: boolean | null
+          klein_key?: string | null
           r2_key?: string
           volgorde?: number | null
         }
@@ -319,6 +331,50 @@ export type Database = {
           stemgroep?: Database["public"]["Enums"]["stemgroep_type"] | null
         }
         Relationships: []
+      }
+      videos: {
+        Row: {
+          album_id: string | null
+          created_at: string
+          datum: string | null
+          id: string
+          openbaar: boolean
+          r2_key: string | null
+          titel: string
+          volgorde: number
+          youtube_id: string | null
+        }
+        Insert: {
+          album_id?: string | null
+          created_at?: string
+          datum?: string | null
+          id?: string
+          openbaar?: boolean
+          r2_key?: string | null
+          titel: string
+          volgorde?: number
+          youtube_id?: string | null
+        }
+        Update: {
+          album_id?: string | null
+          created_at?: string
+          datum?: string | null
+          id?: string
+          openbaar?: boolean
+          r2_key?: string | null
+          titel?: string
+          volgorde?: number
+          youtube_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       website_instellingen: {
         Row: {

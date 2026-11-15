@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { IconClock, IconMapPin, IconEye } from "@/components/icons";
-import { DateStub, IconCopy, IconPlus, IconSearch, Tabs, maandTitel, useToast, vandaag } from "../_components/ui";
-import { Werkblad, kiesMetSchuif } from "../_components/Werkblad";
+import { DateStub, IconCopy, IconPlus, IconSearch, Tabs, maandTitel, useNaijlen, useToast, vandaag } from "../_components/ui";
 import AgendaDrawer, { toForm, type AgendaForm, type AgendaItem, type Album } from "./AgendaDrawer";
 import { bewaarOptreden, verwijderOptreden, type AgendaInput } from "./actions";
 
-// Wat er rechts open staat: een bestaand optreden, of een nieuw (eventueel als kopie)
+// Wat er in het venster open staat: een bestaand optreden, of een nieuw (eventueel als kopie)
 type Gekozen = { id: string; kopie?: AgendaForm } | null;
 
 export default function AgendaClient({ items, albums, loadError, startNieuw, startId }: {
@@ -20,12 +19,13 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
   const [tab, setTab]   = useState<"komend" | "archief">("komend");
   const [zoek, setZoek] = useState("");
   const [gekozen, setGekozen] = useState<Gekozen>(startNieuw ? { id: "nieuw" } : startId ? { id: startId } : null);
+  const [open, sluitend] = useNaijlen(gekozen);
   const [toast, melding] = useToast();
 
   const today   = vandaag();
   const komend  = useMemo(() => items.filter((i) => !i.datum_sorteer || i.datum_sorteer >= today), [items, today]);
   const archief = useMemo(() => items.filter((i) => i.datum_sorteer && i.datum_sorteer < today).reverse(), [items, today]);
-  const item    = gekozen && gekozen.id !== "nieuw" ? items.find((i) => String(i.id) === gekozen.id) ?? null : null;
+  const item    = open && open.id !== "nieuw" ? items.find((i) => String(i.id) === open.id) ?? null : null;
 
   // Een optreden uit het archief openen (bijv. via het overzicht): naar het juiste tabblad
   const [vorigeKeuze, setVorigeKeuze] = useState(gekozen?.id);
@@ -49,16 +49,14 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
     return out;
   }, [tab, komend, archief, zoek]);
 
-  const kies = useCallback((nieuw: Gekozen) => {
-    kiesMetSchuif(gekozen?.id ?? null, nieuw?.id ?? null, () => setGekozen(nieuw));
-  }, [gekozen]);
-  const sluit = useCallback(() => kies(null), [kies]);
+  const kies = (nieuw: Gekozen) => setGekozen(nieuw);
+  const sluit = () => setGekozen(null);
 
   async function save(input: AgendaInput) {
     const res = await bewaarOptreden(item ? item.id : null, input);
     if (res.error) return res.error;
     setTab(input.datum_sorteer && input.datum_sorteer < today ? "archief" : "komend");
-    setGekozen({ id: String(res.id) });
+    setGekozen(null);
     melding(item ? "Wijzigingen opgeslagen" : "Optreden toegevoegd");
     return null;
   }
@@ -78,9 +76,11 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
     <div className="adm-empty"><p className="adm-empty-title">De agenda kon niet worden geladen</p><p>{loadError}</p></div>
   ) : (
     <>
-      <button className="adm-wb-nieuw" data-id="nieuw" data-gekozen={gekozen?.id === "nieuw" || undefined} onClick={() => kies({ id: "nieuw" })}>
-        <IconPlus /> Nieuw optreden
-      </button>
+      {groepen.length > 0 && (
+        <div className="adm-kolomkop adm-kolomkop--agenda" aria-hidden="true">
+          <span /><span>Optreden</span><span>Locatie</span><span>Tijd</span><span />
+        </div>
+      )}
       {groepen.length === 0 ? (
         <div className="adm-empty">
           {zoek
@@ -94,9 +94,7 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
             {g.items.map((i) => (
               <li
                 key={i.id}
-                data-id={String(i.id)}
-                data-gekozen={gekozen?.id === String(i.id) || undefined}
-                className="adm-row"
+                className="adm-row adm-row--agenda"
                 data-hidden={!i.gepubliceerd || undefined}
                 data-past={tab === "archief" || undefined}
                 onClick={() => kies({ id: String(i.id) })}
@@ -110,7 +108,9 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
                     {!i.locatie && !i.tijd && <span className="adm-missing">Locatie en tijd nog onbekend</span>}
                   </div>
                 </div>
-                {!i.gepubliceerd && <span className="adm-pill">Verborgen</span>}
+                <span className={i.locatie ? "adm-col" : "adm-col adm-col--leeg"}>{i.locatie ?? "Nog onbekend"}</span>
+                <span className={i.tijd ? "adm-col" : "adm-col adm-col--leeg"}>{i.tijd ?? "–"}</span>
+                <span className="adm-actions">{!i.gepubliceerd && <span className="adm-pill">Verborgen</span>}</span>
               </li>
             ))}
           </ul>
@@ -119,11 +119,12 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
     </>
   );
 
-  const blad = gekozen && (gekozen.id === "nieuw" || item) ? (
+  const venster = open && (open.id === "nieuw" || item) ? (
     <AgendaDrawer
-      key={gekozen.id + (gekozen.kopie ? "-kopie" : "")}
+      key={open.id + (open.kopie ? "-kopie" : "")}
+      sluitend={sluitend}
       mode={item ? "edit" : "new"}
-      initial={gekozen.kopie ?? toForm(item ?? undefined)}
+      initial={open.kopie ?? toForm(item ?? undefined)}
       albums={albums}
       onClose={sluit}
       onSave={save}
@@ -162,20 +163,8 @@ export default function AgendaClient({ items, albums, loadError, startNieuw, sta
         </div>
       </div>
 
-      <div className="adm-content">
-        <Werkblad
-          gekozen={gekozen?.id ?? null}
-          lijst={lijst}
-          blad={blad}
-          leeg={
-            <>
-              <p className="adm-empty-title">Kies een optreden</p>
-              <p>Klik links op een optreden om het te bewerken, of voeg een nieuw optreden toe.</p>
-              <button className="adm-btn adm-btn--primary" onClick={() => kies({ id: "nieuw" })}><IconPlus /> Nieuw optreden</button>
-            </>
-          }
-        />
-      </div>
+      <div className="adm-content">{lijst}</div>
+      {venster}
       {toast}
     </div>
   );

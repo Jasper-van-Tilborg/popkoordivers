@@ -182,6 +182,8 @@
   .leden-fotos a { border-radius: 10px; }
   .leden-foto { aspect-ratio: 1; }
   .leden-foto:hover { transform: none; }
+  .leden-foto__bijschrift { font-size: 12px; padding: 14px 8px 6px; }
+  .leden-videos { grid-template-columns: 1fr; gap: 12px; }
 
   /* Wie is wie */
   .leden-avatar { color: var(--oranje-tekst); }
@@ -204,7 +206,6 @@
   .smoel { padding: 18px 10px; }
   .smoel-avatar { width: 60px; height: 60px; font-size: 18px; }
   .smoel-naam { font-size: 15.5px; }
-  .smoel-stem { font-size: 12.5px; color: var(--oranje-tekst); letter-spacing: 0; }
 }
 
 /* Smalle telefoons: de balk en de stemgroepen net iets kleiner, zodat alles past */
@@ -220,4 +221,9 @@
 
 @media (max-width: 760px) {
   .lezer { padding: 20px 18px 26px; font-size: 17px; }
+}
+
+/* Nieuwsbrieven & ALV: de kopjes op dezelfde rand als de rijen */
+@media (max-width: 760px) {
+  .docs-groep-titel { margin: 16px 18px 0; }
 }

@@ -3,20 +3,94 @@
 import { useCallback, useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { IconBack, IconStarSmall, IconTrash, IconUpload, useNaijlen, useToast } from "../../_components/ui";
-import { uploadNaarR2 } from "../../_components/upload";
+import { DeleteButton, Drawer, IconBack, IconStarSmall, IconTrash, IconUpload, Tabs, useNaijlen, useToast } from "../../_components/ui";
+import { Vinkje } from "../../_components/velden";
+import { uploadKlein, uploadNaarR2 } from "../../_components/upload";
 import AlbumDrawer from "../AlbumDrawer";
-import { fotoToevoegen, fotosToegevoegd, verwijderAlbum, verwijderFoto, wijzigAlbum, zetFotoVolgorde, zetImpressie, type AlbumInput } from "../actions";
+import { fotoToevoegen, fotosToegevoegd, verwijderAlbum, verwijderFoto, wijzigAlbum, zetBijschrift, zetFotoVolgorde, zetImpressie, type AlbumInput } from "../actions";
+import { VideoLijst, type AlbumKeuze, type Video } from "../Videos";
 
-interface Foto { id: string; impressies: boolean; url: string }
+interface Foto { id: string; impressies: boolean; bijschrift: string | null; url: string; klein: string | null }
 interface Upload { naam: string; voortgang: number; fout?: string }
-type Actie = { soort: "impressie"; id: string; impressies: boolean } | { soort: "volgorde"; ids: string[] };
+type Actie = { soort: "impressie"; id: string; impressies: boolean } | { soort: "volgorde"; ids: string[] } | { soort: "bijschrift"; id: string; bijschrift: string | null };
 
-export default function AlbumClient({ album, fotos }: {
+// Eén foto groot, met het bijschrift en of hij op de website staat
+function FotoVenster({ foto, nummer, aantal, sluitend, onClose, onBewaar, onVerwijder }: {
+  foto: Foto;
+  nummer: number;
+  aantal: number;
+  sluitend?: boolean;
+  onClose: () => void;
+  onBewaar: (bijschrift: string, impressie: boolean) => Promise<string | null>;
+  onVerwijder: () => Promise<string | null>;
+}) {
+  const [bijschrift, setBijschrift] = useState(foto.bijschrift ?? "");
+  const [impressie, setImpressie]   = useState(foto.impressies);
+  const [busy, setBusy]             = useState<"save" | "delete" | null>(null);
+  const [fout, setFout]             = useState("");
+  const gewijzigd = bijschrift.trim() !== (foto.bijschrift ?? "") || impressie !== foto.impressies;
+
+  async function bewaar() {
+    setBusy("save");
+    const f = await onBewaar(bijschrift, impressie);
+    setBusy(null);
+    if (f) setFout(f);
+  }
+  async function verwijder() {
+    setBusy("delete");
+    const f = await onVerwijder();
+    setBusy(null);
+    if (f) setFout(f);
+  }
+
+  return (
+    <Drawer
+      title={`Foto ${nummer} van ${aantal}`}
+      onClose={busy ? () => {} : onClose}
+      sluitend={sluitend}
+      footer={
+        <>
+          {fout && <p className="adm-server-err" role="alert">{fout}</p>}
+          <div className="adm-foot-actions">
+            <DeleteButton onConfirm={verwijder} busy={busy === "delete"} />
+            <span className="adm-spacer" />
+            <button type="button" className="adm-btn adm-btn--ghost" onClick={onClose} disabled={!!busy}>Annuleren</button>
+            <button type="button" className="adm-btn adm-btn--primary" onClick={bewaar} disabled={!!busy || !gewijzigd}>{busy === "save" ? "Opslaan…" : "Opslaan"}</button>
+          </div>
+        </>
+      }
+    >
+      <section className="adm-fieldset">
+        <a className="adm-foto-groot" href={foto.url} target="_blank" rel="noopener">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={foto.url} alt={foto.bijschrift ?? ""} />
+        </a>
+      </section>
+      <section className="adm-fieldset">
+        <div className="adm-field">
+          <label htmlFor="ft-bijschrift">Bijschrift</label>
+          <input id="ft-bijschrift" className="adm-input" value={bijschrift} maxLength={200} onChange={(e) => setBijschrift(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && gewijzigd) bewaar(); }} />
+        </div>
+        <div className="adm-field adm-field--vinkje">
+          <Vinkje checked={impressie} onChange={setImpressie}>Ook op de openbare website</Vinkje>
+        </div>
+      </section>
+    </Drawer>
+  );
+}
+
+export default function AlbumClient({ album, fotos, videos, albums, startTab }: {
   album: { id: string; slug: string; titel: string; datum: string };
   fotos: Foto[];
+  videos: Video[];
+  albums: AlbumKeuze[];
+  startTab: "fotos" | "videos";
 }) {
   const router = useRouter();
+  const [tab, setTab]         = useState(startTab);
+  const [open, setOpen]       = useState<string | null>(null);
+  const [toonFoto, fotoSluit] = useNaijlen(open);
   const [toast, melding]      = useToast();
   const [bewerken, setBewerken] = useState(false);
   const [toonBewerken, sluitend] = useNaijlen(bewerken ? true : null);
@@ -29,9 +103,9 @@ export default function AlbumClient({ album, fotos }: {
   // Foto's die er bij het openen al waren; alles daarna is nieuw en popt in
   const [bekend] = useState(() => new Set(fotos.map((f) => f.id)));
   const [lijst, pasToe] = useOptimistic(fotos, (state, a: Actie) =>
-    a.soort === "impressie"
-      ? state.map((f) => (f.id === a.id ? { ...f, impressies: a.impressies } : f))
-      : a.ids.map((id) => state.find((f) => f.id === id)).filter((f): f is Foto => !!f)
+    a.soort === "impressie" ? state.map((f) => (f.id === a.id ? { ...f, impressies: a.impressies } : f))
+    : a.soort === "bijschrift" ? state.map((f) => (f.id === a.id ? { ...f, bijschrift: a.bijschrift } : f))
+    : a.ids.map((id) => state.find((f) => f.id === id)).filter((f): f is Foto => !!f)
   );
 
   const sluit = useCallback(() => setBewerken(false), []);
@@ -52,8 +126,9 @@ export default function AlbumClient({ album, fotos }: {
       while (volgende < beelden.length) {
         const i = volgende++;
         try {
-          const key = await uploadNaarR2(beelden[i], { soort: "album", albumId: album.id }, (v) => zet(i, { voortgang: v * 0.95 }));
-          const res = await fotoToevoegen(album.id, key);
+          const key = await uploadNaarR2(beelden[i], { soort: "album", albumId: album.id }, (v) => zet(i, { voortgang: v * 0.9 }));
+          const klein = await uploadKlein(beelden[i], album.id);
+          const res = await fotoToevoegen(album.id, key, klein);
           if (res.error) throw new Error(res.error);
           zet(i, { voortgang: 1 });
           gelukt++;
@@ -101,6 +176,31 @@ export default function AlbumClient({ album, fotos }: {
     melding(res.error ? `Verwijderen lukte niet: ${res.error}` : "Foto verwijderd");
   }
 
+  // Vanuit het venster van één foto: bijschrift en/of website
+  async function bewaarFoto(f: Foto, bijschrift: string, impressie: boolean): Promise<string | null> {
+    const nieuw = bijschrift.trim() || null;
+    if (nieuw !== f.bijschrift) {
+      const res = await zetBijschrift(f.id, bijschrift);
+      if (res.error) return res.error;
+      startTransition(() => pasToe({ soort: "bijschrift", id: f.id, bijschrift: nieuw }));
+    }
+    if (impressie !== f.impressies) {
+      const res = await zetImpressie(f.id, impressie);
+      if (res.error) return res.error;
+    }
+    setOpen(null);
+    melding("Foto opgeslagen");
+    return null;
+  }
+
+  async function verwijderUitVenster(f: Foto): Promise<string | null> {
+    const res = await verwijderFoto(f.id);
+    if (res.error) return res.error;
+    setOpen(null);
+    melding("Foto verwijderd");
+    return null;
+  }
+
   async function bewaar(input: AlbumInput) {
     const res = await wijzigAlbum(album.id, input);
     if (res.error) return res.error;
@@ -132,7 +232,15 @@ export default function AlbumClient({ album, fotos }: {
         </div>
       </header>
 
+      <div className="adm-toolbar">
+        <Tabs label="Foto's of video's" value={tab} onChange={setTab}
+          items={[{ id: "fotos", label: "Foto's", count: lijst.length }, { id: "videos", label: "Video's", count: videos.length }]} />
+      </div>
+
       <div className="adm-content">
+        {tab === "videos" ? (
+          <VideoLijst videos={videos} albums={albums} albumId={album.id} melding={melding} />
+        ) : (<>
         <label
           htmlFor="al-upload"
           className="adm-drop"
@@ -189,8 +297,11 @@ export default function AlbumClient({ album, fotos }: {
                   <button className="adm-photo-btn adm-photo-btn--icon" onClick={() => verplaats(i, i - 1)} disabled={i === 0} aria-label="Eén plek naar voren">‹</button>
                   <button className="adm-photo-btn adm-photo-btn--icon" onClick={() => verplaats(i, i + 1)} disabled={i === lijst.length - 1} aria-label="Eén plek naar achteren">›</button>
                 </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={f.url} alt="" loading="lazy" />
+                <button type="button" className="adm-photo-open" onClick={() => setOpen(f.id)} aria-label={`Foto ${i + 1} openen${f.bijschrift ? `: ${f.bijschrift}` : ""}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={f.klein ?? f.url} alt="" loading="lazy" draggable={false} />
+                </button>
+                {f.bijschrift && <span className="adm-photo-bijschrift">{f.bijschrift}</span>}
                 <div className="adm-photo-tools">
                   <button
                     className="adm-photo-btn"
@@ -216,7 +327,17 @@ export default function AlbumClient({ album, fotos }: {
           </ul>
           </>
         )}
+        </>)}
       </div>
+
+      {toonFoto && (() => {
+        const i = lijst.findIndex((f) => f.id === toonFoto);
+        const f = lijst[i];
+        return f ? (
+          <FotoVenster key={f.id} foto={f} nummer={i + 1} aantal={lijst.length} sluitend={fotoSluit}
+            onClose={() => setOpen(null)} onBewaar={(b, imp) => bewaarFoto(f, b, imp)} onVerwijder={() => verwijderUitVenster(f)} />
+        ) : null;
+      })()}
 
       {toonBewerken && (
         <AlbumDrawer

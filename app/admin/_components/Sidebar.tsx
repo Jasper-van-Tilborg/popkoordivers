@@ -18,13 +18,13 @@ const groepen: { kop: string | null; alleenAdmin?: boolean; items: Item[] }[] = 
   { kop: "Website", items: [
     { label: "Agenda", href: "/admin/agenda", icon: <IconCalendar size={19} /> },
     { label: "Nieuws", href: "/admin/nieuws", icon: <IconNewspaper size={19} /> },
-    { label: "Media",  href: "/admin/albums", icon: <IconCamera size={19} /> },
   ] },
   { kop: "Ledenomgeving", items: [
     { label: "Opnames",       href: "/admin/bestanden/opnames",       icon: <IconMicro /> },
     { label: "Choreografie",  href: "/admin/bestanden/choreo",        icon: <IconDans /> },
     { label: "Nieuwsbrieven", href: "/admin/bestanden/nieuwsbrieven", icon: <IconPost /> },
     { label: "ALV-stukken",   href: "/admin/bestanden/alv",           icon: <IconStukken /> },
+    { label: "Foto's & video's", href: "/admin/albums",               icon: <IconCamera size={19} /> },
     { label: "Bestuur & commissies", href: "/admin/organisatie",       icon: <IconGroep /> },
   ] },
   { kop: "Beheer", alleenAdmin: true, items: [

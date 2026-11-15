@@ -15,8 +15,8 @@ export default async function WieIsWiePage() {
     sessie(),
     supabase.from("groepen").select("id, naam, soort, toelichting, contactpersoon_id, volgorde, leden:groepsleden!groepsleden_groep_id_fkey(id, naam, functie, volgorde)").order("volgorde"),
     // Leden mogen elkaars profiel niet rechtstreeks lezen (e-mailadressen); de server
-    // haalt alleen naam en stemgroep op, na de login-check in sessie().
-    createAdminClient().from("profiles").select("naam, stemgroep, in_smoelenboek").not("naam", "is", null).order("naam"),
+    // haalt alleen de naam op, na de login-check in sessie().
+    createAdminClient().from("profiles").select("naam, in_smoelenboek").not("naam", "is", null).order("naam"),
   ]);
 
   // Bestuur en commissies (Admin → Bestuur & commissies)
@@ -95,7 +95,6 @@ export default async function WieIsWiePage() {
               <div key={i} className="leden-kaart smoel">
                 <div className="leden-avatar smoel-avatar">{initialen(l.naam)}</div>
                 <p className="smoel-naam">{l.naam}</p>
-                <span className="smoel-stem">{l.stemgroep ?? "Divers"}</span>
               </div>
             ))}
           </div>

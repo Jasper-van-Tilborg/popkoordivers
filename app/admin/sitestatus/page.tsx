@@ -66,11 +66,11 @@ export default async function SitestatusPage() {
                 </li>
               </ul>
               {!!s?.keepalive_runs?.length && (
-                <ul className="adm-list adm-logboek adm-logboek--datum">
-                  {s.keepalive_runs.map((r) => (
-                    <li key={r.start}>
-                      <time>{tijd(r.start)}</time>
-                      <span>{r.status === "succeeded" ? "Gelukt" : `Mislukt${r.bericht ? `: ${r.bericht}` : ""}`}</span>
+                <ul className="adm-dagen">
+                  {[...s.keepalive_runs].reverse().map((r) => (
+                    <li key={r.start} data-fout={r.status !== "succeeded" || undefined} title={`${tijd(r.start)}: ${r.status === "succeeded" ? "gelukt" : `mislukt${r.bericht ? ` (${r.bericht})` : ""}`}`}>
+                      <span>{new Date(r.start).toLocaleDateString("nl-NL", { timeZone: NL, weekday: "short" })}</span>
+                      <strong>{new Date(r.start).toLocaleDateString("nl-NL", { timeZone: NL, day: "numeric" })}</strong>
                     </li>
                   ))}
                 </ul>
@@ -86,7 +86,7 @@ export default async function SitestatusPage() {
                 </li>
               </ul>
               {s?.db_bytes ? <div className="adm-meter-rij"><Meter waarde={s.db_bytes} max={DB_MAX} /></div> : null}
-              <dl className="adm-cijfers">
+              <dl className="adm-tellijst adm-tellijst--twee">
                 {TABELLEN.map((t, i) => (
                   <div key={t.naam}><dt>{t.label}</dt><dd>{tellingen[i].count ?? "?"}</dd></div>
                 ))}
@@ -104,15 +104,15 @@ export default async function SitestatusPage() {
                 </li>
               </ul>
               <div className="adm-meter-rij"><Meter waarde={opslag} max={R2_MAX} /></div>
-              <dl className="adm-cijfers">
-                <div><dt>Website (openbaar)</dt><dd>{openbaar ? `${tel(openbaar.aantal, "bestand", "bestanden")}, ${mb(openbaar.bytes)}` : "?"}</dd></div>
-                <div><dt>Ledenomgeving (privé)</dt><dd>{prive ? `${tel(prive.aantal, "bestand", "bestanden")}, ${mb(prive.bytes)}` : "?"}</dd></div>
+              <dl className="adm-tellijst">
+                <div><dt>Website (openbaar)</dt><dd>{openbaar ? <>{mb(openbaar.bytes)} <span>{tel(openbaar.aantal, "bestand", "bestanden")}</span></> : "?"}</dd></div>
+                <div><dt>Ledenomgeving (privé)</dt><dd>{prive ? <>{mb(prive.bytes)} <span>{tel(prive.aantal, "bestand", "bestanden")}</span></> : "?"}</dd></div>
               </dl>
             </section>
 
             <section className="adm-blok">
               <div className="adm-blok-kop"><h2>Accounts</h2></div>
-              <dl className="adm-cijfers">
+              <dl className="adm-tellijst">
                 <div><dt>Beheerders</dt><dd>{perRol("admin")}</dd></div>
                 <div><dt>Redacteuren</dt><dd>{perRol("redacteur")}</dd></div>
                 <div><dt>Leden</dt><dd>{perRol("lid")}</dd></div>
@@ -127,7 +127,7 @@ export default async function SitestatusPage() {
                   <span>{ontbreekt.length === 0 ? "Alles ingesteld" : `Ontbreekt: ${ontbreekt.join(", ")}`}</span>
                 </li>
               </ul>
-              <dl className="adm-cijfers">
+              <dl className="adm-tellijst">
                 <div><dt>Next.js</dt><dd>{nextVersie}</dd></div>
                 <div><dt>Node.js</dt><dd>{process.versions.node}</dd></div>
                 <div><dt>Omgeving</dt><dd>{process.env.VERCEL_ENV ?? process.env.NODE_ENV}</dd></div>

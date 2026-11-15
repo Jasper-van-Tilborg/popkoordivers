@@ -29,8 +29,8 @@ export default async function Redactie({ nu }: { nu: Date }) {
   const [komend, concepten, albums, fotos, bestanden] = await Promise.all([
     supabase.from("agenda").select("id, titel, datum_sorteer, locatie, tijd, gepubliceerd").gte("datum_sorteer", vandaag).order("datum_sorteer"),
     supabase.from("berichten").select("id, titel").eq("gepubliceerd", false).order("created_at", { ascending: false }),
-    supabase.from("albums").select("id, titel, datum").order("created_at", { ascending: false }),
-    supabase.from("fotos").select("album_id, r2_key, impressies").order("volgorde").order("created_at"),
+    supabase.from("albums").select("id, titel, datum").order("datum_sorteer", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
+    supabase.from("fotos").select("album_id, r2_key, klein_key, impressies").order("volgorde").order("created_at"),
     supabase.from("bestanden").select("categorie, naam, created_at").order("created_at", { ascending: false }),
   ]);
 
@@ -41,7 +41,7 @@ export default async function Redactie({ nu }: { nu: Date }) {
   const recent = await Promise.all((albums.data ?? []).slice(0, 4).map(async (a) => {
     const eigen = alleFotos.filter((f) => f.album_id === a.id);
     const imp = eigen.find((f) => f.impressies);
-    const cover = imp ? getPublicUrl(imp.r2_key) : eigen[0] ? await downloadUrl(eigen[0].r2_key) : null;
+    const cover = imp ? getPublicUrl(imp.klein_key ?? imp.r2_key) : eigen[0] ? await downloadUrl(eigen[0].klein_key ?? eigen[0].r2_key) : null;
     return { ...a, aantal: eigen.length, cover };
   }));
 

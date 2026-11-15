@@ -5,7 +5,8 @@ import { safeName, uploadUrl, type Bucket } from "@/lib/r2";
 
 export type UploadSoort =
   | { soort: "nieuws" }
-  | { soort: "album"; albumId: string }
+  | { soort: "album"; albumId: string; klein?: boolean }
+  | { soort: "video" }
   | { soort: "bestand"; categorie: string };
 
 // De server bepaalt bucket en key; de browser krijgt alleen een tijdelijke uploadlink.
@@ -24,7 +25,12 @@ export async function vraagUploadAan(doel: UploadSoort, bestandsnaam: string, co
     case "album":
       if (!/^[0-9a-f-]{36}$/.test(doel.albumId)) throw new Error("Ongeldig album");
       bucket = "prive";
-      key = `albums/${doel.albumId}/${naam}`;
+      // De kleine versie (voor rasters) naast de grote, in een eigen map
+      key = `albums/${doel.albumId}/${doel.klein ? "klein/" : ""}${naam}`;
+      break;
+    case "video":
+      bucket = "prive";
+      key = `videos/${naam}`;
       break;
     case "bestand":
       bucket = "prive";

@@ -2,9 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-/* ── Bewerkscherm ────────────────────────────────────────────────────────────────
-   inline: als blok rechts in het Werkblad (Agenda, Nieuws, Bestanden, Leden).
-   Anders: een venster in het midden, voor korte formulieren (een album). */
+/* ── Bewerkscherm: een venster in het midden van het scherm ───────────────────── */
 
 // Houdt een waarde nog even vast nadat hij null wordt, zodat iets kan wegschuiven
 // voordat het uit beeld verdwijnt. Geeft [waarde om te tonen, bezig met sluiten].
@@ -19,16 +17,15 @@ export function useNaijlen<T>(waarde: T | null, ms = 200): [T | null, boolean] {
   return [waarde ?? laatste, waarde === null && laatste !== null];
 }
 
-export function Drawer({ title, onClose, children, footer, sluitend, inline, acties }: {
+export function Drawer({ title, onClose, children, footer, sluitend, acties }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   footer: ReactNode;
   sluitend?: boolean;
-  inline?: boolean;
   acties?: ReactNode;
 }) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => { closeRef.current = onClose; });
 
@@ -57,17 +54,10 @@ export function Drawer({ title, onClose, children, footer, sluitend, inline, act
     </>
   );
 
-  if (inline) {
-    return (
-      <section ref={ref} className="adm-blad" data-sluitend={sluitend || undefined} aria-labelledby="adm-drawer-titel">
-        {inhoud}
-      </section>
-    );
-  }
   return (
     <>
       <div className="adm-overlay" data-sluitend={sluitend || undefined} onClick={onClose} />
-      <div ref={ref as React.RefObject<HTMLDivElement>} className="adm-venster" data-sluitend={sluitend || undefined} role="dialog" aria-modal="true" aria-labelledby="adm-drawer-titel">
+      <div ref={ref} className="adm-venster" data-sluitend={sluitend || undefined} role="dialog" aria-modal="true" aria-labelledby="adm-drawer-titel">
         {inhoud}
       </div>
     </>

@@ -85,25 +85,23 @@ const gewoon = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
 // Zoveel mogelijk op de site zelf: geluid en video in de speler, een Word-bestand (docx)
 // als tekst in hetzelfde venster. De rest (pdf, wma, oude .doc) opent als bestand.
 const AUDIO = ["mp3", "m4a", "wav", "ogg", "aac"];
-const soort = (ext?: string) => ext === "pdf" ? "pdf" : AUDIO.includes(ext ?? "") ? "audio" : ext === "mp4" ? "video" : ext === "docx" ? "word" : "anders";
+export const soort = (ext?: string) => ext === "pdf" ? "pdf" : AUDIO.includes(ext ?? "") ? "audio" : ext === "mp4" ? "video" : ext === "docx" ? "word" : "anders";
 // Een mp4 kan video zijn of alleen geluid; de speler ziet dat pas bij het openen
-const KNOP = { pdf: "PDF ↓", audio: "Luisteren", video: "Afspelen", word: "Lezen", anders: "Openen" };
+export const KNOP = { pdf: "PDF ↓", audio: "Luisteren", video: "Afspelen", word: "Lezen", anders: "Openen" };
 // Op de telefoon staat alleen het icoon in de knop (de hele rij is klikbaar)
 const pad = (d: string) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="lied-knop-icoon">{d === "play" ? <path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12.2-7.4a1 1 0 0 0 0-1.72L8.5 3.74A1 1 0 0 0 7 4.6z" fill="currentColor" stroke="none" /> : d === "lees" ? <path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6" /> : <path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14" />}</svg>;
-const ICOON = { pdf: pad("omlaag"), audio: pad("play"), video: pad("play"), word: pad("lees"), anders: pad("omlaag") };
+export const ICOON = { pdf: pad("omlaag"), audio: pad("play"), video: pad("play"), word: pad("lees"), anders: pad("omlaag") };
 
 interface Props {
   liedjes: Record<string, Lied[]>;
-  // De stemgroep van het lid zelf; daar opent de lijst mee
-  begin?: string | null;
   // De tabbladen, standaard de stemgroepen
   tabs?: readonly string[];
   // Wat er in de lijst staat, voor de tekst als er niets is: "opnames"
   wat?: string;
 }
 
-export default function StemTabs({ liedjes, begin, tabs: tabbladen = stemgroepen, wat = "opnames" }: Props) {
-  const [active, setActive] = useState(tabbladen.find((s) => s === begin) ?? tabbladen[0]);
+export default function StemTabs({ liedjes, tabs: tabbladen = stemgroepen, wat = "opnames" }: Props) {
+  const [active, setActive] = useState(tabbladen[0]);
   const [gekozenPagina, setPagina] = useState(0);
   const [perPagina, setPerPagina] = useState(10);
   const [zoek, setZoek] = useState("");

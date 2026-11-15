@@ -13,5 +13,8 @@ export const MET_STEMGROEP: readonly string[] = ["opnames"];
 // Bij deze categorieën hoort een bestand bij een liednummer uit de map van het koor
 export const MET_LIEDNUMMER: readonly string[] = ["opnames", "choreo"];
 
+// Documenten met een eigen datum (verschenen op / datum van de vergadering); daarop sorteren ze
+export const MET_DATUM: readonly string[] = ["nieuwsbrieven", "alv"];
+
 export type CategorieId = (typeof CATEGORIEEN)[number]["id"];
 export const categorie = (id: string) => CATEGORIEEN.find((c) => c.id === id);

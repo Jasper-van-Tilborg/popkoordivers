@@ -65,6 +65,9 @@ function meestVoorkomend(opnames: Opname[]) {
 
 export const sleutelVoor = (nummer: number | null, titel: string) => (nummer ? `n${nummer}` : `t${titel.toLowerCase()}`);
 
+// De eigen pagina van een lied in de admin
+export const liedHref = (sleutel: string) => `/admin/bestanden/opnames/${encodeURIComponent(sleutel)}`;
+
 export function groepeer(opnames: Opname[]): Lied[] {
   const groepen = new Map<string, Opname[]>();
   for (const o of opnames) {

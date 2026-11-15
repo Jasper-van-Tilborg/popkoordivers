@@ -25,11 +25,12 @@ interface Props {
   onSave: (input: BerichtInput) => Promise<string | null>;
   onDelete?: () => Promise<string | null>;
   acties?: ReactNode;
+  sluitend?: boolean;
 }
 
 const heeftFoto = (url: string) => /^(https?:\/\/|\/)/.test(url);
 
-export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete, acties }: Props) {
+export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete, acties, sluitend }: Props) {
   const [titel, setTitel]   = useState(bericht?.titel ?? "");
   const [datum, setDatum]   = useState(bericht?.created_at.slice(0, 10) ?? vandaag());
   const [categorie, setCategorie] = useState(bericht?.categorie ?? "Nieuws");
@@ -94,7 +95,7 @@ export default function NieuwsDrawer({ bericht, onClose, onSave, onDelete, actie
 
   return (
     <Drawer
-      inline
+      sluitend={sluitend}
       acties={acties}
       title={bericht ? "Bericht bewerken" : "Nieuw bericht"}
       onClose={onClose}

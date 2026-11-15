@@ -11,8 +11,8 @@ export { DUUR, CURVE } from "@/lib/paginaWissel";
 
 export const VOLGORDE = [
   "/admin",
-  "/admin/agenda", "/admin/nieuws", "/admin/albums",
-  "/admin/bestanden/opnames", "/admin/bestanden/choreo", "/admin/bestanden/nieuwsbrieven", "/admin/bestanden/alv", "/admin/organisatie",
+  "/admin/agenda", "/admin/nieuws",
+  "/admin/bestanden/opnames", "/admin/bestanden/choreo", "/admin/bestanden/nieuwsbrieven", "/admin/bestanden/alv", "/admin/albums", "/admin/organisatie",
   "/admin/gebruikers", "/admin/activiteit", "/admin/sitestatus",
 ];
 

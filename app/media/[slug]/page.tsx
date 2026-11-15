@@ -6,6 +6,7 @@ import Reveal from "@/components/Reveal";
 import RevealText from "@/components/RevealText";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicUrl } from "@/lib/r2";
+import VideoSpeler from "@/components/VideoSpeler";
 import Gallery from "./Gallery";
 
 export const dynamic = "force-dynamic";
@@ -22,13 +23,13 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
 
   if (!album) notFound();
 
-  const { data: fotosData } = await supabase
-    .from("fotos")
-    .select("r2_key")
-    .eq("album_id", album.id)
-    .eq("impressies", true)
-    .order("volgorde")
-    .order("created_at");
+  const [{ data: fotosData }, { data: videosData }] = await Promise.all([
+    supabase.from("fotos").select("r2_key, klein_key").eq("album_id", album.id).eq("impressies", true)
+      .order("volgorde").order("created_at"),
+    supabase.from("videos").select("id, titel, youtube_id, r2_key").eq("album_id", album.id).eq("openbaar", true)
+      .order("volgorde"),
+  ]);
+  const videos = videosData ?? [];
 
   const photos = (fotosData ?? []).map((f) => getPublicUrl(f.r2_key));
 
@@ -61,7 +62,17 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
         {/* ── Gallery ── */}
         <section className="gallery-section" style={{ padding: "60px 24px 120px", background: "#FFFFFF" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <Gallery photos={photos} />
+            {videos.length > 0 && (
+              <div className="album-videos">
+                {videos.map((v) => (
+                  <div key={v.id}>
+                    <VideoSpeler titel={v.titel} youtubeId={v.youtube_id} src={v.r2_key ? getPublicUrl(v.r2_key) : null} className="album-video" />
+                    <p style={{ margin: "10px 2px 0", fontSize: "14px", fontWeight: 700, color: "#111" }}>{v.titel}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <Gallery photos={photos} thumbs={(fotosData ?? []).map((f) => (f.klein_key ? getPublicUrl(f.klein_key) : null))} />
           </div>
         </section>
 
@@ -86,6 +97,9 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
           transition: color 0.15s;
         }
         .album-back-link:hover { color: #fff; }
+        .album-videos { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 48px; }
+        .album-video { border-radius: 16px; }
+        @media (max-width: 640px) { .album-videos { grid-template-columns: 1fr; } }
       `}</style>
     </>
   );

@@ -7,13 +7,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/database.types";
 import { DOMEIN, isEmail, isGebruikersnaam } from "@/lib/gebruikersnaam";
 
-type Stemgroep = Database["public"]["Enums"]["stemgroep_type"];
 type Rol = Database["public"]["Enums"]["user_rol"];
 
 export interface LidInput {
   naam: string;
   email: string;   // e-mailadres of gebruikersnaam
-  stemgroep: Stemgroep | null;
   rol: Rol;
   in_smoelenboek: boolean;
 }
@@ -37,7 +35,6 @@ const BEZET = "Dit e-mailadres of deze gebruikersnaam is al in gebruik.";
 const profiel = (input: LidInput) => ({
   naam: input.naam.trim() || null,
   email: inlogVan(input)?.email ?? null,
-  stemgroep: input.stemgroep,
   rol: input.rol,
   in_smoelenboek: input.in_smoelenboek,
 });

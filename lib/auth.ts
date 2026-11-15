@@ -18,13 +18,12 @@ export const huidigeSessie = cache(async () => {
   const { data } = await supabase.auth.getClaims();
   const id = data?.claims.sub;
   if (!id) return null;
-  const { data: profiel } = await supabase.from("profiles").select("rol, naam, stemgroep").eq("id", id).single();
+  const { data: profiel } = await supabase.from("profiles").select("rol, naam").eq("id", id).single();
   return {
     supabase,
     user: { id, email: typeof data.claims.email === "string" ? data.claims.email : null },
     rol: profiel?.rol ?? null,
     naam: profiel?.naam ?? null,
-    stemgroep: profiel?.stemgroep ?? null,
   };
 });
 

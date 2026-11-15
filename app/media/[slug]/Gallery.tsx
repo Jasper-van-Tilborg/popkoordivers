@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback, useRef, type CSSProperties } from "re
 
 interface GalleryProps {
   photos: string[];
+  // Kleine versies voor het raster (zelfde volgorde); de lightbox toont de grote
+  thumbs?: (string | null)[];
 }
 
 type LightboxAnim = "open" | "left" | "right";
 
-export default function Gallery({ photos }: GalleryProps) {
+export default function Gallery({ photos, thumbs }: GalleryProps) {
   const [loaded, setLoaded] = useState<Set<number>>(new Set());
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [anim, setAnim] = useState<LightboxAnim>("open");
@@ -72,7 +74,7 @@ export default function Gallery({ photos }: GalleryProps) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   ref={(el) => { imgRefs.current[i] = el; }}
-                  src={src}
+                  src={thumbs?.[i] ?? src}
                   alt=""
                   onLoad={() => markLoaded(i)}
                   loading="lazy"

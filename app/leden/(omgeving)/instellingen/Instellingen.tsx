@@ -8,7 +8,7 @@ import { WEERGAVE_COOKIE, type Weergave } from "../weergave";
 
 export default function Instellingen({ weergave, account, beheer }: {
   weergave: Weergave;
-  account: { naam: string | null; stemgroep: string | null; inlog: string };
+  account: { naam: string | null; inlog: string };
   beheer: boolean;
 }) {
   const router = useRouter();
@@ -55,7 +55,6 @@ export default function Instellingen({ weergave, account, beheer }: {
         <h2 className="leden-kaart-titel">Account</h2>
         <dl className="leden-gegevens">
           <div><dt>Naam</dt><dd>{account.naam ?? "Onbekend"}</dd></div>
-          <div><dt>Stemgroep</dt><dd>{account.stemgroep ?? "Geen"}</dd></div>
           <div><dt>Inloggen met</dt><dd>{account.inlog}</dd></div>
         </dl>
         <div className="leden-instelling-knoppen">

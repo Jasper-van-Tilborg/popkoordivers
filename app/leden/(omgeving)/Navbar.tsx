@@ -147,7 +147,7 @@ function Tabbalk({ actief, beheer }: { actief: string | null; beheer: boolean })
   );
 }
 
-type Account = { naam: string | null; stemgroep: string | null; inlog: string };
+type Account = { naam: string | null; inlog: string };
 
 export default function Navbar({ rol, account, weergave }: { rol: "lid" | "redacteur" | "admin"; account: Account; weergave: Weergave }) {
   const pad = usePathname();

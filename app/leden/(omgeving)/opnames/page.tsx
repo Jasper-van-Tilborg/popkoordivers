@@ -3,7 +3,7 @@ import StemTabs from "../components/StemTabs";
 import { STEMGROEPEN, bestandenLijst, sessie } from "../data";
 
 export default async function OpnamesPage() {
-  const [{ stemgroep }, opnames] = await Promise.all([sessie(), bestandenLijst(["opnames"])]);
+  const [, opnames] = await Promise.all([sessie(), bestandenLijst(["opnames"])]);
 
   // Per stemgroep, en opnames zonder stemgroep onder Compleet (het hele koor)
   const lijst = (filter: (b: (typeof opnames)[number]) => boolean) => opnames
@@ -19,7 +19,7 @@ export default async function OpnamesPage() {
       <Kop titel="Opnames" />
       <Sectie>
         <div className="leden-kaart leden-opnames">
-          <StemTabs liedjes={perStem} begin={stemgroep} />
+          <StemTabs liedjes={perStem} />
         </div>
       </Sectie>
     </>

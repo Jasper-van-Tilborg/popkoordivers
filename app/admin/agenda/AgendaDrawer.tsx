@@ -55,9 +55,10 @@ interface Props {
   onSave: (input: AgendaInput) => Promise<string | null>;
   onDelete?: () => Promise<string | null>;
   acties?: ReactNode;
+  sluitend?: boolean;
 }
 
-export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, onDelete, acties }: Props) {
+export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, onDelete, acties, sluitend }: Props) {
   const [form, setForm]           = useState(initial);
   const [errors, setErrors]       = useState<Partial<Record<"titel" | "datum" | "link", string>>>({});
   const [serverErr, setServerErr] = useState("");
@@ -105,7 +106,7 @@ export default function AgendaDrawer({ mode, initial, albums, onClose, onSave, o
 
   return (
     <Drawer
-      inline
+      sluitend={sluitend}
       acties={acties}
       title={mode === "edit" ? "Optreden bewerken" : "Nieuw optreden"}
       onClose={onClose}

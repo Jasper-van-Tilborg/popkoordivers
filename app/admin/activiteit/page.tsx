@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { huidigeSessie } from "@/lib/auth";
 import { NL, Zin, type ActiviteitRegel } from "../_components/activiteit";
+import Filters from "./Filters";
 
 const PER_PAGINA = 50;
 
@@ -9,7 +10,7 @@ const FILTERS = [
   { id: "",          label: "Alles",          soorten: null },
   { id: "agenda",    label: "Agenda",         soorten: ["optreden"] },
   { id: "nieuws",    label: "Nieuws",         soorten: ["bericht"] },
-  { id: "media",     label: "Media",          soorten: ["album", "foto"] },
+  { id: "media",     label: "Foto's & video's", soorten: ["album", "foto", "video"] },
   { id: "bestanden", label: "Ledenomgeving",  soorten: ["bestand", "groep"] },
   { id: "gebruikers", label: "Gebruikers",    soorten: ["lid"] },
 ];
@@ -66,21 +67,7 @@ export default async function ActiviteitPage({ searchParams }: { searchParams: P
         </div>
       </header>
 
-      <div className="adm-toolbar">
-        <nav className="adm-filters" aria-label="Soort">
-          {FILTERS.map((f) => (
-            <Link key={f.id} href={url({ soort: f.id || undefined, voor: undefined })} aria-current={f.id === filter.id ? "true" : undefined}>{f.label}</Link>
-          ))}
-        </nav>
-        {personen.length > 1 && (
-          <nav className="adm-filters" aria-label="Persoon">
-            <Link href={url({ wie: undefined, voor: undefined })} aria-current={!wie ? "true" : undefined}>Iedereen</Link>
-            {personen.map(([id, naam]) => (
-              <Link key={id} href={url({ wie: id, voor: undefined })} aria-current={wie === id ? "true" : undefined}>{naam}</Link>
-            ))}
-          </nav>
-        )}
-      </div>
+      <Filters soort={filter.id} wie={wie} soorten={FILTERS} personen={personen} />
 
       <div className="adm-content">
         {dagen.length === 0 ? (

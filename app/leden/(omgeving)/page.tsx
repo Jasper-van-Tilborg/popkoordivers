@@ -40,16 +40,11 @@ function aftellen(datum: string) {
 // de agenda en het nieuws van de website.
 export default async function OverzichtPage() {
   const supabase = await db();
-  const ik = sessie();
   const [{ naam }, opnames, { data: optredens }, { data: berichten }] = await Promise.all([
-    ik,
-    // Voor de tegel: drie opnames voor de eigen stem (zonder stem: die van het hele koor)
-    ik.then(async ({ stemgroep }) => {
-      let q = supabase.from("bestanden").select("id, naam").eq("categorie", "opnames");
-      q = stemgroep ? q.eq("stemgroep", stemgroep) : q.is("stemgroep", null);
-      const { data } = await q.order("created_at", { ascending: false }).limit(3);
-      return data ?? [];
-    }),
+    sessie(),
+    // Voor de tegel: de drie nieuwste opnames van het hele koor
+    supabase.from("bestanden").select("id, naam").eq("categorie", "opnames").is("stemgroep", null)
+      .order("created_at", { ascending: false }).limit(3).then(({ data }) => data ?? []),
     supabase.from("agenda").select("id, titel, datum, datum_sorteer, tijd, locatie").eq("gepubliceerd", true).gte("datum_sorteer", vandaag()).order("datum_sorteer").limit(4),
     supabase.from("berichten").select("id, slug, titel, datum").eq("gepubliceerd", true).order("created_at", { ascending: false }).limit(3),
   ]);

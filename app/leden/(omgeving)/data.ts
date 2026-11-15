@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { huidigeSessie } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { downloadUrl } from "@/lib/r2";
 import type { Database } from "@/lib/database.types";
 import { WEERGAVE_COOKIE, type Weergave } from "./weergave";
 
@@ -23,17 +22,19 @@ export const sessie = cache(async () => {
 // ingelogd, komt hier niet (proxy.ts), en de database laat alleen leden lezen (RLS).
 export const db = cache(createClient);
 
-// Bestanden uit de ledenomgeving, nieuwste eerst, met een tijdelijke link (1 uur geldig).
-export async function bestanden(categorieen: string[], limiet?: number) {
+// Documenten (nieuwsbrieven, ALV-stukken), nieuwste eerst. Zonder links: die haalt
+// de pagina pas op als iemand een document opent (actions.ts).
+export async function documenten(categorieen: string[]) {
   const supabase = await db();
-  let q = supabase
+  const { data } = await supabase
     .from("bestanden")
-    .select("id, naam, categorie, stemgroep, r2_key, created_at")
+    .select("id, naam, categorie, datum, r2_key, created_at")
     .in("categorie", categorieen)
+    .order("datum", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
-  if (limiet) q = q.limit(limiet);
-  const { data } = await q;
-  return Promise.all((data ?? []).map(async ({ r2_key, ...b }) => ({ ...b, url: await downloadUrl(r2_key) })));
+  return (data ?? []).map(({ r2_key, datum, created_at, ...b }) => ({
+    ...b, datum: datum ?? created_at.slice(0, 10), ext: r2_key.split(".").pop()!.toLowerCase(),
+  }));
 }
 
 // Alleen de lijst, zonder links: bij honderden opnames haalt de pagina een link
