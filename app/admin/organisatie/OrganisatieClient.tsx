@@ -3,20 +3,21 @@
 import { useMemo, useRef, useState } from "react";
 import { Drawer, DeleteButton, IconOmhoog, IconOmlaag, IconPlus, IconSearch, IconTrash, useNaijlen, useToast } from "../_components/ui";
 import { Keuze, Suggestie } from "../_components/velden";
+import { uploadNaarR2 } from "../_components/upload";
 import { bewaarGroep, verplaatsGroep, verwijderGroep, type GroepInput } from "./actions";
 
-export interface Persoon { id: number; naam: string; functie: string | null }
+export interface Persoon { id: number; naam: string; functie: string | null; foto_key: string | null; foto: string | null }
 export interface Groep {
   id: number;
   naam: string;
-  soort: "bestuur" | "commissie" | "overig";
+  soort: "bestuur" | "smoelenboek" | "commissie" | "overig";
   toelichting: string | null;
   contactpersoon_id: number | null;
   leden: Persoon[];
 }
 
 // Een regel in het formulier; nieuwe mensen hebben nog geen id, wel een sleutel
-type Regel = { sleutel: string; id?: number; naam: string; functie: string };
+type Regel = { sleutel: string; id?: number; naam: string; functie: string; foto_key: string | null; foto: string | null; uploadt?: boolean };
 
 const FUNCTIES = ["Voorzitter", "Secretaris", "Penningmeester", "Bestuurslid"];
 const SOORTEN = [
@@ -26,6 +27,7 @@ const SOORTEN = [
 
 let teller = 0;
 const sleutel = () => `n${++teller}`;
+const leeg = (): Regel => ({ sleutel: sleutel(), naam: "", functie: "", foto_key: null, foto: null });
 
 function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDone }: {
   groep: Groep | null;
@@ -37,38 +39,56 @@ function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDo
   onDone: (melding: string) => void;
 }) {
   const isBestuur = groep?.soort === "bestuur";
+  const isSmoelenboek = groep?.soort === "smoelenboek";
+  // Vaste groepen: geen soort, contactpersoon of plek in de lijst, en niet te verwijderen
+  const isVast = isBestuur || isSmoelenboek;
   const [naam, setNaam] = useState(groep?.naam ?? "");
   const [soort, setSoort] = useState<GroepInput["soort"]>(groep ? (groep.soort === "overig" ? "overig" : "commissie") : nieuwSoort);
   const [toelichting, setToelichting] = useState(groep?.toelichting ?? "");
   const [contact, setContact] = useState(groep?.contactpersoon_id ? String(groep.contactpersoon_id) : "");
   const [regels, setRegels] = useState<Regel[]>(() => {
-    const r = (groep?.leden ?? []).map((l) => ({ sleutel: `p${l.id}`, id: l.id, naam: l.naam, functie: l.functie ?? "" }));
-    return r.length ? r : [{ sleutel: sleutel(), naam: "", functie: "" }];
+    const r = (groep?.leden ?? []).map((l) => ({ sleutel: `p${l.id}`, id: l.id, naam: l.naam, functie: l.functie ?? "", foto_key: l.foto_key, foto: l.foto }));
+    return r.length ? r : [leeg()];
   });
   const [fout, setFout] = useState("");
   const [busy, setBusy] = useState<"save" | "delete" | "plek" | null>(null);
   const lijstRef = useRef<HTMLOListElement>(null);
 
   const zet = (i: number, veld: "naam" | "functie", v: string) => setRegels((r) => r.map((x, j) => (j === i ? { ...x, [veld]: v } : x)));
+  const werkBij = (s: string, wat: Partial<Regel>) => setRegels((r) => r.map((x) => (x.sleutel === s ? { ...x, ...wat } : x)));
+
+  // Een portret kiezen: meteen omhoog, opgeslagen wordt het met de rest
+  async function kiesFoto(s: string, file: File | undefined) {
+    if (!file) return;
+    setFout("");
+    werkBij(s, { uploadt: true, foto: URL.createObjectURL(file) });
+    try {
+      werkBij(s, { foto_key: await uploadNaarR2(file, { soort: "smoel" }), uploadt: false });
+    } catch (e) {
+      werkBij(s, { uploadt: false, foto: groep?.leden.find((l) => `p${l.id}` === s)?.foto ?? null });
+      setFout(e instanceof Error ? e.message : "De foto kon niet worden geüpload.");
+    }
+  }
   const schuif = (i: number, d: -1 | 1) => setRegels((r) => {
     const n = [...r];
     [n[i], n[i + d]] = [n[i + d], n[i]];
     return n;
   });
   function voegToe() {
-    setRegels((r) => [...r, { sleutel: sleutel(), naam: "", functie: "" }]);
+    setRegels((r) => [...r, leeg()]);
     // Na het tekenen: focus op de nieuwe naam
     requestAnimationFrame(() => lijstRef.current?.querySelector<HTMLInputElement>("li:last-child input")?.focus());
   }
 
   async function save() {
     if (!naam.trim()) { setFout("Geef de groep een naam."); return; }
+    if (regels.some((r) => r.uploadt)) { setFout("Wacht tot de foto's zijn geüpload."); return; }
     setBusy("save");
     setFout("");
     const res = await bewaarGroep(groep?.id ?? null, {
       naam, soort, toelichting,
       contactpersoon_id: contact ? Number(contact) : null,
-      leden: regels.map(({ id, naam, functie }) => ({ id, naam, functie })),
+      leden: regels.map(({ id, naam, functie, foto_key }) => ({ id, naam, functie, foto_key })),
     });
     setBusy(null);
     if (res.error) setFout(res.error);
@@ -98,7 +118,7 @@ function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDo
       sluitend={sluitend}
       title={groep ? groep.naam : nieuwSoort === "overig" ? "Nieuwe taak" : "Nieuwe commissie"}
       onClose={onClose}
-      acties={groep && !isBestuur && (
+      acties={groep && !isVast && (
         <>
           <button className={`adm-icon-btn${plek.eerste ? " adm-icon-btn--off" : ""}`} onClick={() => verplaats(-1)} disabled={plek.eerste || !!busy} title="Eén plek omhoog" aria-label="Eén plek omhoog"><IconOmhoog /></button>
           <button className={`adm-icon-btn${plek.laatste ? " adm-icon-btn--off" : ""}`} onClick={() => verplaats(1)} disabled={plek.laatste || !!busy} title="Eén plek omlaag" aria-label="Eén plek omlaag"><IconOmlaag /></button>
@@ -108,7 +128,7 @@ function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDo
         <>
           {fout && <p className="adm-server-err" role="alert">{fout}</p>}
           <div className="adm-foot-actions">
-            {groep && !isBestuur && <DeleteButton onConfirm={remove} busy={busy === "delete"} />}
+            {groep && !isVast && <DeleteButton onConfirm={remove} busy={busy === "delete"} />}
             <span className="adm-spacer" />
             <button type="button" className="adm-btn adm-btn--ghost" onClick={onClose}>Annuleren</button>
             <button type="button" className="adm-btn adm-btn--primary" onClick={save} disabled={!!busy}>
@@ -124,20 +144,20 @@ function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDo
             <label htmlFor="gr-naam">Naam</label>
             <input id="gr-naam" className="adm-input" value={naam} onChange={(e) => setNaam(e.target.value)} placeholder="bijv. Muziekcommissie" />
           </div>
-          {!isBestuur && (
+          {!isVast && (
             <div className="adm-field">
               <label htmlFor="gr-soort">Soort</label>
               <Keuze id="gr-soort" value={soort} onChange={setSoort} opties={SOORTEN} />
             </div>
           )}
         </div>
-        <div className="adm-grid-2">
+        {!isSmoelenboek && <div className="adm-grid-2">
           <div className="adm-field">
             <label htmlFor="gr-toelichting">Toelichting <span className="adm-optional">optioneel</span></label>
             <input id="gr-toelichting" className="adm-input" value={toelichting} onChange={(e) => setToelichting(e.target.value)} placeholder="bijv. 16 t/m 18 april 2027" />
             <p className="adm-hint">Staat onder de naam in de ledenomgeving.</p>
           </div>
-          {!isBestuur && (
+          {!isVast && (
             <div className="adm-field">
               <label htmlFor="gr-contact">Contactpersoon in het bestuur</label>
               <Keuze
@@ -148,24 +168,34 @@ function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDo
               />
             </div>
           )}
-        </div>
+        </div>}
       </section>
 
       <section className="adm-fieldset">
         <h3>{isBestuur ? "Bestuursleden" : "Leden"}</h3>
-        <p className="adm-hint" style={{ marginTop: 0 }}>In deze volgorde staan ze in de ledenomgeving. Een lege regel wordt overgeslagen.</p>
-        <ol className="adm-personen" ref={lijstRef}>
+        <p className="adm-hint" style={{ marginTop: 0 }}>{isSmoelenboek ? "In de ledenomgeving staan ze op alfabet." : "In deze volgorde staan ze in de ledenomgeving."} Een lege regel wordt overgeslagen.</p>
+        <ol className={`adm-personen${isSmoelenboek ? " adm-personen--foto" : ""}`} ref={lijstRef}>
           {regels.map((r, i) => (
             <li key={r.sleutel}>
+              {isSmoelenboek && (
+                <label className="adm-avatar adm-avatar--kies" data-bezig={r.uploadt || undefined} title={r.foto ? "Andere foto kiezen" : "Foto kiezen"}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {r.foto ? <img src={r.foto} alt="" /> : initialen(r.naam || "?")}
+                  <input type="file" hidden accept="image/*" aria-label={`Foto van ${r.naam || `persoon ${i + 1}`}`}
+                    onChange={(e) => { kiesFoto(r.sleutel, e.target.files?.[0]); e.target.value = ""; }} />
+                </label>
+              )}
               <input className="adm-input" value={r.naam} onChange={(e) => zet(i, "naam", e.target.value)} placeholder="Naam" aria-label={`Naam ${i + 1}`} />
               {isBestuur ? (
                 <Suggestie value={r.functie} onChange={(v) => zet(i, "functie", v)} suggesties={FUNCTIES} placeholder="Functie" />
               ) : (
-                <input className="adm-input" value={r.functie} onChange={(e) => zet(i, "functie", e.target.value)} placeholder={soort === "overig" ? "bijv. Materialen" : "bijv. dirigent of extern"} aria-label={`${functieLabel} ${i + 1}`} />
+                <input className="adm-input" value={r.functie} onChange={(e) => zet(i, "functie", e.target.value)} placeholder={isSmoelenboek ? "bijv. Alt of dirigent" : soort === "overig" ? "bijv. Materialen" : "bijv. dirigent of extern"} aria-label={`${functieLabel} ${i + 1}`} />
               )}
               <span className="adm-personen-knoppen">
-                <button type="button" className={`adm-icon-btn${i === 0 ? " adm-icon-btn--off" : ""}`} onClick={() => schuif(i, -1)} disabled={i === 0} aria-label={`${r.naam || "Regel"} omhoog`}><IconOmhoog /></button>
-                <button type="button" className={`adm-icon-btn${i === regels.length - 1 ? " adm-icon-btn--off" : ""}`} onClick={() => schuif(i, 1)} disabled={i === regels.length - 1} aria-label={`${r.naam || "Regel"} omlaag`}><IconOmlaag /></button>
+                {!isSmoelenboek && <>
+                  <button type="button" className={`adm-icon-btn${i === 0 ? " adm-icon-btn--off" : ""}`} onClick={() => schuif(i, -1)} disabled={i === 0} aria-label={`${r.naam || "Regel"} omhoog`}><IconOmhoog /></button>
+                  <button type="button" className={`adm-icon-btn${i === regels.length - 1 ? " adm-icon-btn--off" : ""}`} onClick={() => schuif(i, 1)} disabled={i === regels.length - 1} aria-label={`${r.naam || "Regel"} omlaag`}><IconOmlaag /></button>
+                </>}
                 <button type="button" className="adm-icon-btn" onClick={() => setRegels((x) => x.filter((_, j) => j !== i))} aria-label={`${r.naam || "Regel"} weghalen`}><IconTrash /></button>
               </span>
             </li>
@@ -195,6 +225,7 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
   const groep = open && !nieuw ? groepen.find((g) => String(g.id) === open) ?? null : null;
   const bestuurGroep = groepen.find((g) => g.soort === "bestuur");
   const bestuur = bestuurGroep?.leden ?? [];
+  const smoelenboekGroep = groepen.find((g) => g.soort === "smoelenboek");
 
   // Zoeken op de naam van de groep of van iemand erin
   const q = zoek.trim().toLowerCase();
@@ -205,7 +236,6 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
   const zelfdeSoort = groep ? groepen.filter((g) => g.soort === groep.soort) : [];
   const plek = { eerste: zelfdeSoort[0]?.id === groep?.id, laatste: zelfdeSoort[zelfdeSoort.length - 1]?.id === groep?.id };
   const contactNaam = (g: Groep) => bestuur.find((b) => b.id === g.contactpersoon_id)?.naam;
-  const mensen = new Set(groepen.flatMap((g) => g.leden.map((l) => l.naam.toLowerCase()))).size;
 
   const kaarten = (titel: string, soort: GroepInput["soort"], items: Groep[]) => {
     const zichtbaar = items.filter(past);
@@ -244,7 +274,7 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
   };
 
   const inhoud = loadError ? (
-    <div className="adm-empty"><p className="adm-empty-title">Bestuur en commissies konden niet worden geladen</p><p>{loadError}</p></div>
+    <div className="adm-empty"><p className="adm-empty-title">Wie is wie kon niet worden geladen</p><p>{loadError}</p></div>
   ) : (
     <>
       {bestuurGroep && past(bestuurGroep) && (
@@ -265,6 +295,26 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
               ))}
             </ul>
           ) : <p className="adm-blok-leeg">Nog niemand in het bestuur</p>}
+        </section>
+      )}
+      {smoelenboekGroep && past(smoelenboekGroep) && (
+        <section className="adm-blok adm-blok--smoelenboek">
+          <div className="adm-blok-kop">
+            <h2>{smoelenboekGroep.naam} <span className="adm-count">{smoelenboekGroep.leden.length}</span></h2>
+            <button className="adm-btn adm-btn--ghost adm-btn--small" onClick={() => setGekozen(String(smoelenboekGroep.id))}>Bewerken</button>
+          </div>
+          {smoelenboekGroep.leden.length > 0 ? (
+            <ul className="adm-bestuur">
+              {smoelenboekGroep.leden.filter((l) => !q || l.naam.toLowerCase().includes(q) || smoelenboekGroep.naam.toLowerCase().includes(q)).map((p) => (
+                <li key={p.id}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <span className="adm-avatar" aria-hidden="true">{p.foto ? <img src={p.foto} alt="" loading="lazy" /> : initialen(p.naam)}</span>
+                  <span className="adm-bestuur-naam">{p.naam}</span>
+                  {p.functie && <span className="adm-bestuur-functie">{p.functie}</span>}
+                </li>
+              ))}
+            </ul>
+          ) : <p className="adm-blok-leeg">Nog niemand in het smoelenboek</p>}
         </section>
       )}
       {kaarten("Commissies", "commissie", commissies)}
@@ -292,8 +342,8 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
     <div className="adm-page">
       <header className="adm-head">
         <div>
-          <h1>Bestuur &amp; commissies</h1>
-          <p className="adm-sub">{bestuur.length} in het bestuur, {commissies.length} commissies, {mensen} mensen in totaal.</p>
+          <h1>Wie is wie</h1>
+          <p className="adm-sub">{bestuur.length} in het bestuur, {commissies.length} commissies, {smoelenboekGroep?.leden.length ?? 0} in het smoelenboek.</p>
         </div>
         <button className="adm-btn adm-btn--primary" onClick={() => setGekozen("nieuw:commissie")}><IconPlus /> Commissie toevoegen</button>
       </header>

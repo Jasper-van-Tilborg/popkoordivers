@@ -155,6 +155,7 @@ export default function LiedClient({ lied, liedjes, startOpname }: { lied: Lied;
                         <button type="button" className="adm-opname-naam" onClick={() => setVenster({ soort: "opname", id: o.id })} title="Bewerken">
                           {kortLabel(o, lied.titel) || o.naam}
                           <span className="adm-opname-ext">{o.ext.toUpperCase()}</span>
+                          {!!o.versies?.length && <span className="adm-pill">{o.versies.length + 1} versies</span>}
                         </button>
                         <button type="button" className="adm-icon-btn" onClick={() => download(o.id)} title="Downloaden" aria-label={`Downloaden: ${o.naam}`}><IconDownload /></button>
                       </div>

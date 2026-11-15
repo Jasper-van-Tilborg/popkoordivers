@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Drawer, DeleteButton, IconPlus, IconSearch, useNaijlen, useToast } from "../_components/ui";
-import { Keuze, Vinkje } from "../_components/velden";
+import { Keuze } from "../_components/velden";
 import { gebruikersnaamVoor, isEmail, isGebruikersnaam } from "@/lib/gebruikersnaam";
 import { maakLid, verwijderLid, wijzigLid, zetWachtwoord, type LidInput } from "./actions";
 
@@ -11,7 +11,6 @@ interface Lid {
   email: string;
   naam: string | null;
   rol: LidInput["rol"];
-  in_smoelenboek: boolean;
   laatst_ingelogd: string | null;
 }
 
@@ -39,7 +38,6 @@ function LidDrawer({ lid, eigen, sluitend, onClose, onDone }: {
     naam: lid?.naam ?? "",
     email: lid?.email ?? "",
     rol: lid?.rol ?? "lid",
-    in_smoelenboek: lid?.in_smoelenboek ?? true,
   });
   const [wachtwoord, setWachtwoord] = useState(() => (lid ? "" : maakWachtwoord()));
   const [fout, setFout]   = useState("");
@@ -125,9 +123,6 @@ function LidDrawer({ lid, eigen, sluitend, onClose, onDone }: {
               </button>
             )}
           </div>
-        </div>
-        <div className="adm-field adm-field--vinkje">
-          <Vinkje checked={form.in_smoelenboek} onChange={(v) => set("in_smoelenboek", v)}>Tonen in het smoelenboek</Vinkje>
         </div>
       </section>
 

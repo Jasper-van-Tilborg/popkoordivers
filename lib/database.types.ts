@@ -272,6 +272,7 @@ export type Database = {
       }
       groepsleden: {
         Row: {
+          foto_key: string | null
           functie: string | null
           groep_id: number
           id: number
@@ -279,6 +280,7 @@ export type Database = {
           volgorde: number
         }
         Insert: {
+          foto_key?: string | null
           functie?: string | null
           groep_id: number
           id?: never
@@ -286,6 +288,7 @@ export type Database = {
           volgorde?: number
         }
         Update: {
+          foto_key?: string | null
           functie?: string | null
           groep_id?: number
           id?: never
@@ -298,6 +301,38 @@ export type Database = {
             columns: ["groep_id"]
             isOneToOne: false
             referencedRelation: "groepen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opname_versies: {
+        Row: {
+          bestand_id: number
+          created_at: string
+          datum: string
+          id: number
+          r2_key: string
+        }
+        Insert: {
+          bestand_id: number
+          created_at?: string
+          datum: string
+          id?: never
+          r2_key: string
+        }
+        Update: {
+          bestand_id?: number
+          created_at?: string
+          datum?: string
+          id?: never
+          r2_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opname_versies_bestand_id_fkey"
+            columns: ["bestand_id"]
+            isOneToOne: false
+            referencedRelation: "bestanden"
             referencedColumns: ["id"]
           },
         ]
@@ -431,7 +466,7 @@ export type Database = {
       sitestatus: { Args: never; Returns: Json }
     }
     Enums: {
-      groep_soort: "bestuur" | "commissie" | "overig"
+      groep_soort: "bestuur" | "commissie" | "overig" | "smoelenboek"
       stemgroep_type: "Alt" | "Mezzo" | "Sopraan" | "Tenor" | "Bas"
       user_rol: "lid" | "redacteur" | "admin"
     }
@@ -561,7 +596,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      groep_soort: ["bestuur", "commissie", "overig"],
+      groep_soort: ["bestuur", "commissie", "overig", "smoelenboek"],
       stemgroep_type: ["Alt", "Mezzo", "Sopraan", "Tenor", "Bas"],
       user_rol: ["lid", "redacteur", "admin"],
     },

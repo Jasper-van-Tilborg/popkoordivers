@@ -14,6 +14,16 @@ export interface Opname {
   liednummer: number | null;
   ext: string;
   created_at: string;
+  // Datum van de huidige versie (leeg: created_at)
+  datum: string | null;
+  // Eerdere versies, nieuwste eerst; alleen op de pagina van een lied geladen
+  versies?: Versie[];
+}
+
+export interface Versie {
+  id: number;
+  datum: string;
+  ext: string;
 }
 
 export interface Lied {

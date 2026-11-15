@@ -204,7 +204,7 @@
   .commissie-functie { font-size: 12.5px; color: #555; }
   .smoelenboek-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .smoel { padding: 18px 10px; }
-  .smoel-avatar { width: 60px; height: 60px; font-size: 18px; }
+  .smoel-avatar { width: 80px; height: 80px; font-size: 20px; }
   .smoel-naam { font-size: 15.5px; }
 }
 

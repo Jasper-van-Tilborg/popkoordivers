@@ -8,6 +8,9 @@ import type { Database } from "@/lib/database.types";
 
 type Stemgroep = Database["public"]["Enums"]["stemgroep_type"];
 
+// Vandaag als "2026-11-15", in Nederlandse tijd
+const vandaag = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
+
 export interface OpnameInput {
   naam: string;
   stemgroep: Stemgroep | null;
@@ -72,34 +75,69 @@ export async function wijzigOpname(id: number, input: OpnameInput) {
   return {};
 }
 
-// Een nieuwe versie van dezelfde opname: het oude bestand gaat weg
-export async function vervangOpname(id: number, key: string) {
+// Een nieuwe versie van dezelfde opname: de leden krijgen meteen de nieuwe,
+// het vorige bestand blijft bewaard als eerdere versie (alleen in de admin)
+export async function nieuweVersie(id: number, key: string) {
   const sessie = await requireBeheer();
   const { supabase } = sessie;
   if (!key.startsWith(UPLOADMAP)) return { error: "Ongeldig bestand." };
-  const { data } = await supabase.from("bestanden").select("r2_key, naam").eq("id", id).eq("categorie", "opnames").single();
+  const { data } = await supabase.from("bestanden").select("r2_key, naam, datum, created_at").eq("id", id).eq("categorie", "opnames").single();
   if (!data) {
     await deleteFile("prive", key).catch(() => {});
     return { error: "Deze opname bestaat niet meer." };
   }
-  const { error } = await supabase.from("bestanden").update({ r2_key: key }).eq("id", id);
+  const { error: fout } = await supabase.from("opname_versies")
+    .insert({ bestand_id: id, r2_key: data.r2_key, datum: data.datum ?? data.created_at.slice(0, 10) });
+  if (fout) {
+    await deleteFile("prive", key).catch(() => {});
+    return { error: fout.message };
+  }
+  const { error } = await supabase.from("bestanden").update({ r2_key: key, datum: vandaag() }).eq("id", id);
   if (error) {
+    await supabase.from("opname_versies").delete().eq("bestand_id", id).eq("r2_key", data.r2_key);
     await deleteFile("prive", key).catch(() => {});
     return { error: error.message };
   }
-  await deleteFile("prive", data.r2_key).catch(() => {});
   await logActiviteit(sessie, "vervangen", "bestand", { id, naam: data.naam });
   vernieuw();
   return {};
 }
 
+// Een eerdere versie weggooien
+export async function verwijderVersie(versieId: number) {
+  const sessie = await requireBeheer();
+  const { supabase } = sessie;
+  const { data } = await supabase.from("opname_versies").select("r2_key, bestanden(naam)").eq("id", versieId).single();
+  if (!data) return { error: "Deze versie bestaat niet meer." };
+  const { error } = await supabase.from("opname_versies").delete().eq("id", versieId);
+  if (error) return { error: error.message };
+  await deleteFile("prive", data.r2_key).catch(() => {});
+  await logActiviteit(sessie, "verwijderd", "bestand", { naam: `${data.bestanden?.naam ?? "Opname"} (eerdere versie)` });
+  vernieuw();
+  return {};
+}
+
+// Tijdelijke link naar een eerdere versie, of om hem op te slaan als "030 Back It Up Alt Band (12-11-2026).mp3"
+export async function versieLink(versieId: number, opslaan = false) {
+  const { supabase } = await requireBeheer();
+  const { data } = await supabase.from("opname_versies").select("r2_key, datum, bestanden(naam, liednummer)").eq("id", versieId).maybeSingle();
+  if (!data) return null;
+  if (!opslaan) return downloadUrl(data.r2_key);
+  const ext = data.r2_key.split(".").pop();
+  const [j, m, d] = data.datum.split("-");
+  const naam = [data.bestanden?.liednummer && String(data.bestanden.liednummer).padStart(3, "0"), data.bestanden?.naam, `(${d}-${m}-${j})`].filter(Boolean).join(" ");
+  return downloadUrl(data.r2_key, 3600, `${naam.replace(/[\\/:*?"<>|]/g, "")}.${ext}`);
+}
+
 export async function verwijderOpnames(ids: number[], titel?: string) {
   const sessie = await requireBeheer();
   const { supabase } = sessie;
-  const { data } = await supabase.from("bestanden").select("id, r2_key, naam").in("id", ids).eq("categorie", "opnames");
+  const { data } = await supabase.from("bestanden").select("id, r2_key, naam, opname_versies(r2_key)").in("id", ids).eq("categorie", "opnames");
   const { error } = await supabase.from("bestanden").delete().in("id", ids).eq("categorie", "opnames");
   if (error) return { error: error.message };
-  await Promise.all((data ?? []).map((b) => deleteFile("prive", b.r2_key).catch(() => {})));
+  // De eerdere versies gaan in de database vanzelf mee; hun bestanden ook weg
+  const keys = (data ?? []).flatMap((b) => [b.r2_key, ...b.opname_versies.map((v) => v.r2_key)]);
+  await Promise.all(keys.map((k) => deleteFile("prive", k).catch(() => {})));
   await logActiviteit(sessie, "verwijderd", "bestand", {
     naam: data?.length === 1 ? data[0].naam : `${titel ?? "Opnames"} (${data?.length ?? 0} opnames)`,
   });

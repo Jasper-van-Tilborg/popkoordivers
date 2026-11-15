@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { downloadUrl } from "@/lib/r2";
 import { Kop, Sectie } from "../Kop";
 import { db, initialen, sessie } from "../data";
 
@@ -11,22 +11,21 @@ const Chevron = () => (
 export default async function WieIsWiePage() {
   const supabase = await db();
   // sessie() hoort erbij: zonder login gaat die naar de loginpagina voordat er iets getoond wordt
-  const [, { data: groepenRaw }, { data: ledenRaw }] = await Promise.all([
+  const [, { data: groepenRaw }] = await Promise.all([
     sessie(),
-    supabase.from("groepen").select("id, naam, soort, toelichting, contactpersoon_id, volgorde, leden:groepsleden!groepsleden_groep_id_fkey(id, naam, functie, volgorde)").order("volgorde"),
-    // Leden mogen elkaars profiel niet rechtstreeks lezen (e-mailadressen); de server
-    // haalt alleen de naam op, na de login-check in sessie().
-    createAdminClient().from("profiles").select("naam, in_smoelenboek").not("naam", "is", null).order("naam"),
+    supabase.from("groepen").select("id, naam, soort, toelichting, contactpersoon_id, volgorde, leden:groepsleden!groepsleden_groep_id_fkey(id, naam, functie, volgorde, foto_key)").order("volgorde"),
   ]);
 
-  // Bestuur en commissies (Admin → Bestuur & commissies)
+  // Bestuur, smoelenboek en commissies (Admin → Wie is wie)
   const groepen = (groepenRaw ?? []).map((g) => ({ ...g, leden: [...g.leden].sort((a, b) => a.volgorde - b.volgorde) }));
   const bestuursleden = groepen.find((g) => g.soort === "bestuur")?.leden ?? [];
   const commissies = groepen
-    .filter((g) => g.soort !== "bestuur" && g.leden.length > 0)
+    .filter((g) => (g.soort === "commissie" || g.soort === "overig") && g.leden.length > 0)
     .sort((a, b) => Number(a.soort === "overig") - Number(b.soort === "overig") || a.volgorde - b.volgorde)
     .map((g) => ({ ...g, contact: bestuursleden.find((l) => l.id === g.contactpersoon_id)?.naam ?? null }));
-  const leden = (ledenRaw ?? []).filter((l) => l.in_smoelenboek).map((l) => ({ ...l, naam: l.naam! }));
+  const smoelenboek = groepen.find((g) => g.soort === "smoelenboek");
+  // Portretten staan in de privé bucket: tijdelijke links (1 uur geldig)
+  const leden = await Promise.all((smoelenboek?.leden ?? []).map(async (l) => ({ ...l, foto: l.foto_key ? await downloadUrl(l.foto_key) : null })));
 
   return (
     <>
@@ -86,15 +85,19 @@ export default async function WieIsWiePage() {
         </Sectie>
       )}
 
-      <Sectie titel="Smoelenboek" aantal={leden.length} id="smoelenboek">
+      <Sectie titel={smoelenboek?.naam ?? "Smoelenboek"} aantal={leden.length} id="smoelenboek">
         {leden.length === 0 ? (
           <p className="leden-leeg">Binnenkort beschikbaar.</p>
         ) : (
           <div className="smoelenboek-grid">
-            {leden.map((l, i) => (
-              <div key={i} className="leden-kaart smoel">
-                <div className="leden-avatar smoel-avatar">{initialen(l.naam)}</div>
+            {leden.map((l) => (
+              <div key={l.id} className="leden-kaart smoel">
+                <div className="leden-avatar smoel-avatar">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {l.foto ? <img src={l.foto} alt="" loading="lazy" /> : initialen(l.naam)}
+                </div>
                 <p className="smoel-naam">{l.naam}</p>
+                {l.functie && <span className="smoel-functie">{l.functie}</span>}
               </div>
             ))}
           </div>

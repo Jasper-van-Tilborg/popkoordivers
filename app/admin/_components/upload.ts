@@ -47,7 +47,9 @@ export async function uploadKlein(file: File, albumId: string): Promise<string |
 
 // Uploadt rechtstreeks van de browser naar R2 en geeft de key terug.
 export async function uploadNaarR2(file: File, doel: UploadSoort, onProgress?: (fractie: number) => void): Promise<string> {
-  const bestand = doel.soort === "bestand" || doel.soort === "video" || (doel.soort === "album" && doel.klein) ? file : await verklein(file);
+  // Een portret voor het smoelenboek is altijd klein genoeg voor een kaartje
+  const bestand = doel.soort === "smoel" ? (await alsJpeg(file, KLEIN, 0.85)) ?? file
+    : doel.soort === "bestand" || doel.soort === "video" || (doel.soort === "album" && doel.klein) ? file : await verklein(file);
   const type = bestand.type || "application/octet-stream";
   const { key, url } = await vraagUploadAan(doel, bestand.name, type);
 

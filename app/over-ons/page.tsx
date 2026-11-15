@@ -80,7 +80,7 @@ export default function OverOnsPage() {
                   Opgericht met passie, gegroeid met plezier
                 </h2>
                 <p style={{ fontSize: "17px", lineHeight: 1.8, color: "#555", margin: 0, maxWidth: "540px" }}>
-                  Wat begon als een klein ensemble van muziekliefhebbers groeide uit tot meer dan 60 stemmen. Met piano, live band en bijpassende choreografie zorgen we voor een complete show.
+                  Wat begon als een klein ensemble van muziekliefhebbers groeide uit tot een koor van 60 stemmen. Met piano, live band en bijpassende choreografie zorgen we voor een complete show.
                 </p>
               </Reveal>
 
@@ -93,7 +93,7 @@ export default function OverOnsPage() {
                 </Reveal>
                 <Reveal delay={200} style={{ height: "100%" }}>
                   <div style={{ background: "var(--primary)", borderRadius: "24px", padding: "32px 28px", display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", minHeight: "200px" }}>
-                    <p style={{ fontSize: "clamp(48px, 5vw, 64px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-3px", margin: "0 0 10px" }}>60<span style={{ fontSize: "0.55em" }}>+</span></p>
+                    <p style={{ fontSize: "clamp(48px, 5vw, 64px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-3px", margin: "0 0 10px" }}>60</p>
                     <p style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.85)", margin: 0, lineHeight: 1.5 }}>zangers & zangeressen · 5 stemgroepen</p>
                   </div>
                 </Reveal>

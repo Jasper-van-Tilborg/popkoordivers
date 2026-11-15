@@ -162,6 +162,8 @@
   background: #FFF1EA; color: var(--primary); font-family: var(--font-display), var(--font-manrope), sans-serif; font-weight: 800; font-size: 15px;
 }
 .adm-row--avatar { grid-template-columns: 44px 1fr auto; }
+.adm-avatar { overflow: hidden; flex-shrink: 0; }
+.adm-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .adm-actions { display: flex; align-items: center; gap: 6px; }
 .adm-status { width: 64px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
@@ -210,6 +212,7 @@
 /* Bestuur & commissies */
 .adm-blok--bestuur { margin-bottom: 32px; }
 .adm-blok--bestuur .adm-blok-tekst { padding-bottom: 6px; }
+.adm-blok--smoelenboek { margin-bottom: 32px; }
 .adm-bestuur { list-style: none; margin: 0; padding: 6px 20px 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px 20px; }
 .adm-bestuur li { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: center; }
 .adm-bestuur .adm-avatar { grid-row: span 2; }
@@ -342,12 +345,22 @@
 .adm-personen { list-style: none; margin: 12px 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .adm-personen li { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .adm-personen-knoppen { display: flex; gap: 2px; }
+/* Smoelenboek: vooraan een rondje met de foto; erop klikken kiest een (andere) foto */
+.adm-personen--foto li { grid-template-columns: 40px minmax(0, 1.3fr) minmax(0, 1fr) auto; }
+.adm-avatar--kies { width: 40px; height: 40px; font-size: 13px; cursor: pointer; transition: box-shadow 0.15s, opacity 0.15s; }
+.adm-avatar--kies:hover, .adm-avatar--kies:focus-within { box-shadow: 0 0 0 2px var(--primary); }
+.adm-avatar--kies[data-bezig] { opacity: 0.5; cursor: wait; }
 @media (max-width: 760px) {
   .adm-personen { gap: 12px; }
   .adm-personen li { grid-template-columns: 1fr auto; row-gap: 6px; }
   .adm-personen li + li { padding-top: 12px; border-top: 1px solid var(--line-soft); }
   .adm-personen li > :nth-child(2) { grid-column: 1; grid-row: 2; }
   .adm-personen-knoppen { grid-row: 1 / span 2; grid-column: 2; flex-direction: column; }
+  .adm-personen--foto li { grid-template-columns: 40px 1fr auto; }
+  .adm-personen--foto .adm-avatar--kies { grid-row: 1 / span 2; grid-column: 1; }
+  .adm-personen--foto li > :nth-child(2) { grid-column: 2; grid-row: 1; }
+  .adm-personen--foto li > :nth-child(3) { grid-column: 2; grid-row: 2; }
+  .adm-personen--foto .adm-personen-knoppen { grid-column: 3; }
 }
 /* Een voorstel onder een veld, als tekstknop */
 .adm-link-knop { margin-top: 6px; padding: 0; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 700; color: var(--primary); cursor: pointer; }
@@ -780,6 +793,7 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 .adm-opname-naam--bezig { flex-direction: column; align-items: stretch; gap: 6px; cursor: default; padding-left: 38px; }
 .adm-opname-naam--bezig:hover { color: inherit; }
 .adm-opname-ext { font-size: 11px; font-weight: 700; color: var(--ink-3); }
+.adm-opname .adm-pill { font-size: 11px; padding: 2px 8px; }
 .adm-opname .adm-icon-btn { opacity: 0; transition: opacity 0.12s; }
 .adm-opname:hover .adm-icon-btn, .adm-opname .adm-icon-btn:focus-visible { opacity: 1; }
 @media (hover: none) { .adm-opname .adm-icon-btn { opacity: 1; } }
@@ -833,6 +847,13 @@ html[data-vt="pagina-omhoog"]::view-transition-new(adm-pagina) { animation-name:
 .adm-lied-drop:hover, .adm-lied-drop[data-drag] { border-color: var(--primary); background: #FFF8F4; }
 .adm-lied-drop:focus-visible, .adm-lied-drop:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
 .adm-lied-drop:disabled, .adm-lied-drop[data-disabled] { opacity: 0.6; cursor: not-allowed; }
+
+/* Versies van een opname: bovenaan de huidige (die de leden krijgen), daaronder de eerdere */
+.adm-versies { list-style: none; margin: 10px 0 14px; padding: 0; border: 1px solid var(--line); border-radius: 12px; }
+.adm-versies li { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 8px; }
+.adm-versies li + li { border-top: 1px solid var(--line-soft); }
+.adm-versie-datum { font-size: 14.5px; font-weight: 600; }
+.adm-versies .adm-spacer { flex: 1; }
 
 .adm-wachtrij { list-style: none; margin: 14px 0 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; }
 .adm-wachtrij li { display: grid; grid-template-columns: minmax(0, 1fr) 140px auto; align-items: start; gap: 10px; padding: 10px; }
