@@ -32,3 +32,23 @@ export function ledenUitweg(pad: string | null): Uitweg {
   const deel = (pad ?? "").split("/").filter(Boolean)[1];
   return (deel && LEDEN[deel]) || { href: "/leden", label: "Naar de ledenhome" };
 }
+
+// De admin: terug naar het onderdeel uit de zijbalk waar het adres onder valt
+const ADMIN: Uitweg[] = [
+  { href: "/admin/agenda", label: "Naar Agenda" },
+  { href: "/admin/nieuws", label: "Naar Nieuws" },
+  { href: "/admin/bestanden/opnames", label: "Naar Opnames" },
+  { href: "/admin/bestanden/choreo", label: "Naar Choreografie" },
+  { href: "/admin/bestanden/nieuwsbrieven", label: "Naar Nieuwsbrieven" },
+  { href: "/admin/bestanden/alv", label: "Naar ALV-stukken" },
+  { href: "/admin/albums", label: "Naar Foto's & video's" },
+  { href: "/admin/organisatie", label: "Naar Wie is wie" },
+  { href: "/admin/gebruikers", label: "Naar Gebruikers" },
+  { href: "/admin/activiteit", label: "Naar Activiteit" },
+  { href: "/admin/sitestatus", label: "Naar Sitestatus" },
+];
+
+export function adminUitweg(pad: string | null): Uitweg {
+  const p = pad ?? "";
+  return ADMIN.find((a) => p === a.href || p.startsWith(`${a.href}/`)) ?? { href: "/admin", label: "Naar het overzicht" };
+}
