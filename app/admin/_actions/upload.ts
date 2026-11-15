@@ -7,6 +7,7 @@ export type UploadSoort =
   | { soort: "nieuws" }
   | { soort: "album"; albumId: string; klein?: boolean }
   | { soort: "video" }
+  | { soort: "smoel" }
   | { soort: "bestand"; categorie: string };
 
 // De server bepaalt bucket en key; de browser krijgt alleen een tijdelijke uploadlink.
@@ -31,6 +32,10 @@ export async function vraagUploadAan(doel: UploadSoort, bestandsnaam: string, co
     case "video":
       bucket = "prive";
       key = `videos/${naam}`;
+      break;
+    case "smoel":
+      bucket = "prive";
+      key = `smoelenboek/${naam}`;
       break;
     case "bestand":
       bucket = "prive";

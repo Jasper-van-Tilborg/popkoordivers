@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Drawer, DeleteButton, IconDownload, IconUpload } from "../../_components/ui";
+import { useRef, useState } from "react";
+import { Drawer, DeleteButton, IconDownload, IconTrash, IconUpload, formatDatum } from "../../_components/ui";
 import { Keuze } from "../../_components/velden";
 import { uploadNaarR2 } from "../../_components/upload";
-import { opnameLink, vervangOpname, verwijderOpnames, wijzigOpname } from "./actions";
-import { STEMMEN, naarStemgroep, nr, stemVan, type Lied, type Opname, type Stem } from "./liedjes";
+import { nieuweVersie, opnameLink, versieLink, verwijderOpnames, verwijderVersie, wijzigOpname } from "./actions";
+import { STEMMEN, naarStemgroep, nr, speelbaar, stemVan, type Lied, type Opname, type Stem } from "./liedjes";
 import { OPNAME_TYPES, foutTekst } from "./uploaden";
 
 const STEM_OPTIES = STEMMEN.map((s) => ({ value: s, label: s }));
 
-// Eén opname: naam, stem, ander lied, vervangen, downloaden of verwijderen
+const Speel = ({ speelt }: { speelt: boolean }) => (
+  <svg width={12} height={12} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    {speelt ? <path d="M6.5 5h4v14h-4zM13.5 5h4v14h-4z" /> : <path d="M7.5 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8a1 1 0 0 0-1.5.86z" />}
+  </svg>
+);
+
+// Eén opname: naam, stem, ander lied, versies, downloaden of verwijderen
 export default function OpnameVenster({ opname, lied, liedjes, sluitend, onClose, onDone }: {
   opname: Opname;
   lied: Lied;
@@ -22,7 +28,11 @@ export default function OpnameVenster({ opname, lied, liedjes, sluitend, onClose
   const [naam, setNaam]           = useState(opname.naam);
   const [stem, setStem]           = useState<Stem>(stemVan(opname));
   const [nummer, setNummer]       = useState(nr(opname.liednummer));
-  const [busy, setBusy]           = useState<"save" | "delete" | "vervang" | null>(null);
+  const [busy, setBusy]           = useState<"save" | "delete" | "vervang" | `versie-${number}` | null>(null);
+  const [zeker, setZeker]         = useState<number | null>(null);
+  const [speelt, setSpeelt]       = useState<number | "huidig" | null>(null);
+  const audio = useRef<HTMLAudioElement>(null);
+  const versies = opname.versies ?? [];
   const [voortgang, setVoortgang] = useState<number | null>(null);
   const [fout, setFout]           = useState("");
 
@@ -47,9 +57,9 @@ export default function OpnameVenster({ opname, lied, liedjes, sluitend, onClose
     setVoortgang(0);
     try {
       const key = await uploadNaarR2(file, { soort: "bestand", categorie: "opnames" }, setVoortgang);
-      const res = await vervangOpname(opname.id, key);
+      const res = await nieuweVersie(opname.id, key);
       if (res.error) throw new Error(res.error);
-      onDone("Bestand vervangen");
+      onDone("Nieuwe versie geüpload");
     } catch (e) {
       setFout(foutTekst(e));
     }
@@ -61,6 +71,36 @@ export default function OpnameVenster({ opname, lied, liedjes, sluitend, onClose
     const url = await opnameLink(opname.id, true);
     if (url) window.location.assign(url);
     else setFout("Deze opname kon niet worden gedownload.");
+  }
+
+  // Afspelen in het venster: de huidige versie of een eerdere
+  async function speel(wat: number | "huidig") {
+    const a = audio.current;
+    if (!a) return;
+    if (speelt === wat) { a.pause(); setSpeelt(null); return; }
+    a.pause();
+    setSpeelt(wat);
+    const url = wat === "huidig" ? await opnameLink(opname.id) : await versieLink(wat);
+    if (!url) { setSpeelt(null); return setFout("Deze versie kon niet worden geopend."); }
+    a.src = url;
+    a.play().catch(() => {});
+  }
+
+  async function downloadVersie(id: number) {
+    const url = await versieLink(id, true);
+    if (url) window.location.assign(url);
+    else setFout("Deze versie kon niet worden gedownload.");
+  }
+
+  async function weg(id: number) {
+    if (zeker !== id) return setZeker(id);
+    if (speelt === id) { audio.current?.pause(); setSpeelt(null); }
+    setFout("");
+    setBusy(`versie-${id}`);
+    const res = await verwijderVersie(id);
+    setBusy(null);
+    setZeker(null);
+    if (res.error) setFout(`Verwijderen lukte niet: ${res.error}`);
   }
 
   async function verwijder() {
@@ -108,12 +148,39 @@ export default function OpnameVenster({ opname, lied, liedjes, sluitend, onClose
       </section>
 
       <section className="adm-fieldset">
+        <h3>Versies</h3>
+        <ul className="adm-versies">
+          <li>
+            <button type="button" className="adm-opname-speel" onClick={() => speel("huidig")} disabled={!speelbaar(opname.ext)}
+              aria-label={speelt === "huidig" ? "Pauzeren" : "Afspelen"}><Speel speelt={speelt === "huidig"} /></button>
+            <span className="adm-versie-datum">{formatDatum(opname.datum ?? opname.created_at.slice(0, 10))}</span>
+            <span className="adm-opname-ext">{opname.ext.toUpperCase()}</span>
+            <span className="adm-spacer" />
+            <span className="adm-pill adm-pill--brand">Leden</span>
+          </li>
+          {versies.map((v) => (
+            <li key={v.id}>
+              <button type="button" className="adm-opname-speel" onClick={() => speel(v.id)} disabled={!speelbaar(v.ext)}
+                aria-label={speelt === v.id ? "Pauzeren" : "Afspelen"}><Speel speelt={speelt === v.id} /></button>
+              <span className="adm-versie-datum">{formatDatum(v.datum)}</span>
+              <span className="adm-opname-ext">{v.ext.toUpperCase()}</span>
+              <span className="adm-spacer" />
+              <button type="button" className="adm-icon-btn" onClick={() => downloadVersie(v.id)} title="Downloaden" aria-label={`Versie van ${formatDatum(v.datum)} downloaden`}><IconDownload /></button>
+              {zeker === v.id
+                ? <button type="button" className="adm-btn adm-btn--danger-solid adm-btn--small" onClick={() => weg(v.id)} onBlur={() => setZeker(null)} autoFocus disabled={!!busy}>
+                    {busy === `versie-${v.id}` ? "Verwijderen…" : "Ja, verwijderen"}
+                  </button>
+                : <button type="button" className="adm-icon-btn" onClick={() => weg(v.id)} title="Verwijderen" aria-label={`Versie van ${formatDatum(v.datum)} verwijderen`} disabled={!!busy}><IconTrash /></button>}
+            </li>
+          ))}
+        </ul>
         <label className="adm-lied-drop" data-disabled={!!busy || undefined}>
           <IconUpload />
-          <span>{busy === "vervang" ? "Uploaden…" : <><strong>Bestand vervangen</strong> {opname.ext.toUpperCase()}</>}</span>
+          <span>{busy === "vervang" ? "Uploaden…" : <strong>Nieuwe versie uploaden</strong>}</span>
           <input type="file" hidden accept={OPNAME_TYPES} disabled={!!busy} onChange={(e) => { vervang(e.target.files?.[0]); e.target.value = ""; }} />
         </label>
         {voortgang !== null && <div className="adm-progress" style={{ marginTop: 12 }}><div style={{ width: `${Math.round(voortgang * 100)}%` }} /></div>}
+        <audio ref={audio} preload="none" onEnded={() => setSpeelt(null)} />
       </section>
     </Drawer>
   );

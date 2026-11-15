@@ -13,7 +13,6 @@ export interface LidInput {
   naam: string;
   email: string;   // e-mailadres of gebruikersnaam
   rol: Rol;
-  in_smoelenboek: boolean;
 }
 
 const rolNaam: Record<Rol, string> = { lid: "lid", redacteur: "redacteur", admin: "beheerder" };
@@ -36,7 +35,6 @@ const profiel = (input: LidInput) => ({
   naam: input.naam.trim() || null,
   email: inlogVan(input)?.email ?? null,
   rol: input.rol,
-  in_smoelenboek: input.in_smoelenboek,
 });
 
 export async function maakLid(input: LidInput, wachtwoord: string) {

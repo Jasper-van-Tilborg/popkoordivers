@@ -15,7 +15,7 @@ export default async function OpnamesPage({ searchParams }: { searchParams: Prom
 
   const { data, error } = await supabase
     .from("bestanden")
-    .select("id, naam, stemgroep, liednummer, r2_key, created_at")
+    .select("id, naam, stemgroep, liednummer, r2_key, created_at, datum")
     .eq("categorie", "opnames");
 
   // Alleen de lijst; een link om te luisteren of downloaden komt pas bij het klikken

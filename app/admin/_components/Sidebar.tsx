@@ -25,7 +25,7 @@ const groepen: { kop: string | null; alleenAdmin?: boolean; items: Item[] }[] = 
     { label: "Nieuwsbrieven", href: "/admin/bestanden/nieuwsbrieven", icon: <IconPost /> },
     { label: "ALV-stukken",   href: "/admin/bestanden/alv",           icon: <IconStukken /> },
     { label: "Foto's & video's", href: "/admin/albums",               icon: <IconCamera size={19} /> },
-    { label: "Bestuur & commissies", href: "/admin/organisatie",       icon: <IconGroep /> },
+    { label: "Wie is wie",    href: "/admin/organisatie",           icon: <IconGroep /> },
   ] },
   { kop: "Beheer", alleenAdmin: true, items: [
     { label: "Gebruikers", href: "/admin/gebruikers", icon: <IconUsers size={19} /> },
