@@ -34,9 +34,12 @@ function useUitklapper<T extends HTMLElement>(open: boolean, sluit: () => void, 
       });
     };
     plaats();
+    // Een lijst die korter of langer wordt (tijdens het typen) opnieuw plaatsen
+    const maat = new ResizeObserver(plaats);
+    if (laag.current) maat.observe(laag.current);
     window.addEventListener("resize", plaats);
     window.addEventListener("scroll", plaats, true);
-    return () => { window.removeEventListener("resize", plaats); window.removeEventListener("scroll", plaats, true); };
+    return () => { maat.disconnect(); window.removeEventListener("resize", plaats); window.removeEventListener("scroll", plaats, true); };
   }, [open, breedte]);
 
   useEffect(() => {
@@ -146,29 +149,41 @@ export function Keuze<T extends string>({ id, value, onChange, opties, disabled 
 
 /* ── Suggestie: tekstveld met voorstellen ────────────────────────────────────── */
 
-export function Suggestie({ id, value, onChange, suggesties, placeholder }: {
+// Een voorstel is een tekst, of een tekst met een beeld (portret) en een hint
+export type Voorstel = string | { waarde: string; hint?: string; beeld?: ReactNode };
+const waardeVan = (s: Voorstel) => (typeof s === "string" ? s : s.waarde);
+
+export function Suggestie({ id, value, onChange, suggesties, placeholder, label }: {
   id?: string;
   value: string;
   onChange: (v: string) => void;
-  suggesties: string[];
+  suggesties: Voorstel[];
   placeholder?: string;
+  label?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [actief, setActief] = useState(-1);
   const lijstId = useId();
   const sluit = () => setOpen(false);
-  const { veld, laag, stijl } = useUitklapper<HTMLInputElement>(open, sluit);
   const q = gewoon(value.trim());
-  const lijst = suggesties.filter((s) => !q || (gewoon(s).includes(q) && gewoon(s) !== q));
+  const lijst = suggesties.filter((s) => { const w = gewoon(waardeVan(s)); return !q || (w.includes(q) && w !== q); });
   const toon = open && lijst.length > 0;
+  const { veld, laag, stijl } = useUitklapper<HTMLInputElement>(toon, sluit);
+
+  const kies = (s: Voorstel) => { onChange(waardeVan(s)); meldWijziging(veld.current); setOpen(false); };
 
   function toets(e: KeyboardEvent) {
     if (!toon) { if (e.key === "ArrowDown") { setOpen(true); setActief(0); } return; }
     if (e.key === "ArrowDown") { e.preventDefault(); setActief((i) => Math.min(lijst.length - 1, i + 1)); }
     else if (e.key === "ArrowUp") { e.preventDefault(); setActief((i) => Math.max(0, i - 1)); }
-    else if (e.key === "Enter" && actief >= 0) { e.preventDefault(); onChange(lijst[actief]); meldWijziging(veld.current); setOpen(false); }
+    else if (e.key === "Enter" && actief >= 0) { e.preventDefault(); kies(lijst[actief]); }
     else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOpen(false); }
   }
+
+  // Het actieve voorstel in beeld houden bij bladeren met de pijltjes
+  useEffect(() => {
+    if (toon && actief >= 0) laag.current?.querySelector(`[data-i="${actief}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [toon, actief, laag]);
 
   return (
     <>
@@ -178,10 +193,12 @@ export function Suggestie({ id, value, onChange, suggesties, placeholder }: {
         className="adm-input"
         value={value}
         placeholder={placeholder}
+        aria-label={label}
         autoComplete="off"
         role="combobox"
         aria-expanded={toon}
         aria-controls={toon ? lijstId : undefined}
+        aria-activedescendant={toon && actief >= 0 ? `${lijstId}-${actief}` : undefined}
         aria-autocomplete="list"
         onFocus={() => setOpen(true)}
         onChange={(e) => { onChange(e.target.value); setOpen(true); setActief(-1); }}
@@ -192,11 +209,16 @@ export function Suggestie({ id, value, onChange, suggesties, placeholder }: {
           <div ref={laag} className="adm-uitklap" style={stijl}>
             <ul id={lijstId} role="listbox">
               {lijst.map((s, i) => (
-                <li key={s} role="option" aria-selected={false} data-actief={i === actief || undefined}
+                <li key={waardeVan(s)} id={`${lijstId}-${i}`} data-i={i} role="option" aria-selected={false} data-actief={i === actief || undefined}
                   onPointerEnter={() => setActief(i)}
                   onPointerDown={(e) => e.preventDefault()}
-                  onClick={() => { onChange(s); meldWijziging(veld.current); setOpen(false); }}>
-                  <span>{s}</span>
+                  onClick={() => kies(s)}>
+                  {typeof s === "string" ? <span>{s}</span> : (
+                    <span className="adm-voorstel">
+                      {s.beeld}
+                      <span>{s.waarde}{s.hint && <small>{s.hint}</small>}</span>
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>

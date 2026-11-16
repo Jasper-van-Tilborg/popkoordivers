@@ -221,7 +221,9 @@
 .adm-bestuur-functie { font-size: 13px; color: var(--ink-2); align-self: start; }
 .adm-cards--groep .adm-card-nieuw { min-height: 150px; }
 .adm-groep-namen { list-style: none; margin: 12px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 5px; font-size: 14px; color: var(--ink); }
-.adm-groep-namen span { margin-left: 8px; font-size: 13px; color: var(--ink-3); }
+.adm-groep-namen li { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.adm-groep-namen .adm-avatar { width: 26px; height: 26px; font-size: 10px; }
+.adm-groep-functie { font-size: 13px; color: var(--ink-3); }
 .adm-groep-contact { margin-left: auto; font-size: 12.5px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Instellingen: uitleg links, velden rechts */
@@ -403,6 +405,10 @@
 }
 .adm-uitklap li small { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
 .adm-uitklap li[data-actief] { background: #F5F4F2; }
+.adm-uitklap li:has(.adm-voorstel) { padding: 6px 10px; }
+.adm-voorstel { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.adm-voorstel > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-voorstel .adm-avatar { width: 32px; height: 32px; font-size: 12px; }
 .adm-uitklap li[aria-selected="true"] { color: #C2410C; }
 .adm-uitklap li[aria-selected="true"] svg { color: var(--primary); flex-shrink: 0; }
 

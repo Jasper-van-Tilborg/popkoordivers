@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { Drawer, DeleteButton, IconOmhoog, IconOmlaag, IconPlus, IconSearch, IconTrash, useNaijlen, useToast } from "../_components/ui";
 import { Keuze, Suggestie } from "../_components/velden";
 import { gewoon } from "../_components/zoeken";
+import { gewoon as naamGewoon } from "@/app/leden/(omgeving)/wie-is-wie/naam";
 import { useGlijden, useOplichten, useWegvagen } from "../_components/beweging";
 import { uploadNaarR2 } from "../_components/upload";
 import { bewaarGroep, verplaatsGroep, verwijderGroep, type GroepInput } from "./actions";
@@ -31,10 +32,11 @@ let teller = 0;
 const sleutel = () => `n${++teller}`;
 const leeg = (): Regel => ({ sleutel: sleutel(), naam: "", functie: "", foto_key: null, foto: null });
 
-function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDone }: {
+function GroepDrawer({ groep, nieuwSoort, bestuur, smoelenboek, plek, sluitend, onClose, onDone }: {
   groep: Groep | null;
   nieuwSoort: GroepInput["soort"];
   bestuur: Persoon[];
+  smoelenboek: Persoon[];
   plek: { eerste: boolean; laatste: boolean };
   sluitend?: boolean;
   onClose: () => void;
@@ -115,6 +117,21 @@ function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDo
 
   const functieLabel = isBestuur ? "Functie" : soort === "overig" ? "Taak" : "Toevoeging";
 
+  // Namen uit het smoelenboek om uit te kiezen; wie al in deze groep staat niet nog eens
+  const smoelen = useMemo(() => {
+    const gezien = new Set<string>();
+    return smoelenboek.filter((p) => !gezien.has(p.naam) && gezien.add(p.naam)).map((p) => ({
+      waarde: p.naam,
+      hint: p.functie ?? undefined,
+      // eslint-disable-next-line @next/next/no-img-element
+      beeld: <span className="adm-avatar" aria-hidden="true">{p.foto ? <img src={p.foto} alt="" loading="lazy" /> : initialen(p.naam)}</span>,
+    }));
+  }, [smoelenboek]);
+  const voorstellen = (i: number) => {
+    const anderen = new Set(regels.filter((_, j) => j !== i).map((r) => gewoon(r.naam.trim())));
+    return smoelen.filter((s) => !anderen.has(gewoon(s.waarde)));
+  };
+
   return (
     <Drawer
       sluitend={sluitend}
@@ -187,7 +204,11 @@ function GroepDrawer({ groep, nieuwSoort, bestuur, plek, sluitend, onClose, onDo
                     onChange={(e) => { kiesFoto(r.sleutel, e.target.files?.[0]); e.target.value = ""; }} />
                 </label>
               )}
-              <input className="adm-input" value={r.naam} onChange={(e) => zet(i, "naam", e.target.value)} placeholder="Naam" aria-label={`Naam ${i + 1}`} />
+              {isSmoelenboek ? (
+                <input className="adm-input" value={r.naam} onChange={(e) => zet(i, "naam", e.target.value)} placeholder="Naam" aria-label={`Naam ${i + 1}`} />
+              ) : (
+                <Suggestie value={r.naam} onChange={(v) => zet(i, "naam", v)} suggesties={voorstellen(i)} placeholder="Naam"label={`Naam ${i + 1}`} />
+              )}
               {isBestuur ? (
                 <Suggestie value={r.functie} onChange={(v) => zet(i, "functie", v)} suggesties={FUNCTIES} placeholder="Functie" />
               ) : (
@@ -231,6 +252,9 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
   const bestuurGroep = groepen.find((g) => g.soort === "bestuur");
   const bestuur = bestuurGroep?.leden ?? [];
   const smoelenboekGroep = groepen.find((g) => g.soort === "smoelenboek");
+  // Het bestuur krijgt het portret uit het smoelenboek, net als in de ledenomgeving
+  const fotos = useMemo(() => new Map((smoelenboekGroep?.leden ?? []).filter((l) => l.foto).map((l) => [naamGewoon(l.naam), l.foto])), [smoelenboekGroep]);
+  const fotoVan = (naam: string) => fotos.get(naamGewoon(naam)) ?? null;
 
   // Zoeken op de naam van de groep of van iemand erin
   const q = gewoon(zoek.trim());
@@ -256,7 +280,13 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
                 {g.toelichting && <p className="adm-card-tekst">{g.toelichting}</p>}
                 {g.leden.length > 0 ? (
                   <ul className="adm-groep-namen">
-                    {g.leden.map((l) => <li key={l.id}>{l.naam}{l.functie && <span>{l.functie}</span>}</li>)}
+                    {g.leden.map((l) => (
+                      <li key={l.id}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <span className="adm-avatar" aria-hidden="true">{fotoVan(l.naam) ? <img src={fotoVan(l.naam)!} alt="" loading="lazy" /> : initialen(l.naam)}</span>
+                        {l.naam}{l.functie && <span className="adm-groep-functie">{l.functie}</span>}
+                      </li>
+                    ))}
                   </ul>
                 ) : <p className="adm-card-tekst adm-missing">Nog niemand</p>}
               </div>
@@ -293,7 +323,8 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
             <ul className="adm-bestuur">
               {bestuur.map((p) => (
                 <li key={p.id}>
-                  <span className="adm-avatar" aria-hidden="true">{initialen(p.naam)}</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <span className="adm-avatar" aria-hidden="true">{fotoVan(p.naam) ? <img src={fotoVan(p.naam)!} alt="" loading="lazy" /> : initialen(p.naam)}</span>
                   <span className="adm-bestuur-naam">{p.naam}</span>
                   {p.functie && <span className="adm-bestuur-functie">{p.functie}</span>}
                 </li>
@@ -336,6 +367,7 @@ export default function OrganisatieClient({ groepen, loadError, startNieuw, star
       groep={groep}
       nieuwSoort={nieuw ?? "commissie"}
       bestuur={bestuur}
+      smoelenboek={smoelenboekGroep?.leden ?? []}
       plek={plek}
       sluitend={sluitend}
       onClose={() => setGekozen(null)}
